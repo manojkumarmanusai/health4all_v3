@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="<?php echo base_url();?>assets/css/metallic.css" >
 <link rel="stylesheet" href="<?php echo base_url();?>assets/css/theme.default.css" >
 <script type="text/javascript">
+
 $(document).ready(function(){$("#from_date").datepicker({
 		dateFormat:"dd-M-yy",changeYear:1,changeMonth:1,onSelect:function(sdt)
 		{$("#to_date").datepicker({dateFormat:"dd-M-yy",changeYear:1,changeMonth:1})
@@ -81,6 +82,26 @@ $(document).ready(function(){$("#from_date").datepicker({
         $('#from_time').ptTimeSelect();
 	$('#to_time').ptTimeSelect();
         });
+
+	//create function for  for Excel report
+	function fnExcelReport() {
+		var $table = $('#table-sort').clone();
+
+		$table.find('.tablesorter-filter-row').remove();
+		$table.find('thead tr.tablesorter-headerRow').nextAll('.tablesorter-filter-row').remove();
+
+		var tab_text = '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
+		tab_text += '<head><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>';
+		tab_text += '</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml></head><body>';
+		tab_text += '<table border="1">';
+		tab_text += $table.html();
+		tab_text += '</table></body></html>';
+
+		$('#test')
+			.attr('href', 'data:application/vnd.ms-excel,' + encodeURIComponent(tab_text))
+			.attr('download', 'login_activity_details.xls');
+
+		}
 </script>
 <script type="text/javascript">
 /**
@@ -91,26 +112,32 @@ $(document).ready(function(){$("#from_date").datepicker({
 	 */
 
 	function postFromLocation(path, params, method='post') {
-
-	  // The rest of this code assumes you are not using a library.
-	  // It can be made less verbose if you use one.
-	  const form = document.createElement('form');
-	  form.method = method;
-	  form.action = path;
-
-	  for (const key in params) {
-	    if (params.hasOwnProperty(key)) {
-	      const hiddenField = document.createElement('input');
-	      hiddenField.type = 'hidden';
-	      hiddenField.name = key;
-	      hiddenField.value = params[key];
-
-	      form.appendChild(hiddenField);
-	    }
+	let lastLoc = path.split('/').at(-1);
+	if (lastLoc == ''){
+		lastLoc = path.split('/').at(-2);
+	}
+	  let form = null ;
+      if (lastLoc == 'login_activity_detail'){
+		form = document.getElementById("loginActivityForm");
 	  }
+	  else {	
+		form = document.createElement('form');
+		form.method = method;
+		form.action = path;
+	  }
+	  for (const key in params) {
+			if (params.hasOwnProperty(key)) {
+			const hiddenField = document.createElement('input');
+			hiddenField.type = 'hidden';
+			hiddenField.name = key;
+			hiddenField.value = params[key];
 
-	  document.body.appendChild(form);
-	  form.submit();
+			form.appendChild(hiddenField);
+			}
+		}
+
+		document.body.appendChild(form);
+		form.submit();
 	}
 function doPost(page_no){
 	postFromLocation(window.location.pathname,{page_no: page_no});	
@@ -121,6 +148,10 @@ function onchange_page_dropdown(dropdownobj){
 </script>
 
 <style type="text/css">
+	.pagination {
+    position: relative;
+    z-index: 1;
+}
 .page_dropdown{
     position: relative;
     float: left;
@@ -200,7 +231,7 @@ display: inline-grid;
 		if($this->input->post('to_date')) $to_date=date("Y-m-d",strtotime($this->input->post('to_date'))); else $to_date = date("Y-m-d");
 		?>
 		<div class="row">
-			<?php echo form_open("reports/login_activity_detail",array('role'=>'form','class'=>'form-custom')); ?>
+			<?php echo form_open("reports/login_activity_detail",array( 'id'    => 'loginActivityForm', 'role'=>'form','class'=>'form-custom')); ?>
 					<!-- <b>Trend:  </b>
 					<label><input type ="radio" name="trend_type" class ="form-control"  
 					<?php if($this->input->post('trend_type')=="Day"){ echo " checked "; }?> value="Day" > Daily </label>
@@ -230,6 +261,10 @@ display: inline-grid;
 		<br/>	
 
 
+		<a href="#" id="test" onClick="javascript:fnExcelReport();">
+            <button type="button" class="btn btn-default btn-md excel">
+                <i class="fa fa-file-excel-o"ara-hidden="true"></i> Export to excel</button></a>
+             	
 <div style='padding: 0px 2px;'>
 
 <h5>Report as on <?php echo date("j-M-Y h:i A"); ?></h5>

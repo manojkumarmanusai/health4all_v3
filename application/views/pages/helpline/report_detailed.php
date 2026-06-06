@@ -763,7 +763,7 @@ echo "</select></li>";
 			<div class="col-xs-12 col-sm-12 col-md-6 col-lg-3">
 				<div class="form-horizontal">
 					<label for="callModal-customer">Call<font style="color:red">*</font></label>
-					<input type="text" class="form-control" id="callModal-customer" placeholder="Enter '0' followed by 10 digit phone number" required readonly onblur="setFromNumber()" />
+					<input type="text" class="form-control" id="callModal-customer" onkeypress="return event.charCode >= 48 && event.charCode <= 57" placeholder="Enter '0' followed by 10 digit phone number" required readonly onblur="setFromNumber()" />
 					<p class="error callModal-customer-error">This field is required</p>
 				</div>
 			</div>		
@@ -825,7 +825,7 @@ echo "</select></li>";
 			<div class="col-xs-12 col-sm-12 col-md-6 col-lg-3">
 				<div class="form-horizontal">
 					<label for="smsModal-customer">SMS To<font style="color:red">*</font></label>
-					<input type="text" class="form-control" id="smsModal-customer" placeholder="Enter '0' followed by 10 digit phone number" required readonly onblur="setSmsToNumber()" />
+					<input type="text" class="form-control" id="smsModal-customer" onkeypress="return event.charCode >= 48 && event.charCode <= 57" placeholder="Enter '0' followed by 10 digit phone number" required readonly onblur="setSmsToNumber()" />
 					<p class="error smsModal-customer-error">This field is required</p>
 				</div>
 			</div>		
@@ -1107,6 +1107,7 @@ function initiateCall(){
 		$('.callModal-customer-error').show();
 		return;
 	}
+
 	$('.callModal-customer-error').hide();
 	
 	if(!callDetails.app_id){
@@ -1114,7 +1115,6 @@ function initiateCall(){
 		return;
 	}
 	$('.callModal-app_id-error').hide();
-
 
 	// customer to agent flow...
 	// ajax for call...
@@ -1144,7 +1144,6 @@ function initiateSms(){
 		return;
 	}
 	$('.smsModal-customer-error').hide();
-
 	// customer to agent flow...
 	// ajax for call...
 	$('#initiateSmsButton').val('Calling...').attr('disabled', 'disabled');
