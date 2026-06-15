@@ -217,7 +217,7 @@ function get_dist_summary(){
 		 ->join('icd_chapter','icd_block.chapter_id=icd_chapter.chapter_id','left')
 		 ->join('route_secondary','patient_followup.route_secondary_id=route_secondary.id','left')
 		 //->join('route_primary','route_secondary.route_primary_id=route_primary.route_primary_id','left')
-		 ->join('district','patient.district_id=district.district_id')
+		 ->join('district','patient.district_id=district.district_id','left')
 		 ->join('state','district.state_id=state.state_id','left')
 		 ->where('patient_followup.hospital_id',$hospital['hospital_id']);
 		

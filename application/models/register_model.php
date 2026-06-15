@@ -1449,7 +1449,7 @@ class Register_model extends CI_Model{
 		
 		//till here
 
-		$this->db->where('patient_id', $this->input->post('patient_id'));
+		$this->db->where('patient_followup_id', $this->input->post('patient_followup_id'));
 		if($this->db->update('patient_followup'))
 		
 			return true;
