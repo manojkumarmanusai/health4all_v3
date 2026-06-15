@@ -3291,7 +3291,7 @@ function openSmsModal(){
 			<div class="col-xs-12 col-sm-12 col-md-6 col-lg-3">
 				<div class="form-horizontal">
 					<label for="smsModal-customer">SMS To<font style="color:red">*</font></label>
-					<input type="text" class="form-control" id="smsModal-customer" placeholder="Enter '0' followed by 10 digit phone number" value='<?php echo $patient->phone;?>' required" />
+					<input type="text" class="form-control" id="smsModal-customer" onkeypress="return event.charCode >= 48 && event.charCode <= 57" placeholder="Enter '0' followed by 10 digit phone number" value='<?php echo $patient->phone;?>' required" />
 					 <p class="error smsModal-customer-error">This field is required</p> 
 
 				</div>

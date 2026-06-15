@@ -172,24 +172,21 @@ $(function(){
 </script>
 <script>
 function fnExcelReport() {
-      //created a variable named tab_text where 
-    var tab_text = '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
-    //row and columns arrangements
-    tab_text = tab_text + '<head><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>';
-    tab_text = tab_text + '<x:Name>Excel Sheet</x:Name>';
+	var tab_text = '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
+	tab_text += '<head><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>';
+        tab_text += '<x:WorksheetOptions><x:Panes></x:Panes></x:WorksheetOptions>';
+        tab_text += '</x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml></head><body>';
 
-    tab_text = tab_text + '<x:WorksheetOptions><x:Panes></x:Panes></x:WorksheetOptions></x:ExcelWorksheet>';
-    tab_text = tab_text + '</x:ExcelWorksheets></x:ExcelWorkbook></xml></head><body>';
+  	var table = $('#table-sort').clone();
 
-    tab_text = tab_text + "<table border='100px'>";
-    //id is given which calls the html table
-    tab_text = tab_text + $('#myTable').html();
-    tab_text = tab_text + '</table></body></html>';
-    var data_type = 'data:application/vnd.ms-excel';
-    $('#test').attr('href', data_type + ', ' + encodeURIComponent(tab_text));
-    //downloaded excel sheet name is given here
-    $('#test').attr('download', 'icd_detailed.xls');
+        table.find('.tablesorter-filter-row').remove();
+	table.find('.tablesorter-stickyHeader').remove();
+        tab_text += table[0].outerHTML;
+	tab_text += '</body></html>';
+	var data_type = 'data:application/vnd.ms-excel;charset=utf-8,';
 
+	$('#test').attr('href', data_type + encodeURIComponent(tab_text));
+	$('#test').attr('download', 'icd_detailed.xls');
 }
 
 	function doPost(page_no) {
