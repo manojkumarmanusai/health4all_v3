@@ -362,6 +362,7 @@ $patient = $patients[0];
 	
 		<div class="panel-body">
 			<input type="hidden" class="sr-only" value="<?php echo $transaction_id;?>" name="transaction_id" />
+			<input type="hidden" class="sr-only" value="<?php echo $patient_followup->patient_followup_id;?>" name="patient_followup_id" />
 			<div class="row">
 				
 				<!-- newly commented on 12-01-2024 -->

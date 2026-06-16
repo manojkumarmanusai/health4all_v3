@@ -47,3 +47,7 @@ ALTER TABLE patient_merge_archive ADD hospital_id INT;
 ALTER TABLE `followup_types` ADD `created_by` INT NOT NULL AFTER `created_at`;
 
 ALTER TABLE `followup_types` ADD `updated_by` INT NOT NULL AFTER `created_by`, ADD `updated_date_time` DATETIME NULL DEFAULT NULL AFTER `updated_by`;
+
+ALTER TABLE patient_followup
+DROP INDEX patient_id,
+ADD UNIQUE KEY uk_patient_hospital (patient_id, hospital_id);
