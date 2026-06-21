@@ -229,6 +229,50 @@ function get_dist_summary(){
 	function get_followup_summary()
 	{
 		$hospital=$this->session->userdata('hospital');
+		if($this->input->post('priority_type')){
+			$this->db->where('priority_type.priority_type_id',$this->input->post('priority_type'));
+		}
+		// Get all priority types for the hospital
+		$this->db->select('priority_type_id, priority_type');
+		$this->db->from('priority_type');
+		$this->db->where('hospital_id', $hospital['hospital_id']);
+		$this->db->order_by('priority_type_id');
+
+		$priorityTypes = $this->db->get()->result_array();
+
+		// Base columns
+		$select = array(
+			'icd_block.block_title',
+			'icd_chapter.chapter_title',
+			'patient_followup.icd_code',
+			'icd_code.code_title'
+		);
+		$select[] = "
+		SUM(
+			CASE
+				WHEN patient_followup.priority_type_id = 0
+					OR patient_followup.priority_type_id IS NULL
+				THEN 1
+				ELSE 0
+			END
+		) AS `unupdated_priority`
+	";
+		// Dynamic priority columns
+		foreach ($priorityTypes as $priority)
+		{
+			// Create a safe alias
+			$alias = strtolower(trim($priority['priority_type']));
+			$alias = preg_replace('/[^a-z0-9]+/', '_', $alias);
+			$alias = trim($alias, '_');
+
+			$select[] = sprintf(
+				'SUM(CASE WHEN patient_followup.priority_type_id=%d THEN 1 ELSE 0 END) AS `%s`',
+				(int)$priority['priority_type_id'],
+				$alias
+			);
+		}
+
+
 
 		if($this->input->post('route_primary') && empty($this->input->post('route_secondary')))
 		{
@@ -318,11 +362,8 @@ function get_dist_summary(){
 		}
 		
 		$this->db->select("icd_block.block_title,icd_chapter.chapter_title,patient_followup.icd_code,patient_followup.priority_type_id,
-		icd_code.code_title,
-		SUM(CASE WHEN patient_followup.priority_type_id=1 THEN 1 ELSE 0 END) AS highcount,
-        SUM(CASE WHEN patient_followup.priority_type_id=2 THEN 1 ELSE 0 END) AS mediumcount,
-        SUM(CASE WHEN patient_followup.priority_type_id=3 THEN 1 ELSE 0 END) AS lowcount,
-		SUM(CASE WHEN patient_followup.priority_type_id = 0 THEN 1 ELSE 0 END) AS unupdated_priority");
+		icd_code.code_title,".
+		implode(',', $select)."",FALSE);
 
 		$this->db->from('patient_followup')
 		->join('patient','patient_followup.patient_id=patient.patient_id','left')
