@@ -182,14 +182,14 @@ display: inline-grid;
 					<label for="inputrouteprimary ">Enter Color Code <span class="mandatory" style="color:red;">*</span> </label>
 					<?php
 						$marker_colors = array(
-							'red'     => 'Red',
 							'blue'    => 'Blue',
 							'green'   => 'Green',
-							'yellow'  => 'Yellow',
+							'ltblue'  => 'Light Blue',
 							'orange'  => 'Orange',
-							'purple'  => 'Purple',
 							'pink'    => 'Pink',
-							'ltblue'  => 'Light Blue'
+							'purple'  => 'Purple',
+							'red'     => 'Red',
+							'yellow'  => 'Yellow'
 						);
 
 						$selected_color = !empty($edit_priority_type['color_code'])
