@@ -2140,6 +2140,7 @@ sum(case when patient_sub.gender='F' then 1 else 0 end) as female  from ".$inner
 		$this->db->select("count(*) as count",false);
 		 $this->db->from('patient_visit as pv')
 		 ->join('patient as p','pv.patient_id=p.patient_id')
+		 ->join('patient_followup as pf','pf.patient_id=p.patient_id','left')
 		 ->join('department as pvd','pv.department_id=pvd.department_id','left')
 		 ->join('district','p.district_id=district.district_id','left')
 		 ->join('state','district.state_id=state.state_id','left')
@@ -2151,6 +2152,7 @@ sum(case when patient_sub.gender='F' then 1 else 0 end) as female  from ".$inner
 		 ->join('user as volunteer_user','p.insert_by_user_id = volunteer_user.user_id','left')
 		 ->join('staff as volunteer','volunteer_user.staff_id=volunteer.staff_id','left')
 		 ->join('visit_name vn','pv.visit_name_id=vn.visit_name_id','left')		
+		 ->where('pf.hospital_id',$hospital['hospital_id'])	
 		 ->where('pv.hospital_id',$hospital['hospital_id']);			
 		$resource=$this->db->get();
 		return $resource->result();
@@ -2274,7 +2276,8 @@ sum(case when patient_sub.gender='F' then 1 else 0 end) as female  from ".$inner
 		 ->join('department as sd', 'appointment_with.department_id=sd.department_id','left')
 		 ->join('user as volunteer_user','p.insert_by_user_id = volunteer_user.user_id','left')
 		 ->join('staff as volunteer','volunteer_user.staff_id=volunteer.staff_id','left')
-		 ->join('visit_name vn','pv.visit_name_id=vn.visit_name_id','left')		
+		 ->join('visit_name vn','pv.visit_name_id=vn.visit_name_id','left')	
+		 ->where('pf.hospital_id',$hospital['hospital_id'])	
 		 ->where('pv.hospital_id',$hospital['hospital_id']);
 		$this->db->limit($rows_per_page,$start);			
 		$resource=$this->db->get();
