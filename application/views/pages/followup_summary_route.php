@@ -557,8 +557,47 @@ function onchange_page_dropdown(dropdownobj){
 				
 	<br />
 </form>
-<?php if(isset($report) && count($report)>0){ ?>
+<?php
 
+function priority_alias($name)
+{
+    $alias = strtolower(trim($name));
+    $alias = preg_replace('/[^a-z0-9]+/', '_', $alias);
+    return trim($alias, '_');
+}
+
+if(isset($report) && count($report)>0){
+	
+	$selected_priority_types = $this->input->post('priority_type');
+	$hide_unupdated = !empty($selected_priority_types);
+	if (!is_array($selected_priority_types)) {
+		$selected_priority_types = $selected_priority_types
+			? [$selected_priority_types]
+			: [];
+	}
+	$filtered_priority_types = [];
+	
+	if (!empty($selected_priority_types)) {
+		foreach ($priority_types as $p) {
+			if (in_array($p->priority_type_id, $selected_priority_types)) {
+				$filtered_priority_types[] = $p;
+			}
+		}
+	} else {
+		$filtered_priority_types = $priority_types;
+	}
+	$columns = [];
+
+	foreach ($filtered_priority_types as $p) {
+		$columns[] = [
+			'id' => $p->priority_type_id,
+			'name' => $p->priority_type,
+			'alias' => priority_alias($p->priority_type),
+		];
+	}
+	
+	?>
+		
 		<div style='padding: 0px 2px;' id="print-container">
             <h5>Report as on <?php echo date("j-M-Y h:i A"); ?></h5>
         </div>
@@ -581,24 +620,29 @@ function onchange_page_dropdown(dropdownobj){
 					<?php if(!empty($this->input->post('groupbysecondary'))) { ?>
 					<th style="text-align:center;">Secondary Route</th>
 					<?php } ?>
-					<th style="text-align:center;">High</th>
-					<th style="text-align:center;">Medium</th>
-					<th style="text-align:center;">Low</th>
-					<th style="text-align:center;">Unupdated Priority</th>
+					<?php foreach ($columns as $col) { ?>
+							<th style="text-align:center;">
+								<?php echo $col['name']; ?>
+							</th>
+						<?php } ?>
+						
+						<?php if (!$hide_unupdated) { ?>
+							<th style="text-align:center;">Unupdated Priority</th>
+						<?php } ?>
 					<th style="text-align:center;">Total Count</th>
 				</tr>
 			</thead>
 			<tbody>
 				<?php 
 				$sno=1 ; 
-				foreach($report as $s)
-				{
-					$total_highcount+=$s->highcount;
-					$total_mediumcount+=$s->mediumcount;
-					$total_lowcount+=$s->lowcount;
-					$total_unupdated_priority+=$s->unupdated_priority;
-				
-				?>
+				$total = [];
+				$total['unupdated_priority'] = 0;
+
+				foreach ($columns as $col) {
+					$alias = priority_alias($p->priority_type);
+					$total[$col['alias']] = 0;
+				}
+				foreach($report as $s) { ?>
 				<tr>
 					<td style="text-align:right;" ><?php echo $sno;?></td>
 					<td><?php echo $s->primary_rname;?></td>
@@ -606,19 +650,29 @@ function onchange_page_dropdown(dropdownobj){
 					<td><?php echo $s->secondary_rname;?></td>
 					<?php } ?>
 					
-					<td style="text-align:right;"><?php echo $s->highcount; ?></td>
-					 
-					<td style="text-align:right;"><?php echo $s->mediumcount; ?></td>
-					
-					<td style="text-align:right;"><?php echo $s->lowcount; ?></td>
-					
-					<td style="text-align:right;"><?php echo $s->unupdated_priority; ?></td>
-					
-					<td style="text-align: center">
-						<?php 
-							echo $tot = $s->highcount+$s->mediumcount+$s->lowcount+$s->unupdated_priority;
-						?>
-					</td>
+					<?php
+					$rowTotal = 0;
+					foreach ($columns as $col) {
+						$val = isset($s->{$col['alias']}) ? $s->{$col['alias']} : 0;
+						$total[$col['alias']] += $val;
+						$rowTotal += $val;
+					?>
+						<td style="text-align:right;"><?php echo $val; ?></td>
+					<?php } 
+					if (!$hide_unupdated) {
+						$rowTotal += $s->unupdated_priority;
+						$total['unupdated_priority'] += $s->unupdated_priority;
+					}
+					?>
+					<!-- Unupdated -->
+					<?php if (!$hide_unupdated) { ?>
+						<td style="text-align:right;">
+							<?php echo $s->unupdated_priority; ?>
+						</td>
+					<?php } ?>
+					<td style="text-align:center;">
+       					 <?php echo $rowTotal; ?>
+    				</td>
 				</tr>
 				<?php $sno++;} 	?>
 			</tbody>
@@ -629,15 +683,32 @@ function onchange_page_dropdown(dropdownobj){
 					<?php if(!empty($this->input->post('groupbysecondary'))) { ?>
 					<th></th>
 					<?php } ?>
-					<th style="text-align:right;"><?php echo $total_highcount; ?></th>
-					<th style="text-align:right;"><?php echo $total_mediumcount; ?></th>
-					<th style="text-align:right;"><?php echo $total_lowcount; ?></th>
-					<th style="text-align:right;"><?php echo $total_unupdated_priority?></th>
-					<th style="text-align:center;">
-						<?php		
-							echo $tot =$total_highcount+$total_mediumcount+$total_lowcount+$total_unupdated_priority;
-						?>
+					 <!-- Dynamic totals -->
+					 <?php foreach ($columns as $col) {?>
+						<th style="text-align:right;">
+							<?php echo $total[$col['alias']]; ?>
+						</th>
+					<?php } ?>
+					<?php if (!$hide_unupdated) { ?>
+					<th style="text-align:right;">
+						<?php echo $total['unupdated_priority']; ?>
 					</th>
+					<?php } ?>
+					<th style="text-align:center;">
+					<?php
+						$grand = 0;
+
+						foreach ($filtered_priority_types as $p) {
+							$alias = priority_alias($p->priority_type);
+							$grand += $total[$alias];
+						}
+						
+						if (!$hide_unupdated) {
+							$grand += $total['unupdated_priority'];
+						}
+						echo $grand;
+					?>
+				    </th>
 				</tr>
 			</tfoot>
 	</table>
