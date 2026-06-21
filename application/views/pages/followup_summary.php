@@ -588,6 +588,15 @@ if(isset($report) && count($report)>0){
 	} else {
 		$filtered_priority_types = $priority_types;
 	}
+	$columns = [];
+
+	foreach ($filtered_priority_types as $p) {
+		$columns[] = [
+			'id' => $p->priority_type_id,
+			'name' => $p->priority_type,
+			'alias' => priority_alias($p->priority_type),
+		];
+	}
 	?>
 
 		<div style='padding: 0px 2px;' id="print-container">
@@ -614,9 +623,9 @@ if(isset($report) && count($report)>0){
 					<?php } if(!empty($this->input->post('groupbyicdcode'))) {?>
 						<th style="text-align:center;">ICD Code</th>
 						<?php } ?>
-						<?php foreach ($filtered_priority_types as $p) { ?>
+						<?php foreach ($columns as $col) { ?>
 							<th style="text-align:center;">
-								<?php echo $p->priority_type; ?>
+								<?php echo $col['name']; ?>
 							</th>
 						<?php } ?>
 						
@@ -632,9 +641,9 @@ if(isset($report) && count($report)>0){
 				$total = [];
 				$total['unupdated_priority'] = 0;
 
-				foreach ($filtered_priority_types as $p) {
+				foreach ($columns as $col) {
 					$alias = priority_alias($p->priority_type);
-					$total[$alias] = 0;
+					$total[$col['alias']] = 0;
 				}
 			    ?>
 					
@@ -653,12 +662,9 @@ if(isset($report) && count($report)>0){
 					<?php } ?>
 					<?php
 					$rowTotal = 0;
-					foreach ($filtered_priority_types as $p) {
-						$alias = priority_alias($p->priority_type);
-
-						$val = isset($s->$alias) ? $s->$alias : 0;
-
-						$total[$alias] += $val;
+					foreach ($columns as $col) {
+						$val = isset($s->{$col['alias']}) ? $s->{$col['alias']} : 0;
+						$total[$col['alias']] += $val;
 						$rowTotal += $val;
 					?>
 						<td style="text-align:right;"><?php echo $val; ?></td>
@@ -690,11 +696,9 @@ if(isset($report) && count($report)>0){
 					<?php } ?>
 					<th style="text-align:right;">Total</th>
 					 <!-- Dynamic totals -->
-					<?php foreach ($filtered_priority_types as $p) {
-						$alias = priority_alias($p->priority_type);
-					?>
+					<?php foreach ($columns as $col) {?>
 						<th style="text-align:right;">
-							<?php echo $total[$alias]; ?>
+							<?php echo $total[$col['alias']]; ?>
 						</th>
 					<?php } ?>
 					<?php if (!$hide_unupdated) { ?>
