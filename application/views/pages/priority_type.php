@@ -180,12 +180,32 @@ display: inline-grid;
 				</div>
 				<div class="form-group col-md-4">
 					<label for="inputrouteprimary ">Enter Color Code <span class="mandatory" style="color:red;">*</span> </label>
-					<input class="form-control" name="color_code" id="inputcolor_code" 
-					placeholder="Enter Color Code" type="text" 
-					value="<?php echo $edit_priority_type['color_code'] ?>" autocomplete="off" required>
-				</div></br>
-				<span style="color:red"> Note : </span><p style="color:black">Only Hex Colors can be Added Ex: #000000</p>
-					<p style="color:red"> ' # ' <span style="color:black">mandatory</span></p></br>
+					<?php
+						$marker_colors = array(
+							'red'     => 'Red',
+							'blue'    => 'Blue',
+							'green'   => 'Green',
+							'yellow'  => 'Yellow',
+							'orange'  => 'Orange',
+							'purple'  => 'Purple',
+							'pink'    => 'Pink',
+							'ltblue'  => 'Light Blue'
+						);
+
+						$selected_color = !empty($edit_priority_type['color_code'])
+							? $edit_priority_type['color_code']
+							: '';
+					?>
+					<select class="form-control" name="color_code" id="inputcolor_code" required>
+					<option value="">Select Marker Color</option>
+					<?php foreach ($marker_colors as $value => $label) { ?>
+						<option value="<?php echo $value; ?>"
+							<?php echo ($selected_color == $value) ? 'selected' : ''; ?>>
+							<?php echo $label; ?>
+						</option>
+					<?php } ?>
+				</select>
+				</div>
 				 <?php 
 				 	$user=$this->session->userdata('logged_in'); 
 					$user['user_id'];
@@ -374,8 +394,11 @@ echo "</select></li>";
 	?>
 	<tr>
 		<td style="text-align:right"><?php echo $sno;?></td>	
-		<td style="text-align:center"><?php echo $apt->priority_type; ?></td>	
-		<td style="text-align:center"><?php echo $apt->color_code; ?></td>	
+		<td style="text-align:center"><?php echo $apt->priority_type; ?></td>
+		
+		<td style="text-align:center"><?php  echo isset($marker_colors[$apt->color_code])
+            ? $marker_colors[$apt->color_code]
+            : $apt->color_code; ?></td>	
 		<td style="text-align:center"><?php echo $apt->first_name; ?></td>	
 		<td style="text-align:center"><?php echo $apt->updated_by_name; ?></td>	
 		<td style="text-align:center"><?php if($apt->created_date_time!=''){ echo date("j M Y h:i A.", strtotime("$apt->created_date_time")); } ?></td>	

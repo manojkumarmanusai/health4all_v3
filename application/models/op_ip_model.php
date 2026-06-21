@@ -206,7 +206,8 @@ function get_dist_summary(){
 
 		$this->db->select("patient_followup.patient_id,state.state,district.state_id as state_id, district.district as dname,   district.district_id, 
 		patient_followup.latitude as latitude, patient_followup.longitude as longitude,patient.first_name,patient.last_name,patient.phone,
-		patient.age_years,patient.gender,patient_followup.diagnosis,patient_followup.priority_type_id");
+		patient.age_years,patient.gender,patient_followup.diagnosis,patient_followup.priority_type_id,
+		priority_type.color_code");
 		
 		 $this->db->from('patient_followup')
 		 ->join('patient','patient_followup.patient_id=patient.patient_id','left')
