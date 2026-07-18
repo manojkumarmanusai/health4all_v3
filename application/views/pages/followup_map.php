@@ -480,16 +480,10 @@ function onchange_page_dropdown(dropdownobj){
 					</div>
 
 					<div class="col-md-2">
-						<input type="checkbox" name="highlight_priority" value="" onchange="updateCheckboxValue(this)" <?php if ($this->input->post('highlight_priority') == 1) echo 'checked'; ?>>  Highlight Priority	
+						<input type="checkbox" name="highlight_priority" value="1" <?php if ($this->input->post('highlight_priority') == 1) echo 'checked'; ?>>  Highlight Priority	
 					</div>
 					<script>
-					function updateCheckboxValue(checkbox) {
-						if (checkbox.checked) {
-							checkbox.value = "1";
-						} else {
-							checkbox.value = ""; // You may set it to another value if needed when unchecked
-						}
-					}
+					
 					onchange_state_dropdown(document.getElementById("state"));
 					var district = "<?php echo $this->input->post('district')?>";
 					if(district != ""){
@@ -559,17 +553,8 @@ function onchange_page_dropdown(dropdownobj){
 				<?php
 					$markerColor = 'red'; // Default color
 					if ($this->input->post('highlight_priority') == 1) {
-						switch ($followup->priority_type_id) {
-							case 1:
-								$markerColor = 'red';
-								break;
-							case 2:
-								$markerColor = 'orange';
-								break;
-							case 3:
-								$markerColor = 'blue';
-								break;
-						}
+						if ($followup->color_code)
+							$markerColor = $followup->color_code;
 					}
 				?>
 					

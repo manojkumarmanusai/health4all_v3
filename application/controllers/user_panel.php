@@ -1057,20 +1057,15 @@ class User_panel extends CI_Controller {
 				$color_code = $this->input->post('color_code');
 				$updated_by = $this->input->post('updated_by');
 				$update_datetime = $this->input->post('updated_datetime');
-				if($this->masters_model->check_priority_type($priority_type)) 
-				{
-					$this->data['error'] = 'Priority Type Cannot Be Updated Combination Already Exists';
-				}else
-				{
-					$update_data = array(
-						'priority_type' => $priority_type,
-						'color_code' => $color_code,
-						'updated_by' => $updated_by,
-						'updated_date_time' => $update_datetime,
-					);
-					$this->masters_model->update_priority_type($update_record_id, $update_data);
-					$this->data['success'] = 'Priority Type Updated Successfully';
-				}
+				$update_data = array(
+					'priority_type' => $priority_type,
+					'color_code' => $color_code,
+					'updated_by' => $updated_by,
+					'updated_date_time' => $update_datetime,
+				);
+				$this->masters_model->update_priority_type($update_record_id, $update_data);
+				$this->data['success'] = 'Priority Type Updated Successfully';
+				
 			// Fetch all records from primary table
 			$this->data['all_priority_type'] = $this->masters_model->get_all_priority_type($this->data['rowsperpage']);
 			$this->data['all_priority_type_count'] = $this->masters_model->get_all_priority_type_count();
