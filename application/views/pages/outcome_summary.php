@@ -424,17 +424,17 @@ $(function(){
 		} ?>
 		
 		<td class="text-right">
-			<a href="<?php echo base_url()."reports/outcome_detail/$s->department_id/$s->unit/$s->area/M/0/0/$from_date/$to_date/$visit_name/$date_type/$outcome/".($icd_chapter ?: 0)."/".($icd_block ?: 0)."/".($icd_code ?: 0)?>">
+			<a href="<?php echo base_url()."reports/outcome_detail/$s->department_id/$s->unit/$s->area/M/0/0/$from_date/$to_date/$visit_name/$date_type/All/".($icd_chapter ?: 0)."/".($icd_block ?: 0)."/".($icd_code ?: 0)?>">
 			<?php echo $s->outcome_male;?>
 			</a>
 		</td>
 		<td class="text-right">
-			<a href="<?php echo base_url()."reports/outcome_detail/$s->department_id/$s->unit/$s->area/F/0/0/$from_date/$to_date/$visit_name/$date_type/$outcome/".($icd_chapter ?: 0)."/".($icd_block ?: 0)."/".($icd_code ?: 0)?>">
+			<a href="<?php echo base_url()."reports/outcome_detail/$s->department_id/$s->unit/$s->area/F/0/0/$from_date/$to_date/$visit_name/$date_type/All/".($icd_chapter ?: 0)."/".($icd_block ?: 0)."/".($icd_code ?: 0)?>">
 			<?php echo $s->outcome_female;?>
 			</a>
 		</td>
 		<td class="text-right">
-			<a href="<?php echo base_url()."reports/outcome_detail/$s->department_id/$s->unit/$s->area/0/0/0/$from_date/$to_date/$visit_name/$date_type/$outcome/".($icd_chapter ?: 0)."/".($icd_block ?: 0)."/".($icd_code ?: 0)?>">
+			<a href="<?php echo base_url()."reports/outcome_detail/$s->department_id/$s->unit/$s->area/0/0/0/$from_date/$to_date/$visit_name/$date_type/All/".($icd_chapter ?: 0)."/".($icd_block ?: 0)."/".($icd_code ?: 0)?>">
 			<?php echo $s->outcome;?>
 			</a>
 		</td>
@@ -498,17 +498,17 @@ $(function(){
 			<?php }
 			} ?>
 		    <td class="text-right">
-				<a href="<?php echo base_url()."reports/outcome_detail/-1/0/0/M/0/0/$from_date/$to_date/$visit_name/$date_type/$outcome/".($icd_chapter ?: 0)."/".($icd_block ?: 0)."/".($icd_code ?: 0)?>">
+				<a href="<?php echo base_url()."reports/outcome_detail/-1/0/0/M/0/0/$from_date/$to_date/$visit_name/$date_type/All/".($icd_chapter ?: 0)."/".($icd_block ?: 0)."/".($icd_code ?: 0)?>">
 				<?php echo $total_male;?>
 				</a>
 			</td>
             <td class="text-right">
-				<a href="<?php echo base_url()."reports/outcome_detail/-1/0/0/F/0/0/$from_date/$to_date/$visit_name/$date_type/$outcome/".($icd_chapter ?: 0)."/".($icd_block ?: 0)."/".($icd_code ?: 0)?>">
+				<a href="<?php echo base_url()."reports/outcome_detail/-1/0/0/F/0/0/$from_date/$to_date/$visit_name/$date_type/All/".($icd_chapter ?: 0)."/".($icd_block ?: 0)."/".($icd_code ?: 0)?>">
 				<?php echo $total_female;?>
 				</a>
 			</td>
             <td class="text-right">
-				<a href="<?php echo base_url()."reports/outcome_detail/-1/0/0/0/0/0/$from_date/$to_date/$visit_name/$date_type/$outcome/".($icd_chapter ?: 0)."/".($icd_block ?: 0)."/".($icd_code ?: 0)?>">
+				<a href="<?php echo base_url()."reports/outcome_detail/-1/0/0/0/0/0/$from_date/$to_date/$visit_name/$date_type/All/".($icd_chapter ?: 0)."/".($icd_block ?: 0)."/".($icd_code ?: 0)?>">
 				<?php echo $total_outcome;?>
 				</a>
 			</td>
@@ -553,17 +553,17 @@ $(function(){
 				}
 			} ?>
 		    <td class="text-right">
-				<a href="<?php echo base_url()."reports/outcome_detail/-1/0/0/M/0/0/$from_date/$to_date/$visit_name/$date_type/$outcome/".($icd_chapter ?: 0)."/".($icd_block ?: 0)."/".($icd_code ?: 0)?>">
+				<a href="<?php echo base_url()."reports/outcome_detail/-1/0/0/M/0/0/$from_date/$to_date/$visit_name/$date_type/All/".($icd_chapter ?: 0)."/".($icd_block ?: 0)."/".($icd_code ?: 0)?>">
 				<?php echo round(($total_male/$total_outcome)*100).'%';?>
 				</a>
 			</td>
 		    <td class="text-right">
-				<a href="<?php echo base_url()."reports/outcome_detail/-1/0/0/F/0/0/$from_date/$to_date/$visit_name/$date_type/$outcome/".($icd_chapter ?: 0)."/".($icd_block ?: 0)."/".($icd_code ?: 0)?>">
+				<a href="<?php echo base_url()."reports/outcome_detail/-1/0/0/F/0/0/$from_date/$to_date/$visit_name/$date_type/All/".($icd_chapter ?: 0)."/".($icd_block ?: 0)."/".($icd_code ?: 0)?>">
 				<?php echo round(($total_female/$total_outcome)*100).'%';?>
 				</a>
 			</td>
 		    <td class="text-right">
-				<a href="<?php echo base_url()."reports/outcome_detail/-1/0/0/0/0/0/$from_date/$to_date/$visit_name/$date_type/$outcome/".($icd_chapter ?: 0)."/".($icd_block ?: 0)."/".($icd_code ?: 0)?>">
+				<a href="<?php echo base_url()."reports/outcome_detail/-1/0/0/0/0/0/$from_date/$to_date/$visit_name/$date_type/All/".($icd_chapter ?: 0)."/".($icd_block ?: 0)."/".($icd_code ?: 0)?>">
 				<?php echo round(($total_outcome/$total_outcome)*100).'%';?>
 				</a>
 			</td>
