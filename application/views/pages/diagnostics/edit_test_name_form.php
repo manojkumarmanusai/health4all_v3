@@ -65,7 +65,7 @@ tbody tr:hover {
 	<div class="col-md-12">
 	<?php echo form_open('diagnostics/edit/test_name',array('role'=>'form','id'=>'test_name_form','class'=>'form-inline','name'=>'test_name'));?>
 	<h3> Search Test Name</h3>
-	<table class="table-bordered col-md-12">
+	<table>
 	<tbody>
 	<tr>
 		<td><input type="text" class="form-control" placeholder="Test Name" id="test_name" name="test_name"> 
@@ -77,6 +77,10 @@ tbody tr:hover {
 <?php if(isset($mode) && $mode=="search"){   ?>
 
 	<h3 class="col-md-12">List of Test Names </h3>
+	<?php echo form_open('diagnostics/edit/test_name', array('id' => 'master_test_form', 'style' => 'display:none;')); ?>
+        <input type="hidden" name="test_master_id" id="master_test_id" value="" />
+        <input type="hidden" name="select" value="select" />
+    </form>
 	<div class="col-md-12 ">
 	</div>	
 	<table>
@@ -88,18 +92,21 @@ tbody tr:hover {
 	$j=1;
 	foreach($test_names as $tg){ ?>
 
-	<?php echo form_open('diagnostics/edit/test_name',array('id'=>'test_name_form_'.$tg->test_master_id,'role'=>'form')); ?>
-	<tr onclick="$('#test_name_form_<?php echo $tg->test_master_id;?>').submit();" >
-		<td><?php echo $j++; ?></td>
-		<td><?php echo $tg->test_name; ?>
-		<input type="hidden" value="<?php echo $tg->test_master_id; ?>" name="test_master_id"/>
-		<input type="hidden" value="select" name="select" />
-		</td>
-	</tr>
-	</form>
+	<tr onclick="submitRow('<?php echo $tg->test_master_id; ?>')">
+            <td><?php echo $j++; ?></td>
+            <td><?php echo $tg->test_name; ?></td>
+        </tr>
+	
 	<?php } ?>
 	</tbody>
 	</table>
 		<?php } ?>
 </div>
 </div>
+
+<script>
+function submitRow(id) {
+    $('#master_test_id').val(id);
+    $('#master_test_form').submit();
+}
+</script>
