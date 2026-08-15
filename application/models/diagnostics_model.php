@@ -197,7 +197,7 @@ class Diagnostics_model extends CI_Model{
 			$this->db->where('visit_type',$this->input->post('patient_type_search'));
 		}
 		$this->db->select('test.test_id,test_order.order_id,test_sample.sample_id,test_method,
-		test_name,department,visit_type,patient.first_name, patient.last_name,
+		test_name,department,visit_type,patient.first_name, patient.last_name,patient.gender,patient.patient_id as h4allid,
 		staff.first_name staff_name,hosp_file_no,sample_code,specimen_type,
 		specimen_source,sample_container_type,test_status, ts.nabl',false)
 		->from('test_order')
@@ -251,7 +251,7 @@ class Diagnostics_model extends CI_Model{
 			$this->db->where('visit_type',$this->input->post('patient_type_search'));
 		}
 		//the above searches will get the details of the patient
-		$this->db->select('test.test_id,test_order.order_id,test_sample.sample_id,test_method,test_name,department,visit_type,patient.first_name, patient.last_name,
+		$this->db->select('test.test_id,test_order.order_id,test_sample.sample_id,test_method,test_name,department,visit_type,patient.first_name, patient.last_name,patient.gender,patient.patient_id as h4allid,
 							staff.first_name staff_name,hosp_file_no,sample_code,specimen_type,specimen_source,sample_container_type,test_status,test_master.nabl,study_id,filepath')//adding the specimen source in the update tests
 		->from('test_order')
 		->join('test','test_order.order_id=test.order_id')
@@ -304,7 +304,7 @@ class Diagnostics_model extends CI_Model{
 			$this->db->where('visit_type',$this->input->post('patient_type_search'));
 		}
 		//the above searches will get the details of the patient
-		$this->db->select('test.test_id,test_order.order_id,test_sample.sample_id,test_method,test_name,department,visit_type,patient.first_name, patient.last_name,
+		$this->db->select('test.test_id,test_order.order_id,test_sample.sample_id,test_method,test_name,department,visit_type,patient.first_name, patient.last_name,patient.gender,patient.patient_id as h4allid,
 							staff.first_name staff_name,hosp_file_no,sample_code,specimen_type,specimen_source,sample_container_type,test_status,study_id,filepath')//adding the specimen source in the update tests
 		->from('test_order')
 		->join('test','test_order.order_id=test.order_id')
@@ -350,7 +350,7 @@ class Diagnostics_model extends CI_Model{
 			$this->db->where('hosp_file_no',$this->input->post('hosp_file_no_search'));
 			$this->db->where('visit_type',$this->input->post('patient_type_search'));
 		}
-		$this->db->select('test.test_id,test_order.order_id,test_sample.sample_id,test_method,test_name,department,visit_type,patient.first_name, patient.last_name,
+		$this->db->select('test.test_id,test_order.order_id,test_sample.sample_id,test_method,test_name,department,visit_type,patient.first_name, patient.last_name,patient.gender,patient.patient_id as h4allid,
 							staff.first_name staff_name,hosp_file_no,sample_code,specimen_type,specimen_source,sample_container_type,test_status,test_master.nabl,study_id,filepath')//adding the specimen source in the update tests
 		->from('test_order')
 		->join('test','test_order.order_id=test.order_id')

@@ -1,24 +1,38 @@
+<style type="text/css">
+	table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-family: sans-serif;
+  font-size: 16px;
+  text-align: left;
+}
+
+th {
+  background-color: #e4e4e7;
+  font-weight: bold;
+  padding: 12px 15px;
+}
+
+td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #dddddd;
+}
+
+tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+tr:hover {
+  background-color: #f1f3f5;
+}
+
+</style>	
 <div class="col-md-8 col-md-offset-2">
 	<?php if((isset($mode))&&(($mode)=="select")){ ?>
 	<center><h3>Edit Test Name </h3></center><br>
 	<?php echo form_open('diagnostics/edit/test_name',array('role'=>'form')); ?>
 		<div class="form-group">
-		<label for="test_method" class="col-md-4" >Test Method</label>
-		<div  class="col-md-8">
-		<select name="test_method" id="test_method" class="form-control">
-		<option value="">--SELECT--</option>
-		<?php foreach($test_methods as $e){
-			echo "<option value='$e->test_method_id'";
-			if(isset($test_names) && $test_names[0]->test_method_id==$e->test_method_id)
-				echo " SELECTED ";
-			echo ">$e->test_method</option>";
-		}
-		?>
-		</select>
-		</div>
-			</br>
-	</br>
-
 		<label for="test_name" class="col-md-4">Test Name<font color='red'>*</font></label>
 		<div  class="col-md-8">
 		<input type="text" class="form-control" placeholder="Test Name" id="test_name" name="test_name" 
@@ -58,7 +72,7 @@
 	<h3 class="col-md-12">List of Test Names </h3>
 	<div class="col-md-12 ">
 	</div>	
-	<table class="table-hover table-bordered table-striped col-md-10">
+	<table>
 	<thead>
 	<th>S.No</th><th> Test Name</th>
 	</thead>
