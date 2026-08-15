@@ -19,11 +19,18 @@ td {
   border-bottom: 1px solid #dddddd;
 }
 
-tr:nth-child(even) {
+/* Odd rows (default or explicit background) */
+tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+/* Even rows (alternate background) */
+tbody tr:nth-child(even) {
   background-color: #f8f9fa;
 }
 
-tr:hover {
+/* Hover state on body rows */
+tbody tr:hover {
   background-color: #f1f3f5;
 }
 

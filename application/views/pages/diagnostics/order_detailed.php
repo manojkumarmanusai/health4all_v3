@@ -173,7 +173,7 @@
 			<th>Order Date</th>
 			<th>Sample ID</th>
 			<th>IP/OP Number</th>
-			<th>Patient Name</th>
+			<th>Patient Name/Health4all ID</th>
 			<th>Age/Gender</th>
 			<th>Department/Unit/Area</th>
 			<th>Specimen</th>
@@ -204,7 +204,7 @@
 						</td>
 						<td><?php echo $order->sample_code;?></td>
 						<td><?php echo $order->visit_type." #".$order->hosp_file_no;?></td>
-						<td><?php echo $order->first_name." ".$order->last_name;?></td>
+						<td><?php echo $order->first_name." ".$order->last_name." / ".$order->h4allid;?></td>
 						<td>
 							<?php
 								$age="";
