@@ -314,7 +314,7 @@ if(count($orders)>0){ ?>
 			<th>Sample Code</th>
 			<th>Specimen</th>
 			<th>IP/OP #</th>
-			<th>Patient Name, Health4all ID</th>
+			<th>Patient, Health4all ID</th>
 			<th>Department</th>
 			<th>Tests</th>
 		</thead>
@@ -330,6 +330,11 @@ if(count($orders)>0){ ?>
 				<tr>
 				<?php
 				foreach($orders as $order) { 
+					$age="";
+					if(!!$order->age_years) $age.=$order->age_years."Y ";
+					if(!!$order->age_months) $age.=$order->age_months."M ";
+					if(!!$order->age_days) $age.=$order->age_days."D ";
+					if($order->age_days==0 && $order->age_months==0 && $order->age_years==0) $age.="0D";
 					if($order->order_id==$ord){ ?>
 						<td><?php echo $i++;?></td>
 						<td>
@@ -340,7 +345,7 @@ if(count($orders)>0){ ?>
 						<td><?php echo $order->sample_code;?></td>
 						<td><?php echo $order->specimen_type; if($order->specimen_source!="") echo " - ".$order->specimen_source;?> </td><!--printing the specimen source in the update tests beside the specimen type if the specimen type is not null-->
 						<td><?php echo $order->visit_type." #".$order->hosp_file_no;?></td>
-						<td><?php echo $order->first_name." ".$order->last_name." / ".$order->gender."<br/>".$order->h4allid;?></td>
+						<td><?php echo $order->first_name." ".$order->last_name." / ".$age." / ".$order->gender."<br/>".$order->h4allid;?></td>
 						<td><?php echo $order->department;?></td>
 						<td>
 							<?php foreach($orders as $order){

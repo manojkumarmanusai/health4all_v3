@@ -197,7 +197,7 @@ class Diagnostics_model extends CI_Model{
 			$this->db->where('visit_type',$this->input->post('patient_type_search'));
 		}
 		$this->db->select('test.test_id,test_order.order_id,test_sample.sample_id,test_method,
-		test_name,department,visit_type,patient.first_name, patient.last_name,patient.gender,patient.patient_id as h4allid,
+		test_name,department,visit_type,patient.first_name, patient.last_name,patient.gender,patient.patient_id as h4allid,age_years, age_months, age_days,
 		staff.first_name staff_name,hosp_file_no,sample_code,specimen_type,
 		specimen_source,sample_container_type,test_status, ts.nabl',false)
 		->from('test_order')
@@ -251,7 +251,7 @@ class Diagnostics_model extends CI_Model{
 			$this->db->where('visit_type',$this->input->post('patient_type_search'));
 		}
 		//the above searches will get the details of the patient
-		$this->db->select('test.test_id,test_order.order_id,test_sample.sample_id,test_method,test_name,department,visit_type,patient.first_name, patient.last_name,patient.gender,patient.patient_id as h4allid,
+		$this->db->select('test.test_id,test_order.order_id,test_sample.sample_id,test_method,test_name,department,visit_type,patient.first_name, patient.last_name,patient.gender,patient.patient_id as h4allid,age_years, age_months, age_days,
 							staff.first_name staff_name,hosp_file_no,sample_code,specimen_type,specimen_source,sample_container_type,test_status,test_master.nabl,study_id,filepath')//adding the specimen source in the update tests
 		->from('test_order')
 		->join('test','test_order.order_id=test.order_id')
@@ -304,7 +304,7 @@ class Diagnostics_model extends CI_Model{
 			$this->db->where('visit_type',$this->input->post('patient_type_search'));
 		}
 		//the above searches will get the details of the patient
-		$this->db->select('test.test_id,test_order.order_id,test_sample.sample_id,test_method,test_name,department,visit_type,patient.first_name, patient.last_name,patient.gender,patient.patient_id as h4allid,
+		$this->db->select('test.test_id,test_order.order_id,test_sample.sample_id,test_method,test_name,department,visit_type,patient.first_name, patient.last_name,patient.gender,patient.patient_id as h4allid,age_years, age_months, age_days,
 							staff.first_name staff_name,hosp_file_no,sample_code,specimen_type,specimen_source,sample_container_type,test_status,study_id,filepath')//adding the specimen source in the update tests
 		->from('test_order')
 		->join('test','test_order.order_id=test.order_id')
@@ -350,7 +350,7 @@ class Diagnostics_model extends CI_Model{
 			$this->db->where('hosp_file_no',$this->input->post('hosp_file_no_search'));
 			$this->db->where('visit_type',$this->input->post('patient_type_search'));
 		}
-		$this->db->select('test.test_id,test_order.order_id,test_sample.sample_id,test_method,test_name,department,visit_type,patient.first_name, patient.last_name,patient.gender,patient.patient_id as h4allid,
+		$this->db->select('test.test_id,test_order.order_id,test_sample.sample_id,test_method,test_name,department,visit_type,patient.first_name, patient.last_name,patient.gender,patient.patient_id as h4allid,age_years, age_months, age_days,
 							staff.first_name staff_name,hosp_file_no,sample_code,specimen_type,specimen_source,sample_container_type,test_status,test_master.nabl,study_id,filepath')//adding the specimen source in the update tests
 		->from('test_order')
 		->join('test','test_order.order_id=test.order_id')
@@ -374,7 +374,7 @@ class Diagnostics_model extends CI_Model{
 	function get_order(){
 		$hospital = $this->session->userdata('hospital');
 		$order_id=$this->input->post('order_id');
-		$this->db->select('test.test_id,test.test_master_id,test_group.group_id,test_order.order_id,test_order.order_date_time,test.reported_date_time,test_sample.sample_id,test_method,accredition_logo,
+		$this->db->select('patient.patient_id,test.test_id,test.test_master_id,test_group.group_id,test_order.order_id,test_order.order_date_time,test.reported_date_time,test_sample.sample_id,test_method,accredition_logo,
 		IFNULL(test_name,group_name)test_name,department.department,unit_name,area_name,age_years,age_months,age_days,patient.gender,patient.first_name, patient.last_name,visit_type,
 		order_date_time,hosp_file_no,sample_code,specimen_type,sample_container_type,
 		department.department_email,

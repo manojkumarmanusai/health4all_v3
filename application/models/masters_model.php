@@ -389,7 +389,7 @@ staff.ima_registration_number, staff.doctor_flag as doctor_flag,			staff_categor
 				if($this->input->post('select'))  //query to retrieve row from table when a result is selected from search results
 				{
 						$test_id=$this->input->post('test_group_id');
-						$this->db->where('group_id',$test_id);
+						$this->db->where('test_group.group_id',$test_id);
 				}
 				if($this->input->post('search') && $this->input->post('group_name')!="")  //query to retrieve matches for the text entered in the field from table test_type
 				{

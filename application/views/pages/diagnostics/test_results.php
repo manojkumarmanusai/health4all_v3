@@ -9,7 +9,54 @@ src="<?php echo base_url(); ?>assets/js/jquery.tablesorter.min.js"></script>
 <script type="text/javascript"
 src="<?php echo base_url(); ?>assets/js/jquery.tablesorter.widgets.min.js"></script>
 <style>
+.modal-body, .modal-header {
+    background: #111;
+}
 
+/* 1. Medical Results Table on Landing Page: Center all headers and row data */
+.panel-body .table-bordered {
+    margin: 20px auto !important;
+    width: 100% !important;
+}
+
+.panel-body .table-bordered th,
+.panel-body .table-bordered td {
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding: 8px 12px !important;
+}
+
+.panel-body .table-bordered th {
+    background-color: #fcfcfc;
+}
+
+/* 2. Sensitivity lists centering inside landing page table */
+.panel-body .table-bordered ol,
+.panel-body .table-bordered ul {
+    margin: 0 auto !important;
+    padding-left: 0 !important;
+    list-style-position: inside !important;
+    text-align: center !important;
+}
+
+/* 3. Signature row: Push 'Done By' to far left and 'Approved By' to far right */
+.panel-body > .col-md-12:last-of-type {
+    margin-top: 30px !important;
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+}
+
+.panel-body > .col-md-12:last-of-type > .col-md-6:nth-child(1),
+.panel-body > .col-md-12:last-of-type > .col-md-6:nth-child(5) {
+    text-align: left !important;
+    padding-left: 0 !important;
+}
+
+.panel-body > .col-md-12:last-of-type > .col-md-6:nth-child(2),
+.panel-body > .col-md-12:last-of-type > .col-md-6:nth-child(6) {
+    text-align: right !important;
+    padding-right: 0 !important;
+}
 .modal-body,.modal-header{
 	background:#111;
 }
@@ -80,8 +127,9 @@ src="<?php echo base_url(); ?>assets/js/jquery.tablesorter.widgets.min.js"></scr
     <?php } ?>
     <br>
     <!--display the age if not 0-->
-    <?php
-    if (isset($order)) {                                                            // Display a single order. Code below displays summary of all orders. Note this is $order not $orders.
+    <?php   
+    if (isset($order)) {                     
+        $patient_id = $order[0]->patient_id;                                       // Display a single order. Code below displays summary of all orders. Note this is $order not $orders.
         $order_id = $order [0]->order_id;                                           // Caputres the order ID, each order can include multiple tests.
         $logo = $order [0]->logo;                                                   // Hospital Logo
         $accredition_logo = $order [0]->accredition_logo;                           // If the test is accredited, this variable points to the accreditation logo.
@@ -116,6 +164,8 @@ src="<?php echo base_url(); ?>assets/js/jquery.tablesorter.widgets.min.js"></scr
             $age .= $order [0]->age_months . "M ";
         if ($order [0]->age_days != 0)
             $age .= $order [0]->age_days . "D ";
+        if ($age == "")
+            $age="Not set";
         ?>
         <?php
         $assay_set = 0;                                                               // Display Mehod coloumn in report only if assay_set flag is 1.
@@ -199,7 +249,7 @@ src="<?php echo base_url(); ?>assets/js/jquery.tablesorter.widgets.min.js"></scr
                 <div class="row col-md-12">
                     <div class="col-md-6">
                         <b>Patient : </b>
-                        <?php echo $order[0]->first_name . " " . $order[0]->last_name . " | " . $age . " | " . $order[0]->gender; ?>
+                        <?php echo $order[0]->patient_id." | ".$order[0]->first_name . " " . $order[0]->last_name . " | " . $age . " | " . $order[0]->gender; ?>
                     </div>
                     <div class="col-md-6">
                         <b><?php echo $order[0]->visit_type; ?>
@@ -229,7 +279,7 @@ src="<?php echo base_url(); ?>assets/js/jquery.tablesorter.widgets.min.js"></scr
     <?php echo $sample_code; ?>
                     </div>
                 </div>
-                <br /> <br /> <br />
+                <br/> <br/> <br/>
                 
                 <?php //Generating sensitivity array. Sensitivity array is being generated separately to keep the modular.
                         $antibiotic_result_flag=0;                                  // Antibiotic result flag is set to one if 
@@ -302,6 +352,7 @@ src="<?php echo base_url(); ?>assets/js/jquery.tablesorter.widgets.min.js"></scr
                     }
                 
                 ?>
+                
                 <table class="table table-bordered">
                     <!-- patient test results-->
                     <tr>
@@ -698,15 +749,13 @@ src="<?php echo base_url(); ?>assets/js/jquery.tablesorter.widgets.min.js"></scr
 			</div></div></div>
 			<br />	
 			<div class="col-md-12">
-				<div class="col-md-4">Done By</div>
-				<div class="col-md-4">Verified By</div>
-				<div class="col-md-4">Approved By</div>
+				<div class="col-md-6">Done By</div>
+				<div class="col-md-6">Approved By</div>
 			<br />
 			<br />
 				
-				<div class="col-md-4"><?php echo $done_by; ?><br /><?php echo $done_by_designation; ?></div>
-				<div class="col-md-4"></div>
-				<div class="col-md-4"> <?php echo $approved_by; ?> <br /><?php echo $approved_by_designation; ?></div>
+				<div class="col-md-6"><?php echo $done_by; ?><br /><?php echo $done_by_designation; ?></div>
+				<div class="col-md-6"> <?php echo $approved_by; ?> <br /><?php echo $approved_by_designation; ?></div>
 			</div>
             </div>
             
@@ -739,28 +788,101 @@ src="<?php echo base_url(); ?>assets/js/jquery.tablesorter.widgets.min.js"></scr
 
                         <div id="print_div" hidden class="sr-only">
 
-                            <style media="print">
-                                html {
-                                    padding: 5px;
-                                    width: 95%;
-                                    font-size: 14px;
-                                }
+                          <style>
+                            @page {
+                                margin: 10mm;
+                                size: auto;
+                            }
 
-                                td {
-                                    padding: 5px;
-                                }
+                            html, body {
+                                width: 100% !important;
+                                margin: 0 !important;
+                                padding: 0 !important;
+                                font-family: Arial, Helvetica, sans-serif;
+                                font-size: 13px;
+                                color: #000;
+                                background: #fff;
+                            }
 
-                                th {
-                                    padding: 10px;
-                                }
+                            /* 1. All tables centered on the page */
+                            table {
+                                width: 95% !important;
+                                margin: 12px auto !important;
+                                border-collapse: collapse !important;
+                            }
 
-                                .inner td, .inner th, .inner tr {
-                                    border: 1px solid #000;
-                                }
-                            </style>
+                            /* 2. Top header table: natural widths & clean left alignment */
+                            table:not(.inner) {
+                                table-layout: auto !important;
+                            }
+
+                            table:not(.inner) td {
+                                text-align: left !important;
+                                padding: 4px 8px !important;
+                                vertical-align: top !important;
+                            }
+
+                            table:not(.inner) th {
+                                text-align: center !important;
+                                padding: 4px 8px !important;
+                            }
+
+                            /* 3. Medical Results Table ONLY (.inner): centered columns & row values */
+                            .inner {
+                                border: 1px solid #333 !important;
+                                table-layout: auto !important;
+                            }
+
+                            .inner th, 
+                            .inner td {
+                                border: 1px solid #333 !important;
+                                padding: 8px 12px !important;
+                                text-align: center !important;
+                                vertical-align: middle !important;
+                                white-space: normal !important;
+                            }
+
+                            .inner th {
+                                background-color: #f2f2f2 !important;
+                                font-weight: bold !important;
+                            }
+
+                            /* 4. Lists inside sensitivity table */
+                            .inner ol, .inner ul {
+                                margin: 0 auto !important;
+                                padding-left: 0 !important;
+                                list-style-position: inside !important;
+                                text-align: center !important;
+                            }
+
+                            /* 5. Paragraphs & notes */
+                            p {
+                                width: 95% !important;
+                                margin: 6px auto !important;
+                                text-align: left !important;
+                            }
+
+                            /* 6. Signature section: push left & right to extreme ends */
+                            table:not(.inner):last-of-type {
+                                margin-top: 40px !important;
+                                width: 95% !important;
+                            }
+
+                            table:not(.inner):last-of-type td[align="left"],
+                            table:not(.inner):last-of-type tr td:first-child {
+                                text-align: left !important;
+                                padding-left: 0 !important;
+                            }
+
+                            table:not(.inner):last-of-type td[align="right"],
+                            table:not(.inner):last-of-type tr td:last-child {
+                                text-align: right !important;
+                                padding-right: 0 !important;
+                            }
+                        </style>
                             <img style="position: absolute; top: 3%; left: 3%;" src="<?php echo base_url(); ?>assets/images/<?php echo $logo; ?>" alt="" width="60px" />
 							<?php if($nabl_flag==1) { ?> <img style="position: absolute; top: 3%; right: 5%;" src="<?php echo base_url(); ?>assets/images/<?php echo $accredition_logo; ?>" alt="" width="60px" /> <?php } ?>
-                            <table border="0">
+                            <table border="0" style="margin: 0 auto; width: 95%;">
                                 <thead>
                                     <tr>
                                         <th style="text-align: center" colspan="10">Department of <?php echo $test_area; ?></th>
@@ -775,18 +897,18 @@ src="<?php echo base_url(); ?>assets/js/jquery.tablesorter.widgets.min.js"></scr
                                 <tbody>
                                     <tr>
                                         <td>
-                                            Ordered Date :
+                                            <b>Ordered Date :</b>
                                             <?php echo date("g:ia, d-M-Y", strtotime($order_date_time)); ?>
                                         </td>
                                         <td colspan="2">
-                                            Reported Date :
+                                            <b>Reported Date :</b>
     <?php echo date("g:ia, d-M-Y", strtotime($reported_date_time)); ?>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td><b>Patient : </b>
-    <?php echo $first_name . " " . $last_name . " | " . $age . " | " . $gender; ?>
-                                        </td>
+    <?php echo $patient_id." | ".$first_name . " " . $last_name . " | " . $age . " | " . $gender; ?>
+                                        </td> 
                                         <td colspan="2"><b><?php echo $visit_type; ?> #</b><?php echo $hosp_file_no; ?>
                                         </td>
                                     </tr>
@@ -811,7 +933,7 @@ src="<?php echo base_url(); ?>assets/js/jquery.tablesorter.widgets.min.js"></scr
                                     </tr>
 				</tbody>
 				</table>
-              <table class="inner" style="boder: 1px solid #ccc; border-collapse: collapse;">
+              <table class="inner" style="boader: 1px solid #ccc; border-collapse: collapse;">
                                                     <!-- patient test results-->
                    <tr>
                         <th>#</th>
@@ -1116,7 +1238,7 @@ src="<?php echo base_url(); ?>assets/js/jquery.tablesorter.widgets.min.js"></scr
               </table>
                                            
                 <br />
-                                            <table  class="inner" style="boder: 1px solid #ccc; border-collapse: collapse;">
+                                            <table class="inner" style="border: 1px solid #ccc; border-collapse: collapse; margin: 15px auto; width: 95%;">
                                              <?php   
                                              $microbes = array();
                                              foreach($sensitivity_tests_done as $sensitivity_test_outer){
@@ -1189,22 +1311,20 @@ src="<?php echo base_url(); ?>assets/js/jquery.tablesorter.widgets.min.js"></scr
             <?php } ?>
             <!--Interpretation ending-->
 			<p><?php if($nabl_flag == 1 && $nabl_missing_flag == 1) {?> <b style="color: red">*</b>This test is not NABL accredited.<?php } ?></p>
-                                <table width="100%">
+                                <table style="width: 95%; margin: 20px auto 0 auto;">
                                      <tr></tr>
                                     <tr>
                                         <td colspan="3" align="left">Done By</td>
-                                        <td colspan="3" align="middle">Verified By</td>
                                         <td colspan="3" align="right">Approved By</td>
                                     </tr>
                                     <tr>
                                         <td colspan="3" align="left"><?php echo $done_by; ?><br /><?php echo $done_by_designation; ?></td>
-                                        <td colspan="3" align="middle"></td>
                                         <td colspan="3" align="right"> <?php echo $approved_by; ?> <br /><?php echo $approved_by_designation; ?></td>
                                     </tr>
 
                                 </table>                
                                             
-           
+            </div>
              <!-- End of print_div-->
     <?php } //End of isset($order). Means we are done displaying a single order. Code below displays summary of all orders. Note this is $order not $orders.
         else{ ?>
@@ -1280,7 +1400,7 @@ src="<?php echo base_url(); ?>assets/js/jquery.tablesorter.widgets.min.js"></scr
                                             <th>Sample Code</th>
                                             <th>Specimen</th>
                                             <th>IP/OP #</th>
-                                            <th>Patient Name, Health4all ID</th>
+                                            <th>Patient, Health4all ID</th>
                                             <th>Department</th>
                                             <th>Tests</th>
                                             </thead>
@@ -1293,10 +1413,16 @@ src="<?php echo base_url(); ?>assets/js/jquery.tablesorter.widgets.min.js"></scr
             $o = array_unique($o);
             $i = 1;
             foreach ($o as $ord) {
+               
                 ?>
                                                     <tr>
                                                             <?php
                                                             foreach ($orders as $order) {
+                                                                 $age="";
+                                                                if(!!$order->age_years) $age.=$order->age_years."Y ";
+                                                                if(!!$order->age_months) $age.=$order->age_months."M ";
+                                                                if(!!$order->age_days) $age.=$order->age_days."D ";
+                                                                if($order->age_days==0 && $order->age_months==0 && $order->age_years==0) $age.="0D";
                                                                 if ($order->order_id == $ord) {
                                                                     ?>
                                                                 <td><?php echo $i++; ?></td>
@@ -1314,7 +1440,7 @@ src="<?php echo base_url(); ?>assets/js/jquery.tablesorter.widgets.min.js"></scr
                                             ?> </td>
                                                                 <!--printing the specimen source in the test results beside the specimen type if the specimen type is not null-->
                                                                 <td><?php echo $order->visit_type . " #" . $order->hosp_file_no; ?></td>
-                                                                <td><?php echo $order->first_name." ".$order->last_name." / ".$order->gender."<br/>".$order->h4allid;?></td>
+                                                               <td><?php echo $order->first_name." ".$order->last_name." / ".$age." / ".$order->gender."<br/>".$order->h4allid;?></td>
                                                                 <td><?php echo $order->department; ?></td>
                                                                 <td>
                         <?php

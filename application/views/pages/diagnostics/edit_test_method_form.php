@@ -1,3 +1,40 @@
+<style type="text/css">
+	table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-family: sans-serif;
+  font-size: 16px;
+  text-align: left;
+}
+
+th {
+  background-color: #e4e4e7;
+  font-weight: bold;
+  padding: 12px 15px;
+}
+
+td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #dddddd;
+}
+
+/* Odd rows (default or explicit background) */
+tbody tr:nth-child(odd) {
+  background-color: #ffffff;
+}
+
+/* Even rows (alternate background) */
+tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+/* Hover state on body rows */
+tbody tr:hover {
+  background-color: #f1f3f5;
+}
+
+</style>	
 <div class="col-md-8 col-md-offset-2">
 <?php if((isset($mode))&&(($mode)=="select")){ ?>
 <center><h3>Edit Test Method </h3></center><br>
@@ -39,26 +76,29 @@ echo "value='".$test_methods[0]->test_method."' ";
 <h3 class="col-md-12">List of Test Method Types </h3>
 <div class="col-md-12 ">
 </div>
-<table class="table-hover table-bordered table-striped col-md-10">
-<thead>
-<th>S.No</th><th> Test Methods </th>
-</thead>
-<tbody>
-<?php
-$j=1;
-foreach($test_methods as $tt){ ?>
-
-<?php echo form_open('diagnostics/edit/test_method',array('id'=>'test_method_form_'.$tt->test_method_id,'role'=>'form')); ?>
-<tr onclick="$('#test_method_form_<?php echo $tt->test_method_id;?>').submit();" >
-<td><?php echo $j++; ?></td>
-<td><?php echo $tt->test_method; ?>
-<input type="hidden" value="<?php echo $tt->test_method_id; ?>" name="test_method_id"/>
-<input type="hidden" value="select" name="select" />
-</td>
-</tr>
-</form>
-<?php } ?>
-</tbody>
+<table>
+  <thead>
+    <tr>
+      <th>S.No</th>
+      <th>Test Methods</th>
+    </tr>
+  </thead>
+  <tbody>
+  <?php
+  $j = 1;
+  foreach ($test_methods as $tt) { ?>
+    <tr onclick="$('#test_method_form_<?php echo $tt->test_method_id; ?>').submit();" style="cursor: pointer;">
+      <td><?php echo $j++; ?></td>
+      <td>
+        <?php echo $tt->test_method; ?>
+        <?php echo form_open('diagnostics/edit/test_method', array('id' => 'test_method_form_' . $tt->test_method_id, 'role' => 'form')); ?>
+          <input type="hidden" value="<?php echo $tt->test_method_id; ?>" name="test_method_id" />
+          <input type="hidden" value="select" name="select" />
+        </form>
+      </td>
+    </tr>
+  <?php } ?>
+  </tbody>
 </table>
 <?php } ?>
 </div>
