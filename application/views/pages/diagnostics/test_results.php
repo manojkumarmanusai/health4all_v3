@@ -897,37 +897,37 @@ src="<?php echo base_url(); ?>assets/js/jquery.tablesorter.widgets.min.js"></scr
                                 <tbody>
                                     <tr>
                                         <td>
-                                            <b>Ordered Date :</b>
+                                            <b>Ordered Date:</b>
                                             <?php echo date("g:ia, d-M-Y", strtotime($order_date_time)); ?>
                                         </td>
                                         <td colspan="2">
-                                            <b>Reported Date :</b>
+                                            <b>Reported Date:</b>
     <?php echo date("g:ia, d-M-Y", strtotime($reported_date_time)); ?>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td><b>Patient : </b>
+                                        <td><b>Patient:</b>
     <?php echo $patient_id." | ".$first_name . " " . $last_name . " | " . $age . " | " . $gender; ?>
                                         </td> 
                                         <td colspan="2"><b><?php echo $visit_type; ?> #</b><?php echo $hosp_file_no; ?>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td><b>Department : </b>
+                                        <td><b>Department:</b>
                                             <?php echo $department; ?>
                                         </td>
-                                        <td><b>Unit/Area: </b>
+                                        <td><b>Unit/Area:</b>
                                             <?php echo $unit_name . " / " . $area_name; ?>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td><b>Sample :</b>
+                                        <td><b>Sample:</b>
                                             <?php echo $specimen_type;
                                             if (!!$specimen_source)
                                                 echo " - " . $specimen_source;
                                             ?>
                                         </td>
-                                        <td><b>Sample Code :</b>
+                                        <td><b>Sample Code:</b>
 										<?php echo $sample_code; ?>
                                         </td>
                                     </tr>
