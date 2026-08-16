@@ -351,7 +351,7 @@ $(document).ready(function(){
 					</select>
 
 					<select name="date_type" id="date_type" class="form-control"> 
-                        <option <?php if($this->input->post('date_type') && $this->input->post('date_type') == "admit_date" || $date_type == "admit_date") echo " selected ";?> value="admit_date" selected>Admit date</option>
+                        <option <?php if($this->input->post('date_type') && $this->input->post('date_type') == "admit_date" || $date_type == "admit_date") echo " selected ";?> value="admit_date">Admit date</option>
                         <option <?php if($this->input->post('date_type') && $this->input->post('date_type') == "outcome_date" || $date_type == "outcome_date") echo " selected ";?> value="outcome_date">Outcome Date</option>
                     </select>
 

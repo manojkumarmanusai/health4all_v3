@@ -3170,7 +3170,7 @@ SUM(CASE WHEN aps.is_default =  1 THEN 1 ELSE 0 END) AS default_status_count",fa
 		if ($from_age == '0' && $to_age != '0') {
 			$this->db->where('age_years>=', $to_age, false);
 		}
-		if (!!$outcome || $this->input->post('outcome_type')) {
+		if ($outcome!='All' || $this->input->post('outcome_type')) {
 			if ($this->input->post('outcome_type')) $outcome = $this->input->post('outcome_type');
 			if ($outcome == "Unupdated") {
 				$this->db->where_not_in('outcome', array('Death', 'Absconded', 'Discharge', 'LAMA'));
@@ -3217,7 +3217,7 @@ SUM(CASE WHEN aps.is_default =  1 THEN 1 ELSE 0 END) AS default_status_count",fa
 		->join('mlc', 'patient_visit.visit_id=mlc.visit_id', 'left')
 		->join('hospital', 'patient_visit.hospital_id=hospital.hospital_id', 'left')
 		->join('icd_code','patient_visit.icd_10=icd_code.icd_code','left')
-		->join('patient_followup','patient_visit.patient_id=patient_followup.patient_id','left')
+		->join('patient_followup','patient_visit.patient_id=patient_followup.patient_id and patient_followup.hospital_id=patient_visit.hospital_id','left')
 		->join('icd_code as pficd_code','pficd_code.icd_code=patient_followup.icd_code','left')
 		->join('icd_block','icd_code.block_id=icd_block.block_id','left')
 		->join('icd_chapter','icd_block.chapter_id=icd_chapter.chapter_id','left')
@@ -3323,7 +3323,7 @@ SUM(CASE WHEN aps.is_default =  1 THEN 1 ELSE 0 END) AS default_status_count",fa
 		if($from_age=='0' && $to_age!='0'){
 			$this->db->where('age_years>=',$to_age,false);
 		}
-		if(!!$outcome || $this->input->post('outcome_type')){
+		if($outcome!='All'  || $this->input->post('outcome_type')){
 			if($this->input->post('outcome_type')) $outcome = $this->input->post('outcome_type');
 			if($outcome == "Unupdated") {
 				$this->db->where_not_in('outcome',array('Death','Absconded','Discharge','LAMA'));
@@ -3373,7 +3373,7 @@ SUM(CASE WHEN aps.is_default =  1 THEN 1 ELSE 0 END) AS default_status_count",fa
 		 ->join('mlc','patient_visit.visit_id=mlc.visit_id','left')
 		 ->join('hospital','patient_visit.hospital_id=hospital.hospital_id','left')
 		 ->join('icd_code','patient_visit.icd_10=icd_code.icd_code','left')
-		 ->join('patient_followup','patient_visit.patient_id=patient_followup.patient_id','left')
+		 ->join('patient_followup','patient_visit.patient_id=patient_followup.patient_id and patient_followup.hospital_id=patient_visit.hospital_id','left')
 		 ->join('icd_code as pficd_code','pficd_code.icd_code=patient_followup.icd_code','left')
 		 ->join('icd_block','icd_code.block_id=icd_block.block_id','left')
 		 ->join('icd_chapter','icd_block.chapter_id=icd_chapter.chapter_id','left')
@@ -3680,7 +3680,7 @@ function get_icd_detail_count($icdchapter,$icdblock,$icd_10,$department,$unit,$a
 			$this->db->where('test.test_status',$status);
 		}
 		$this->db->select('test.*,test.test_id,test_order.order_id,order_date_time,age_years,age_months,age_days,
-		test_sample.sample_id,test_method,test_name,department,patient.first_name, patient.last_name, unit_name, area_name,
+		test_sample.sample_id,test_method,test_name,department,patient.first_name, patient.last_name, patient.patient_id as h4allid,unit_name, area_name,
 		binary_result,numeric_result,text_result,
 		test_result_binary,test_result_text,test_result,lab_unit,
 		patient_visit.visit_id,staff.first_name staff_name,hosp_file_no,
@@ -4337,6 +4337,10 @@ function get_icd_detail_count($icdchapter,$icdblock,$icd_10,$department,$unit,$a
 			$this->db->where('icd_chapter.chapter_id',$this->input->post('icd_chapter'));
 		}
 
+		if($this->input->post('outcome_type')){
+			$this->db->where('outcome',$this->input->post('outcome_type'));
+		}
+
 		$this->db->select("department 'department', department.department_id,
         SUM(CASE WHEN 1  THEN 1 ELSE 0 END) 'outcome',
         SUM(CASE WHEN gender = 'F'  THEN 1 ELSE 0 END) 'outcome_female',
@@ -4358,7 +4362,7 @@ function get_icd_detail_count($icdchapter,$icdblock,$icd_10,$department,$unit,$a
         SUM(CASE WHEN outcome!='Discharge' AND outcome!='LAMA' AND outcome!='Absconded' AND outcome!= 'Death' THEN 1 ELSE 0 END) 'total_unupdated'");
 		$this->db->from('patient_visit')
 		 ->join('patient','patient_visit.patient_id=patient.patient_id')
-		 ->join('patient_followup','patient_followup.patient_id=patient.patient_id')
+		 ->join('patient_followup','patient_followup.patient_id=patient.patient_id and patient_followup.hospital_id=patient_visit.hospital_id','left')
 		 ->join('department','patient_visit.department_id=department.department_id','left')
 		 ->join('unit','patient_visit.unit=unit.unit_id','left')
 		 ->join('area','patient_visit.area=area.area_id','left')

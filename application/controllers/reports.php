@@ -1232,7 +1232,7 @@ class Reports extends CI_Controller {
 		}
 	}
 	
-	public function outcome_detail($department=-1,$unit=0,$area=0,$gender=0,$from_age=0,$to_age=0,$from_date=0,$to_date=0,$visit_name=-1,$date_type='admit_date',$outcome=0,$icd_chapter='',$icd_block='',$icd_code='')
+	public function outcome_detail($department=-1,$unit=0,$area=0,$gender=0,$from_age=0,$to_age=0,$from_date=0,$to_date=0,$visit_name=-1,$date_type='admit_date',$outcome='All',$icd_chapter='',$icd_block='',$icd_code='')
 	{
 		if($department !=-1)
 			$this->data['department'] = $department;
@@ -1240,7 +1240,7 @@ class Reports extends CI_Controller {
 			$this->data['unit_type'] = $unit;
 		if($area!=0)
 			$this->data['area_type'] = $area;
-		if($outcome!=0)
+		if($outcome!='All')
 			$this->data['outcome_type'] = $outcome;
 		if($icd_chapter!=' ')
 			$this->data['icd_chapter'] = $icd_chapter;
@@ -1248,9 +1248,11 @@ class Reports extends CI_Controller {
 	    	$this->data['icd_block'] = $icd_block; 
 		if($icd_code!=' ')
 			$this->data['icd_code'] = $icd_code; 
-		if($date_type!=0)
-			$this->data['date_type'] = $date_type; 
+		
+		$this->data['date_type'] = $date_type;
 
+		//echo("<script>alert('PHP: " . $outcome . "');</script>");
+		
 		if($this->session->userdata('logged_in')){
 		$this->data['userdata']=$this->session->userdata('logged_in');
 		$access=0;

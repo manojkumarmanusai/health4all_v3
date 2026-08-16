@@ -314,7 +314,7 @@ if(count($orders)>0){ ?>
 			<th>Sample Code</th>
 			<th>Specimen</th>
 			<th>IP/OP #</th>
-			<th>Patient Name</th>
+			<th>Patient Name, Health4all ID</th>
 			<th>Department</th>
 			<th>Tests</th>
 		</thead>
@@ -340,7 +340,7 @@ if(count($orders)>0){ ?>
 						<td><?php echo $order->sample_code;?></td>
 						<td><?php echo $order->specimen_type; if($order->specimen_source!="") echo " - ".$order->specimen_source;?> </td><!--printing the specimen source in the update tests beside the specimen type if the specimen type is not null-->
 						<td><?php echo $order->visit_type." #".$order->hosp_file_no;?></td>
-						<td><?php echo $order->first_name." ".$order->last_name;?></td>
+						<td><?php echo $order->first_name." ".$order->last_name." / ".$order->gender."<br/>".$order->h4allid;?></td>
 						<td><?php echo $order->department;?></td>
 						<td>
 							<?php foreach($orders as $order){

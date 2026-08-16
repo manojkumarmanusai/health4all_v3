@@ -832,7 +832,6 @@ else if($type=="dosage"){
 				
     $data=array(
 		'test_name'=>$this->input->post('test_name'),
-		'test_method_id'=>$this->input->post('test_method'),
 	);
  	
  	$this->db->where('test_master_id',$this->input->post('test_master_id'));
@@ -840,16 +839,23 @@ else if($type=="dosage"){
    $this->db->trans_start();
    $this->db->update($table,$data);
 
-   foreach($this->input->post("deactivate") as $deactivate){
-       if($deactivate != "active"){
-           $flags = array(
-                'test_range_id' => $deactivate,
-                'range_active' => 0
-           );
-       }
-   }
-   $this->db->update_batch('test_range',$flags,'test_range_id');
-   $range_data = array();
+   $deactivate_ids = $this->input->post("deactivate");
+   $flags = array();
+
+   if (!empty($deactivate_ids) && is_array($deactivate_ids)) {
+		foreach ($deactivate_ids as $deactivate) {
+			if ($deactivate !== "active") {
+				$flags[] = array(
+					'test_range_id' => $deactivate,
+					'range_active'  => 0
+				);
+			}
+		}
+
+		if (!empty($flags)) {
+			$this->db->update_batch('test_range', $flags, 'test_range_id');
+		}
+	}
    
    if($this->input->post("range_items_count")>0){
    for($count =0; $count < $this->input->post("range_items_count");$count++){
