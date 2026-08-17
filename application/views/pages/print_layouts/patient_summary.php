@@ -321,6 +321,7 @@
 							<td style="width:10em">Value</td>
 							<td style="width:5em">Report - Binary</td>
 							<td style="width:10em">Report</td>
+							<td style="width:10em">Normal Range</td>
 							</tr>
 							<?php 
 							$o=array();
@@ -335,8 +336,8 @@
 									if($order->order_id == $ord) { ?>
 								<tr <?php if($order->test_status == 2) { ?> onclick="$('#order_<?php echo $ord;?>').submit()" <?php } ?>>
 										<td><?php echo $i++;?></td>
-										<td>
-											<?php echo $order->order_id;?>
+										<td> 
+											<?php echo date("j-M-Y", strtotime("$order->order_date_time"));?>
 											</form>
 										</td>
 										<td><?php echo $order->specimen_type;?></td>
@@ -357,6 +358,19 @@
 										</td>
 										<td>
 											<?php if($order->test_status==2 && $order->text_result == 1) echo $order->test_result_text; else echo "NA";?>
+										</td>
+										<td>
+											<?php 
+											$result = "";
+
+											if ($order->range_type == 1) $result .= "< " . $order->max ." ". $order->lab_unit;
+											else if ($order->range_type == 2) $result .= "> " . $order->min ." ". $order->lab_unit;
+											else if ($order->range_type == 3) $result .= $order->min . " - " . $order->max ." ". $order->lab_unit;
+											else if($order->range_type == 4) $result .= $order->range_text;
+                                
+                                			echo $result;
+											
+											?>
 										</td>
 								</tr>
 								<?php
