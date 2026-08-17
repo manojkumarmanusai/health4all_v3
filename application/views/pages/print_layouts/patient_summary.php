@@ -314,14 +314,12 @@
 						<table id="table-prescription">
 						<tbody>
 							<tr>
-							<td style="width:3em">#</td>
-							<td style="width:10em">Order Date</td>
-							<td style="width:10em">Specimen</td>
-							<td style="width:12em">Test</td>
-							<td style="width:10em">Value</td>
-							<td style="width:5em">Report - Binary</td>
-							<td style="width:10em">Report</td>
-							<td style="width:10em">Normal Range</td>
+							<td style="width:3em;font-weight: bold;">#</td>
+							<td style="width:10em;font-weight: bold;">Order Date</td>
+							<td style="width:10em;font-weight: bold;">Specimen</td>
+							<td style="width:12em;font-weight: bold;">Test</td>
+							<td style="width:10em;font-weight: bold;">Value</td>
+							<td style="width:10em;font-weight: bold;">Normal Range</td>
 							</tr>
 							<?php 
 							$o=array();
@@ -351,13 +349,34 @@
 											?>
 										</td>
 										<td>
-											<?php if($order->test_status==2 && $order->numeric_result == 1) echo $order->test_result." ".$order->lab_unit; else echo "NA";?>
-										</td>
-										<td>
-											<?php if($order->test_status==2 && $order->binary_result == 1) echo $order->test_result_binary; else echo "NA";?>
-										</td>
-										<td>
-											<?php if($order->test_status==2 && $order->text_result == 1) echo $order->test_result_text; else echo "NA";?>
+
+										<?php 
+											$finalVal= "";
+											if($order->test_status==2 && $order->numeric_result == 1){ 
+												$numeric= $order->test_result." ".$order->lab_unit; 
+											}
+											else {
+													$numeric= "NA";
+											}
+											
+											if( $numeric!="NA"){
+												$finalVal = $numeric;
+											}
+											if($order->test_status==2 && $order->binary_result == 1) $binary_result= $order->test_result_binary; else $binary_result = "NA";
+
+											if( $binary_result!="NA"){
+												$finalVal = $final.", ".$binary_result;
+											}
+
+											if($order->test_status==2 && $order->text_result == 1) $text_result= $order->test_result_text; else $text_result= "NA";
+											
+											if( $text_result!="NA"){
+												$finalVal = $finalVal.", ".$text_result;
+											}
+											if($finalVal == "")
+												 $finalVal ="NA";
+											echo $finalVal;
+										?>
 										</td>
 										<td>
 											<?php 

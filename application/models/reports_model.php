@@ -3679,8 +3679,16 @@ function get_icd_detail_count($icdchapter,$icdblock,$icd_10,$department,$unit,$a
 			else
 			$this->db->where('test.test_status',$status);
 		}
-		$this->db->select('test.*,test.test_id,test_order.order_id,order_date_time,age_years,age_months,age_days,
-		test_sample.sample_id,test_method,test_name,department,patient.first_name, patient.last_name, patient.patient_id as h4allid,unit_name, area_name,
+		$this->db->select('test.test_master_id,
+			test.group_id,
+			test.test_date_time,
+			test.test_done_by,
+			test.test_approved_by,
+			test.reported_date_time,
+			test.test_range_id,
+			test.temp_test_id,
+		,test.test_id,test_order.order_id,order_date_time,age_years,age_months,age_days,
+		test_sample.sample_id,test_method,test_name,department,patient.first_name, patient.last_name, patient.patient_id as h4allid,patient.gender,unit_name, area_name,
 		binary_result,numeric_result,text_result,
 		test_result_binary,test_result_text,test_result,lab_unit,
 		patient_visit.visit_id,staff.first_name staff_name,hosp_file_no,

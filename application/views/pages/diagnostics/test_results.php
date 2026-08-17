@@ -682,8 +682,10 @@ body #table-sort tr td:last-child {
             <?php } ?>
             <table border="0" style="margin: 0 auto; width: 95%;">
                 <thead>
-                    <tr><th style="text-align: center" colspan="10">Department of <?php echo $test_area; ?></th></tr>
-                    <tr><th style="text-align: center" colspan="10"><?php echo $hospital; ?>, <?php echo $place; ?>, <?php echo $district; ?>, <?php echo $state; ?><br /></th></tr>
+                    <tr><th style="text-align: center" colspan="10"><?php echo $hospital; ?><br /></th></tr>
+                    <th style="text-align: center" colspan="10">
+        <?php echo implode(', ', array_filter([$place, $district, $state])); ?><br />
+    </th>                    <tr><th style="text-align: center" colspan="10"><?php echo $test_area." Department" ?> </th></tr>
                     <tr><th style="text-align: center" colspan="10"><u><?php echo $test_method; ?> Report</u><br /></th></tr>
                 </thead>
                 <tbody>
