@@ -2042,7 +2042,7 @@ function openSmsModal(){
 					<th style="width:7em">Value</th>
 					<th style="width:8em">Report - Binary</th>
 					<th style="width:8em">Report</th>
-					<th style="width:7em">Normal Range</th>
+					<th style="width:10em">Normal Range</th>
 				</thead>
 				<tbody>
 					<?php 
