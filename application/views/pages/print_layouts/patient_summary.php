@@ -353,7 +353,7 @@
 										<?php
 											$results = [];
 
-											if ($order->test_status == 2) {
+											if ((int)$order->test_status === 2 || (int)$order->test_status === 3) {
 												if ($order->numeric_result == 1) {
 													$results[] = trim($order->test_result . ' ' . $order->lab_unit);
 												}
