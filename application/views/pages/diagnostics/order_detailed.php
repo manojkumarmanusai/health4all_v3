@@ -212,7 +212,7 @@
 								if($order->age_months!=0) $age.=$order->age_months."M ";
 								if($order->age_days!=0) $age.=$order->age_days."D ";
 								if($order->age_days == 0 && $order->age_months == 0 && $order->age_years == 0) $age.="0D";
-								echo $age;
+								echo $age."/ ".$order->gender;
 							?>
 						</td>
 						<td>

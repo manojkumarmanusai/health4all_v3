@@ -542,7 +542,7 @@
 				if ($f->user_function == "Diagnostics - Order All") { ?>
 					<li <?php if (preg_match("^view_orders^", current_url()))
 						echo 'class="active"'; ?>><a
-							href="<?php echo base_url(); ?>diagnostics/view_orders/0">View Tests</a></li>
+							href="<?php echo base_url(); ?>diagnostics/view_orders/0">Update Tests</a></li>
 					<?php
 					$view_orders = 1;
 				}
