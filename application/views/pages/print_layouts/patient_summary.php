@@ -350,33 +350,25 @@
 										</td>
 										<td>
 
-										<?php 
-											$finalVal= "";
-											if($order->test_status==2 && $order->numeric_result == 1){ 
-												$numeric= $order->test_result." ".$order->lab_unit; 
-											}
-											else {
-													$numeric= "NA";
-											}
-											
-											if( $numeric!="NA"){
-												$finalVal = $numeric;
-											}
-											if($order->test_status==2 && $order->binary_result == 1) $binary_result= $order->test_result_binary; else $binary_result = "NA";
+										<?php
+											$results = [];
 
-											if( $binary_result!="NA"){
-												$finalVal = $final.", ".$binary_result;
+											if ($order->test_status == 2) {
+												if ($order->numeric_result == 1) {
+													$results[] = trim($order->test_result . ' ' . $order->lab_unit);
+												}
+												if ($order->binary_result == 1) {
+													$results[] = $order->test_result_binary;
+												}
+												if ($order->text_result == 1) {
+													$results[] = $order->test_result_text;
+												}
 											}
 
-											if($order->test_status==2 && $order->text_result == 1) $text_result= $order->test_result_text; else $text_result= "NA";
-											
-											if( $text_result!="NA"){
-												$finalVal = $finalVal.", ".$text_result;
-											}
-											if($finalVal == "")
-												 $finalVal ="NA";
-											echo $finalVal;
-										?>
+											$validResults = array_filter($results);
+
+											echo !empty($validResults) ? implode(', ', $validResults) : 'NA';
+											?>
 										</td>
 										<td>
 											<?php 
