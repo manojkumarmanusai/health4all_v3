@@ -318,7 +318,7 @@
 							<td style="width:10em;font-weight: bold;">Order Date</td>
 							<td style="width:10em;font-weight: bold;">Specimen</td>
 							<td style="width:12em;font-weight: bold;">Test</td>
-							<td style="width:10em;font-weight: bold;">Value</td>
+							<td style="width:18em;font-weight: bold;">Value</td>
 							<td style="width:10em;font-weight: bold;">Normal Range</td>
 							</tr>
 							<?php 
