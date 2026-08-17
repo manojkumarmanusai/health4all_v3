@@ -2035,13 +2035,14 @@ function openSmsModal(){
 				<table class="table table-bordered table-striped table-hover" id="table-sort">
 				<thead>
 					<th style="width:3em">#</th>
-					<th style="width:10em">Order ID</th>
-					<th style="width:10em">Order Date</th>
-					<th style="width:10em">Specimen</th>
-					<th style="width:12em">Test</th>
-					<th style="width:10em">Value</th>
-					<th style="width:5em">Report - Binary</th>
-					<th style="width:10em">Report</th>
+					<th style="width:5em">Order ID</th>
+					<th style="width:7em">Order Date</th>
+					<th style="width:7em">Specimen</th>
+					<th style="width:8em">Test</th>
+					<th style="width:7em">Value</th>
+					<th style="width:8em">Report - Binary</th>
+					<th style="width:8em">Report</th>
+					<th style="width:7em">Normal Range</th>
 				</thead>
 				<tbody>
 					<?php 
@@ -2069,11 +2070,34 @@ function openSmsModal(){
 								<td><?php echo $order->specimen_type;?></td>
 								<td>
 								<?php
-													if($order->test_status==1){
-														$label="label-warning"; $status="Completed"; }
-													else if($order->test_status == 2){ $label = "label-success"; $status = "Approved"; }
-													else if($order->test_status == 0){ $label = "label-default"; $status = "Ordered"; }
-													echo '<label class="label '.$label.'" title="'.$status.'">'.$order->test_name."</label><br />";									
+										switch ($order->test_status) {
+												case 0:
+													$label  = 'label-default';
+													$status = 'Ordered';
+													break;
+												case 1:
+													$label  = 'label-info';
+													$status = 'Updated';
+													break;
+												case 2:
+													$label  = 'label-success';
+													$status = 'Approved';
+													break;
+												case 3:
+													$label  = 'label-danger';
+													$status = 'Rejected';
+													break;
+												case 4:
+													$label  = 'label-warning';
+													$status = 'Cancelled';
+													break;
+												default:
+													$label  = 'label-default';
+													$status = 'Unknown';
+													break;
+											}
+
+											echo '<label class="label '.$label.'" title="'.$status.'">'.$order->test_name.'</label><br />';					
 									?>
 								</td>
 								<td>
@@ -2085,6 +2109,19 @@ function openSmsModal(){
 								<td>
 									<?php if($order->test_status==2 && $order->text_result == 1) echo $order->test_result_text; else echo "NA";?>
 								</td>
+								<td>
+											<?php 
+											$result = "";
+
+											if ($order->range_type == 1) $result .= "< " . $order->max ." ". $order->lab_unit;
+											else if ($order->range_type == 2) $result .= "> " . $order->min ." ". $order->lab_unit;
+											else if ($order->range_type == 3) $result .= $order->min . " - " . $order->max ." ". $order->lab_unit;
+											else if($order->range_type == 4) $result .= $order->range_text;
+                                
+                                			echo $result;
+											
+											?>
+										</td>
 						</tr>
 						<?php
 						}

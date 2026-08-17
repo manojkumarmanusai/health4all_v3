@@ -654,7 +654,6 @@ class Diagnostics_model extends CI_Model{
 		->join('department','patient_visit.department_id=department.department_id')
 		->join('specimen_type','test_sample.specimen_type_id=specimen_type.specimen_type_id','left')
 		->where('test_order.hospital_id',$hospital['hospital_id'])
-		->where('test.test_status <>',4) // Cancelled tests
 		->group_by('test.test_id')
 		->order_by('order_date_time','desc');	  
 		$query=$this->db->get();

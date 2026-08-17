@@ -331,8 +331,11 @@
 							foreach($o as $ord){	?>
 								<?php
 								foreach($tests as $order) { 
-									if($order->order_id == $ord) { ?>
-								<tr <?php if($order->test_status == 2) { ?> onclick="$('#order_<?php echo $ord;?>').submit()" <?php } ?>>
+									if($order->order_id == $ord) {
+										if($order->test_status != 2) {
+											continue;
+										} ?>
+								<tr>
 										<td><?php echo $i++;?></td>
 										<td> 
 											<?php echo date("j-M-Y", strtotime("$order->order_date_time"));?>
@@ -353,7 +356,7 @@
 										<?php
 											$results = [];
 
-											if ((int)$order->test_status === 2 || (int)$order->test_status === 3) {
+										
 												if ($order->numeric_result == 1) {
 													$results[] = trim($order->test_result . ' ' . $order->lab_unit);
 												}
@@ -363,7 +366,7 @@
 												if ($order->text_result == 1) {
 													$results[] = $order->test_result_text;
 												}
-											}
+											
 
 											$validResults = array_filter($results);
 
