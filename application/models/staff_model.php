@@ -197,7 +197,7 @@ class Staff_model extends CI_Model{
 		if($clinical != -1){
 			$this->db->where('clinical',$clinical);
 		}
-		$this->db->select("hospital_id,department_id,department")->from("department")->order_by('department');
+		$this->db->select("hospital_id,department_id,department,clinical")->from("department")->order_by('department');
 		$query=$this->db->get();
 		return $query->result();
 	}
@@ -762,6 +762,29 @@ class Staff_model extends CI_Model{
 		}
 		else return true;
 	}
+
+	function user_department_link() {
+		$user_id = $this->input->post('user_id');
+		$user_departments = $this->input->post('user_departments'); 
+		
+		$user_departments_data = array();
+		foreach($user_departments as $ud){ 
+			$user_departments_data[] = array(
+				'user_id'=>$user_id,
+				'department_id'=>$ud
+			);
+		}
+		
+		$this->db->trans_start();
+		$this->db->delete('user_department_link',array('user_id' => $user_id));
+		$this->db->insert_batch('user_department_link',$user_departments_data);
+		$this->db->trans_complete();
+		if($this->db->trans_status()===FALSE){
+			//if the transaction failed,return false.
+			return false;
+		}
+		else return true;
+	}
 	
 	function get_user_hospitals() {
 		if(!!$this->input->post('user_id')){
@@ -773,6 +796,28 @@ class Staff_model extends CI_Model{
 				 ->join("user_hospital_link","user_hospital_link.user_id = user.user_id")
 				 ->join("hospital","hospital.hospital_id = user_hospital_link.hospital_id")
 				 ->order_by('hospital','asc');
+		$query=$this->db->get();
+		return $query->result();
+	}
+
+	function get_user_departments() {
+		if(!!$this->input->post('user_id')){
+			$this->db->where('user.user_id',$this->input->post('user_id'));
+		}
+		$hospital=$this->session->userdata('hospital');
+		
+		if(!!$hospital){
+			$this->db->where('department.hospital_id',$hospital['hospital_id']);
+		}else {
+			return false;
+		}
+		
+		$this->db->select("user.user_id, user.username, department.department_id,department.department, department.department,
+					department.clinical")
+				 ->from("user")
+				 ->join("user_department_link","user_department_link.user_id = user.user_id")
+				 ->join("department","department.department_id = user_department_link.department_id")
+				 ->order_by('department','asc');
 		$query=$this->db->get();
 		return $query->result();
 	}
@@ -799,11 +844,14 @@ class Staff_model extends CI_Model{
 		if($this->input->post('staff_user_name')){
 			$this->db->like('lower(user.username)',strtolower($this->input->post('staff_user_name')));
 		}
-		$this->db->select("staff.staff_id,staff.hospital_id, staff.designation, 
+		$this->db->select("staff.staff_id,staff.hospital_id, staff.department_id,department.department as staff_primary_department,
+		hospital.hospital_short_name as staff_primary_hospital,staff.designation, 
 		staff.first_name, staff.last_name,
 		user.user_id, user.username, staff.phone, user.active")
 			->from("user")
-			->join("staff", "user.staff_id = staff.staff_id");
+			->join("staff", "user.staff_id = staff.staff_id")
+			->join("hospital", "staff.hospital_id = hospital.hospital_id","left")
+			->join("department", "staff.department_id = department.department_id","left");
 		if($default_rowsperpage!=0){
 			$this->db->limit($rows_per_page,$start);
 		}	
@@ -879,12 +927,22 @@ class Staff_model extends CI_Model{
 		} 
 	}
 
-	function gat_all_assigned_hosp($user_id)
+	function get_all_assigned_hosp($user_id)
 	{
 		$this->db->select('uhl.user_id, hospital.hospital as hp_name, hospital.hospital_short_name')
 		->from("user_hospital_link as uhl")
 		->join("hospital", "hospital.hospital_id = uhl.hospital_id")
 		->where('uhl.user_id', $user_id);
+		$query=$this->db->get();
+		return $query->result();
+	}
+
+	function get_all_assigned_department($user_id)
+	{
+		$this->db->select('udl.user_id, department.department as department_name, department.clinical')
+		->from("user_department_link as udl")
+		->join("department", "department.department_id = udl.department_id")
+		->where('udl.user_id', $user_id);
 		$query=$this->db->get();
 		return $query->result();
 	}
