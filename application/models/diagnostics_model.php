@@ -640,8 +640,8 @@ class Diagnostics_model extends CI_Model{
 							specimen_type,sample_container_type,test_status,test_result,test_result_text,numeric_result,lab_unit,
 							(CASE WHEN binary_result = 1 AND test_result_binary = 1 THEN binary_positive ELSE binary_negative END) test_result_binary, binary_result,
 							text_result,study_id,filepath,test_range.min,test_range.max,test_range.range_text,test_range.range_type,  test_range.range_text,')
-		->from('test_order')
-		->join('test','test_order.order_id=test.order_id')
+		->from('test')
+		->join('test_order','test_order.order_id=test.order_id')
 		->join('dicom','test.test_id = dicom.test_id','left')
 		->join('test_sample','test.sample_id=test_sample.sample_id','left')
 		->join('test_master','test.test_master_id=test_master.test_master_id')
@@ -654,7 +654,6 @@ class Diagnostics_model extends CI_Model{
 		->join('department','patient_visit.department_id=department.department_id')
 		->join('specimen_type','test_sample.specimen_type_id=specimen_type.specimen_type_id','left')
 		->where('test_order.hospital_id',$hospital['hospital_id'])
-		->where('test_order.order_status <>',3)
 		->group_by('test.test_id')
 		->order_by('order_date_time','desc');	  
 		$query=$this->db->get();

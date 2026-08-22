@@ -318,7 +318,7 @@
 							<td style="width:10em;font-weight: bold;">Order Date</td>
 							<td style="width:10em;font-weight: bold;">Specimen</td>
 							<td style="width:12em;font-weight: bold;">Test</td>
-							<td style="width:10em;font-weight: bold;">Value</td>
+							<td style="width:18em;font-weight: bold;">Value</td>
 							<td style="width:10em;font-weight: bold;">Normal Range</td>
 							</tr>
 							<?php 
@@ -331,8 +331,11 @@
 							foreach($o as $ord){	?>
 								<?php
 								foreach($tests as $order) { 
-									if($order->order_id == $ord) { ?>
-								<tr <?php if($order->test_status == 2) { ?> onclick="$('#order_<?php echo $ord;?>').submit()" <?php } ?>>
+									if($order->order_id == $ord) {
+										if($order->test_status != 2) {
+											continue;
+										} ?>
+								<tr>
 										<td><?php echo $i++;?></td>
 										<td> 
 											<?php echo date("j-M-Y", strtotime("$order->order_date_time"));?>
@@ -350,33 +353,25 @@
 										</td>
 										<td>
 
-										<?php 
-											$finalVal= "";
-											if($order->test_status==2 && $order->numeric_result == 1){ 
-												$numeric= $order->test_result." ".$order->lab_unit; 
-											}
-											else {
-													$numeric= "NA";
-											}
-											
-											if( $numeric!="NA"){
-												$finalVal = $numeric;
-											}
-											if($order->test_status==2 && $order->binary_result == 1) $binary_result= $order->test_result_binary; else $binary_result = "NA";
+										<?php
+											$results = [];
 
-											if( $binary_result!="NA"){
-												$finalVal = $final.", ".$binary_result;
-											}
-
-											if($order->test_status==2 && $order->text_result == 1) $text_result= $order->test_result_text; else $text_result= "NA";
+										
+												if ($order->numeric_result == 1) {
+													$results[] = trim($order->test_result . ' ' . $order->lab_unit);
+												}
+												if ($order->binary_result == 1) {
+													$results[] = $order->test_result_binary;
+												}
+												if ($order->text_result == 1) {
+													$results[] = $order->test_result_text;
+												}
 											
-											if( $text_result!="NA"){
-												$finalVal = $finalVal.", ".$text_result;
-											}
-											if($finalVal == "")
-												 $finalVal ="NA";
-											echo $finalVal;
-										?>
+
+											$validResults = array_filter($results);
+
+											echo !empty($validResults) ? implode(', ', $validResults) : 'NA';
+											?>
 										</td>
 										<td>
 											<?php 

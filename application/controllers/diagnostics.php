@@ -1,3 +1,26 @@
+<?php 
+/*
+test_order
+====
+order_status
+---------
+0 => Ordered
+1 => Recieved (FE not yet created)
+2 => Updated
+3 => Cancelled
+
+
+test
+====
+test_status
+---------
+0 => Ordered
+1 => Updated
+2 => Approved
+3 => Rejected
+4 => Cancelled
+*/
+?>
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 class diagnostics extends CI_Controller
 {
