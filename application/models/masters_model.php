@@ -1746,11 +1746,14 @@ else if($type=="dosage"){
 
 		$this->db->select("user_function_link.user_id,user_function_link.add,user_function_link.view,user_function_link.edit,user_function.user_function,
 						   user_function.description,staff.first_name,staff.gender,staff.specialisation,staff.email,staff.phone,staff.status,
-						   staff.designation")
+						   staff.designation,department.department as staff_primary_department,
+		hospital.hospital_short_name as staff_primary_hospital")
 				->from("user_function_link")
 				->join('user_function','user_function.user_function_id=user_function_link.function_id','left')
 				->join('user','user.user_id=user_function_link.user_id','left')
 				->join('staff','staff.staff_id=user.staff_id','left')
+				->join('hospital', 'staff.hospital_id = hospital.hospital_id','left')
+				->join('department', 'staff.department_id = department.department_id','left')
 				->where('user_function_link.function_id',$this->input->post('user_functions'));
 		$query = $this->db->get();
 		return $query->result();
