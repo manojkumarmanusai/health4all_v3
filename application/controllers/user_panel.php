@@ -236,6 +236,13 @@ class User_panel extends CI_Controller {
 			$this->data['title']="Link User To Departments";
 			$this->data['userdata']=$this->session->userdata('logged_in');
 			$this->data['defaultsConfigs'] = $this->masters_model->get_data("defaults"); 
+			$hospital=$this->session->userdata('hospital');
+			if(!!$hospital){
+				$hospitalId = $hospital['hospital_id'];
+			}
+			else{
+				$hospitalId = -1;
+			}
 		 	foreach($this->data['defaultsConfigs'] as $default){		 
 		 	if($default->default_id=='pagination'){
 		 			$this->data['rowsperpage'] = $default->value;
@@ -245,13 +252,13 @@ class User_panel extends CI_Controller {
 			}
 			if($this->input->post('submit')){
 				$this->data['status'] = $this->staff_model->user_department_link();
-				$this->data['report_count'] = $this->staff_model->get_user_count();
-				$this->data['user'] = $this->staff_model->get_user($this->data['rowsperpage']);
+				$this->data['report_count'] = $this->staff_model->get_user_count($hospitalId);
+				$this->data['user'] = $this->staff_model->get_user($this->data['rowsperpage'],$hospitalId);
 				$this->data['departments']= false;
 
 			}else if(!$this->input->post('select')){
-				$this->data['report_count'] = $this->staff_model->get_user_count();
-				$this->data['user'] = $this->staff_model->get_user($this->data['rowsperpage']);
+				$this->data['report_count'] = $this->staff_model->get_user_count($hospitalId);
+				$this->data['user'] = $this->staff_model->get_user($this->data['rowsperpage'],$hospitalId);
 				$this->data['assigned_departments'] = $this->staff_model->get_all_assigned_department($this->data['user'][0]->user_id);
 				$this->data['departments']= false;
 

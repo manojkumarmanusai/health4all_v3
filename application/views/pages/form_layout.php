@@ -1,13 +1,74 @@
-	<style>
-	#sortable .control-label{
-		font-size:0.8em;
-	}
-	#footer{
-		position: fixed;
-		bottom: 0px;
-		width: 100%;
-	}
-	</style>
+<style>
+/* 1. Squeeze the main container so it leaves room for the right sidebar */
+.form-custom > .col-md-12 {
+    width: 78% !important;
+    max-width: 78% !important;
+    float: left !important;
+    box-sizing: border-box;
+	margin-left: 135px;
+}
+
+/* 2. Constrain the panel and add a horizontal scrollbar if fields overflow */
+.panel.panel-default {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+}
+
+/* Prevent inner content from crushing below readable width */
+.panel-heading,
+.panel-body {
+    min-width: 580px;
+    box-sizing: border-box;
+}
+
+/* 3. Keep the right sidebar in its original place next to the panel */
+.sidebar {
+    width: 15% !important;
+    max-width: 15% !important;
+    float: left !important;
+    clear: none !important;
+    padding-left: 24px;
+    box-sizing: border-box;
+}
+
+/* 4. Squeeze form controls inside the panel to fit their column cells */
+#sortable .form-control,
+#sortable input[type="text"],
+#sortable select {
+    width: 100% !important;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+#sortable .control-label {
+    font-size: 0.8em;
+    font-weight: 600;
+}
+
+#sortable .form-group {
+    position: relative;
+    margin-bottom: 12px;
+}
+
+#sortable .star {
+    position: absolute;
+    right: 5px;
+    top: 25px;
+    cursor: pointer;
+    font-size: 15px;
+    color: #ccc;
+    user-select: none;
+}
+
+/* 5. Sticky Footer */
+#footer {
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+}
+</style>
 	<!-- Include scripts for jQuery Sortable -->
 	<script src="<?php echo base_url(); ?>assets/js/jquery.ui.core.min.js"></script>
 	<script src="<?php echo base_url(); ?>assets/js/jquery.ui.widget.min.js"></script>

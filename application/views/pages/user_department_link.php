@@ -90,7 +90,7 @@ function onchange_page_dropdown(dropdownobj){
 <div class="form-group col-md-12 col-md-offset-2">
     <table class="table table-bordered table-striped" id="table-sort">
         <thead>
-            <th colspan="3">Select Department User(<?php echo $user_departments[0]->username; ?>) Can access <?php if ($this->session->userdata('hospital')) {
+            <th colspan="3">Select departments user <?php if ($this->input->post('user_name')) { echo $this->input->post('user_name');}  else {echo $user_departments[0]->username;} ?> can access <?php if ($this->session->userdata('hospital')) {
                 echo "from ".$this->session->userdata('hospital')['hospital_short_name'];
             }
             ?></th>
@@ -131,6 +131,7 @@ function onchange_page_dropdown(dropdownobj){
 <?php }else{ ?>
 <?php $page_no = 1;	?>
     <div class="col-md-10 col-md-offset-2">
+    <h3>User Department Link</h3>
     <?php 
     echo form_open('user_panel/user_department_link',array('role'=>'form','class'=>'form-custom',
         'id'=>'search_user')); 
@@ -270,6 +271,7 @@ echo "</select></li>";
         <thead>
             <th style="text-align:center">S.no</th>
             <th style="text-align:center">Name</th>
+            <th style="text-align:center">Primary Hospital</th>
             <th style="text-align:center">Primary Department</th>
             <th style="text-align:center">Designation</th>            
             <th style="text-align:center">User Name</th>
@@ -286,10 +288,12 @@ echo "</select></li>";
             <?php echo $i++; ?>
         </td>
         <td><?php echo $a->first_name.' '.$a->last_name; ?></td>
+        <td><?php echo $a->staff_primary_hospital; ?></td>
         <td><?php echo $a->staff_primary_department; ?></td>
         <td><?php echo $a->designation;?> </td>        
         <td><?php echo $a->username; ?>
             <input type="hidden" value="<?php echo $a->user_id; ?>" name="user_id" />
+            <input type="hidden" value="<?php echo $a->username; ?>" name="user_name" />
             <input type="hidden" value="select" name="select" />
         </td>
         <td>

@@ -164,7 +164,7 @@ display: inline-grid;
 	$page_no = 1;	
 	
 	?>
-<div class="row">
+<div class="row col-md-12 col-md-offset-2">
 		<h4>User Function Access List</h4>	
 		<?php echo form_open("user_panel/user_function_act_list",array('role'=>'form','class'=>'form-custom','id'=>'appointment')); ?> 
 		<input type="hidden" name="page_no" id="page_no" value='<?php echo "$page_no"; ?>'>

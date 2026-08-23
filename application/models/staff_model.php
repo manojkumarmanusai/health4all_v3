@@ -822,7 +822,7 @@ class Staff_model extends CI_Model{
 		return $query->result();
 	}
 
-	function get_user($default_rowsperpage=0) {
+	function get_user($default_rowsperpage=0,$defaulthospital=-1) {
 		if ($this->input->post('page_no')) {
 			$page_no = $this->input->post('page_no');
 		}
@@ -839,6 +839,11 @@ class Staff_model extends CI_Model{
 		
 		if($this->input->post('phone')){
 			$this->db->like('staff.phone',$this->input->post('phone'));
+		}
+		
+		if($defaulthospital!=-1){
+			$this->db->join("user_hospital_link", "user_hospital_link.user_id = user.user_id");
+			$this->db->where('user_hospital_link.hospital_id',$defaulthospital);
 		}
 		
 		if($this->input->post('staff_user_name')){
@@ -859,7 +864,7 @@ class Staff_model extends CI_Model{
 		return $query->result();
 	}
 
-	function get_user_count() {
+	function get_user_count($defaulthospital=-1) {
 		
 		
 		if($this->input->post('phone')){
@@ -869,6 +874,11 @@ class Staff_model extends CI_Model{
 		if($this->input->post('staff_user_name')){
 			$this->db->like('lower(user.username)',strtolower($this->input->post('staff_user_name')));
 		}
+		if($defaulthospital!=-1){
+			$this->db->join("user_hospital_link", "user_hospital_link.user_id = user.user_id");
+			$this->db->where('user_hospital_link.hospital_id',$defaulthospital);
+		}
+
 		$this->db->select("count(*) as count")
 			->from("user")
 			->join("staff", "user.staff_id = staff.staff_id");
