@@ -842,8 +842,19 @@ class Staff_model extends CI_Model{
 		}
 		
 		if($defaulthospital!=-1){
-			$this->db->join("user_hospital_link", "user_hospital_link.user_id = user.user_id");
-			$this->db->where('user_hospital_link.hospital_id',$defaulthospital);
+			$this->db->where(
+				"(
+					staff.hospital_id = " . (int)$defaulthospital . "
+					OR EXISTS (
+						SELECT 1
+						FROM user_hospital_link uhl
+						WHERE uhl.user_id = user.user_id
+						AND uhl.hospital_id = " . (int)$defaulthospital . "
+					)
+				)",
+				NULL,
+				FALSE
+			);
 		}
 		
 		if($this->input->post('staff_user_name')){
@@ -875,8 +886,19 @@ class Staff_model extends CI_Model{
 			$this->db->like('lower(user.username)',strtolower($this->input->post('staff_user_name')));
 		}
 		if($defaulthospital!=-1){
-			$this->db->join("user_hospital_link", "user_hospital_link.user_id = user.user_id");
-			$this->db->where('user_hospital_link.hospital_id',$defaulthospital);
+			$this->db->where(
+				"(
+					staff.hospital_id = " . (int)$hospital_id . "
+					OR EXISTS (
+						SELECT 1
+						FROM user_hospital_link uhl
+						WHERE uhl.user_id = user.user_id
+						AND uhl.hospital_id = " . (int)$hospital_id . "
+					)
+				)",
+				NULL,
+				FALSE
+			);
 		}
 
 		$this->db->select("count(*) as count")

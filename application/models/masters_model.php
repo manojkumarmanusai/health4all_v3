@@ -91,11 +91,23 @@ class Masters_model extends CI_Model{
 		->from('user')
 		->join('staff','user.staff_id=staff.staff_id')
 		->join('hospital','staff.hospital_id=hospital.hospital_id')
-		->join('user_hospital_link','user.user_id=user_hospital_link.user_id')
 		->join('department','staff.department_id=department.department_id');
-		if($hospital_id != '')
-			$this->db->where('user_hospital_link.hospital_id',$hospital_id);
-	}
+		if (!!$hospital_id) {
+			$this->db->where(
+				"(
+					staff.hospital_id = " . (int)$hospital_id . "
+					OR EXISTS (
+						SELECT 1
+						FROM user_hospital_link uhl
+						WHERE uhl.user_id = user.user_id
+						AND uhl.hospital_id = " . (int)$hospital_id . "
+					)
+				)",
+				NULL,
+				FALSE
+			);
+		}
+	 }
 	// 204208 end
 		else if($type=='staff')
 		{
@@ -1694,17 +1706,43 @@ else if($type=="dosage"){
 			}
 		}
 
-		$this->db->select("ph.hospital as hospital ,user.user_id,username,password,user.staff_id,user.active,first_name,last_name,gender, 
-		specialisation, email, designation,phone,pd.department as department,
-		ph.hospital_short_name as primary_hospital")
-		->from("user")
-		->join('staff','user.staff_id=staff.staff_id')
-		->join('hospital ph','staff.hospital_id=ph.hospital_id','left')
-		->join('department pd','staff.department_id=pd.department_id','left')
-		->join('user_hospital_link','user.user_id=user_hospital_link.user_id');
-		if (!!$hospital_id){
-			$this->db->where('user_hospital_link.hospital_id',$hospital_id);
-		}
+		$this->db->select("
+				ph.hospital as hospital,
+				user.user_id,
+				username,
+				password,
+				user.staff_id,
+				user.active,
+				first_name,
+				last_name,
+				gender,
+				specialisation,
+				email,
+				designation,
+				phone,
+				pd.department as department,
+				ph.hospital_short_name as primary_hospital
+			")
+			->from("user")
+			->join('staff', 'user.staff_id = staff.staff_id')
+			->join('hospital ph', 'staff.hospital_id = ph.hospital_id', 'left')
+			->join('department pd', 'staff.department_id = pd.department_id', 'left');
+
+			if (!!$hospital_id) {
+				$this->db->where(
+					"(
+						staff.hospital_id = " . (int)$hospital_id . "
+						OR EXISTS (
+							SELECT 1
+							FROM user_hospital_link uhl
+							WHERE uhl.user_id = user.user_id
+							AND uhl.hospital_id = " . (int)$hospital_id . "
+						)
+					)",
+					NULL,
+					FALSE
+				);
+			}
 		if($this->input->post('search'))
 		{
 			$user = strtolower($this->input->post('user'));
