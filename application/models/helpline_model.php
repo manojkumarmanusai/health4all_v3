@@ -1363,7 +1363,7 @@ SUM(CASE WHEN helpline_call.direction =  'outbound-dial' THEN 1 ELSE 0 END) AS o
 		$user_helpline_access=$this->input->post('user_helpline_access');
 		$this->db->select('user_helpline_id,helpline.helpline_id')->from('helpline')
 		->join('user_helpline_link','helpline.helpline_id=user_helpline_link.helpline_id')
-		->where('user_id',$this->input->post('user'));
+		->where('user_id',$this->input->post('user_id'));
 		$query=$this->db->get();
 		$result=$query->result();
 		$existing_access=array();
@@ -1393,7 +1393,7 @@ SUM(CASE WHEN helpline_call.direction =  'outbound-dial' THEN 1 ELSE 0 END) AS o
 						if($access=="reports") $reports=1;
 					}
 					$user_helpline_data[]=array(
-						'user_id'=>$this->input->post('user'),
+						'user_id'=>$this->input->post('user_id'),
 						'helpline_id'=>$u,
 						'update_access'=>$update,
 						'reports_access'=>$reports

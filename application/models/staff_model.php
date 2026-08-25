@@ -840,6 +840,10 @@ class Staff_model extends CI_Model{
 		if($this->input->post('phone')){
 			$this->db->like('staff.phone',$this->input->post('phone'));
 		}
+
+		if($this->input->post('user_id')){
+			$this->db->where('user.user_id',$this->input->post('user_id'));
+		}
 		
 		if($defaulthospital!=-1){
 			$this->db->where(
@@ -884,6 +888,9 @@ class Staff_model extends CI_Model{
 		
 		if($this->input->post('staff_user_name')){
 			$this->db->like('lower(user.username)',strtolower($this->input->post('staff_user_name')));
+		}
+		if($this->input->post('user_id')){
+			$this->db->where('user.user_id',$this->input->post('user_id'));
 		}
 		if($defaulthospital!=-1){
 			$this->db->where(
