@@ -844,7 +844,20 @@ class Staff_model extends CI_Model{
 		if($this->input->post('user_id')){
 			$this->db->where('user.user_id',$this->input->post('user_id'));
 		}
+
+		if($defaulthospital==-1 && $this->input->post('hospital_id')){
+			$defaulthospital = $this->input->post('hospital_id');
+		}
 		
+		if($this->input->post('status')){
+			if($this->input->post('status')=="Yes"){
+				$this->db->like('user.active',1);
+			}
+			else{
+				$this->db->like('user.active',0);
+			}
+		}
+
 		if($defaulthospital!=-1){
 			$this->db->where(
 				"(
@@ -892,15 +905,27 @@ class Staff_model extends CI_Model{
 		if($this->input->post('user_id')){
 			$this->db->where('user.user_id',$this->input->post('user_id'));
 		}
+		if($defaulthospital==-1 && $this->input->post('hospital_id')){
+			$defaulthospital = $this->input->post('hospital_id');
+		}
+		
+		if($this->input->post('status')){
+			if($this->input->post('status')=="Yes"){
+				$this->db->like('user.active',1);
+			}
+			else{
+				$this->db->like('user.active',0);
+			}
+		}
 		if($defaulthospital!=-1){
 			$this->db->where(
 				"(
-					staff.hospital_id = " . (int)$hospital_id . "
+					staff.hospital_id = " . (int)$defaulthospital . "
 					OR EXISTS (
 						SELECT 1
 						FROM user_hospital_link uhl
 						WHERE uhl.user_id = user.user_id
-						AND uhl.hospital_id = " . (int)$hospital_id . "
+						AND uhl.hospital_id = " . (int)$defaulthospital . "
 					)
 				)",
 				NULL,

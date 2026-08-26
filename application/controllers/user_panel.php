@@ -287,6 +287,7 @@ class User_panel extends CI_Controller {
 		$this->load->view('templates/header',$this->data);
 		$this->load->view('templates/leftnav',$this->data);
 		$this->load->library('form_validation');
+		$this->data['hospitals']=$this->staff_model->get_hospital();
 		foreach($this->data['defaultsConfigs'] as $default){	
 			if($default->default_id=='pagination'){
 				$this->data['rowsperpage'] = $default->value;

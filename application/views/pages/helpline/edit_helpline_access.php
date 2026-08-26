@@ -3,6 +3,8 @@
 <script type="text/javascript" src="<?php echo base_url();?>assets/js/jquery.tablesorter.widgets.min.js"></script>
 <script type="text/javascript" src="<?php echo base_url();?>assets/js/jquery.tablesorter.colsel.js"></script>
 <script type="text/javascript" src="<?php echo base_url();?>assets/js/jquery.tablesorter.print.js"></script>
+<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/selectize.css">
+<script type="text/javascript" src="<?php echo base_url();?>assets/js/jquery.selectize.js"></script>
 <script type="text/javascript">
 $(function(){
 		var options = {
@@ -77,6 +79,7 @@ $(function(){
 <script>
 $(document).ready(function(){
     $('[data-toggle="tooltip"]').tooltip();   
+	initHospitalSelectize();
 });
 </script>
 <style type="text/css">
@@ -135,16 +138,66 @@ input[type=number] {
     border-color: #66afe9;
     outline: 0;	
 }
+/* Sets a fixed or max width for the Selectize control and its dropdown menu */
+.selectize-control {
+    width: 300px !important;       /* Adjust to your preferred width (e.g., 200px, 250px) */
+    display: inline-block !important;
+    vertical-align: middle;
+}
 
+/* Ensures the dropdown list matches the control width */
+.selectize-dropdown {
+    width: auto !important;
+    min-width: 300px !important;
+}
 </style>
 <script type="text/javascript">
+var selectizes = {};
+
 function doPost(page_no){
-	var page_no_hidden = document.getElementById("page_no");
-  	page_no_hidden.value=page_no;
-        $('#search_user').submit();
-   }
+    var page_no_hidden = document.getElementById("page_no");
+    page_no_hidden.value=page_no;
+    $('#search_user').submit();
+}
+
 function onchange_page_dropdown(dropdownobj){
    doPost(dropdownobj.value);    
+}
+
+function initHospitalSelectize(){
+    var hospitals = JSON.parse(JSON.stringify(<?php echo json_encode($hospitals); ?>));
+    
+    // 1. Initialize Selectize and assign jQuery object
+    var $select = $('#hospital').selectize({
+        valueField: 'hospital_id',
+        labelField: 'hospital',
+        searchField: ['hospital','hospital_short_name'],
+        options: hospitals,
+        create: false,
+        render: {
+            option: function(item, escape) {
+                return '<div>' +
+                    '<span class="title">' +
+                        '<span class="prescription_drug_selectize_span">'+escape(item.hospital)+'</span>' +
+                    '</span>' +
+                '</div>';
+            }
+        },
+        load: function(query, callback) {
+            if (!query.length) return callback();
+        }
+    });
+
+    // 2. Extract the actual Selectize control instance
+    selectizes['hospital'] = $select[0].selectize;
+
+    // 3. Call setValue on the valid Selectize instance
+    <?php 
+    $selected_hospital = $this->input->post('hospital_id');
+    if (!empty($selected_hospital)): 
+    ?>
+        selectizes['hospital'].setValue('<?php echo addslashes($selected_hospital); ?>');
+    <?php endif; ?>
 }
 </script>
 <?php $page_no = 1;	?>
@@ -155,8 +208,17 @@ function onchange_page_dropdown(dropdownobj){
         'id'=>'search_user')); 
      ?>
       <input type="hidden" name="page_no" id="page_no" value='<?php echo "$page_no"; ?>'>
+	  Hospital:  <select id="hospital" name="hospital_id" style=" display: inline-grid;" placeholder="Enter Hospital Name" size/>   
+								<option value="">   --Enter Hospital Name--   </option>
+							</select>
      User Name: <input type="text" class="form-control" placeholder="User Name"  style="width:120px"  value="<?php echo $this->input->post('staff_user_name');?>" name="staff_user_name" />
      Phone: <input type="text" class="form-control" placeholder="Phone"  style="width:120px"  value="<?php echo $this->input->post('phone');?>" name="phone" />
+	 Active Status: <select name="status" id="status" class="form-control">
+    			<option value="">Select</option>   
+                        <option value="Yes" <?php echo ($this->input->post('status') == 'Yes') ? 'selected' : ''; ?> >Yes</option> 
+                        <option value="No" <?php echo ($this->input->post('status') == 'No') ? 'selected' : ''; ?> >No</option>          
+                        </select>
+	<br/>					
 	 Rows per page : <input type="number" class="rows_per_page form-custom form-control" name="rows_per_page" id="rows_per_page" min=<?php echo $lower_rowsperpage; ?> max= <?php echo $upper_rowsperpage; ?> step="1" value= <?php if($this->input->post('rows_per_page')) { echo $this->input->post('rows_per_page'); }else{echo $rowsperpage;}  ?> onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))" /> 
       <input type="submit" value="Search" name="submitBtn" class="btn btn-primary btn-sm" /> 
      </form>
