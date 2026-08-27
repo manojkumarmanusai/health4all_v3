@@ -2216,7 +2216,9 @@ function openSmsModal(){
 						<?php
 						foreach($tests as $order) { 
 							if($order->order_id == $ord) { ?>
-						<tr <?php if($order->test_status == 2) { ?> onclick="$('#order_<?php echo $ord;?>').submit()" <?php } ?>>
+						<tr <?php if($order->test_status == 2) { ?> 
+							onclick="document.getElementById('order_<?php echo $order->order_id; ?>').submit();" 
+							<?php } ?>>
 								<td><?php echo $i++;?></td>
 								<td>
 									<?php echo form_open("diagnostics/view_results",array('role'=>'form','class'=>'form-custom','id'=>'order_'.$order->order_id)); ?>
