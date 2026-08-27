@@ -206,8 +206,8 @@ body #table-sort tr td:last-child {
             </div>
             <div class="panel-body">
                 <div class="row col-md-12">
-                    <div class="col-md-6"><b>Order Date : </b><?php echo date("d-M-Y, g:iA", strtotime($order[0]->order_date_time)); ?></div>
-                    <div class="col-md-6"><b>Reported Date : </b><?php echo date("d-M-Y, g:ia", strtotime($order[0]->reported_date_time)); ?></div>
+                    <div class="col-md-6"><b>Order Date : </b><?php echo date("d-M-Y, g:i A", strtotime($order[0]->order_date_time)); ?></div>
+                    <div class="col-md-6"><b>Reported Date : </b><?php echo date("d-M-Y, g:i A", strtotime($order[0]->reported_date_time)); ?></div>
                 </div>
                 <div class="row col-md-12">
                     <div class="col-md-6"><b>Patient : </b><?php echo $order[0]->patient_id." | ".$order[0]->first_name . " " . $order[0]->last_name . " | " . $age . " | " . $order[0]->gender; ?></div>
@@ -690,8 +690,8 @@ body #table-sort tr td:last-child {
                 </thead>
                 <tbody>
                     <tr>
-                        <td><b>Ordered Date:</b> <?php echo date("g:ia, d-M-Y", strtotime($order_date_time)); ?></td>
-                        <td colspan="2"><b>Reported Date:</b> <?php echo date("g:ia, d-M-Y", strtotime($reported_date_time)); ?></td>
+                        <td><b>Ordered Date:</b> <?php echo date("d-M-Y, g:i A", strtotime($order_date_time)); ?></td>
+                        <td colspan="2"><b>Reported Date:</b> <?php echo date("d-M-Y, g:i A", strtotime($reported_date_time)); ?></td>
                     </tr>
                     <tr>
                         <td><b>Patient:</b> <?php echo $patient_id." | ".$first_name . " " . $last_name . " | " . $age . " | " . $gender; ?></td> 
