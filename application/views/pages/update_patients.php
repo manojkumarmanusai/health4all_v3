@@ -218,10 +218,60 @@
 <script type="text/javascript" src="<?php echo base_url();?>assets/js/jquery.selectize.js"></script>
 <script type="text/javascript" src="<?php echo base_url();?>assets/js/jquery.timeentry.min.js"></script>
 <script type="text/javascript">
-$(document).on('change', '.add_to_summary_checkbox', function() {
-    var isChecked = $(this).is(':checked') ? '1' : '0';
-    // Find the hidden input within the same table cell (td) or label container
-    $(this).closest('td, label').find('.summary_hidden_input').val(isChecked);
+	$(document).on('change', '.add_to_summary_checkbox_new', function () {
+    var isChecked = $(this).is(':checked');
+
+    $(this)
+        .siblings('.summary_hidden_input_new')
+        .val(isChecked ? '1' : '0');
+});
+	// Select / Deselect all
+$(document).on('change', '#select_all_summary', function () {
+    var isChecked = $(this).is(':checked');
+
+    $('.add_to_summary_checkbox').each(function () {
+        $(this).prop('checked', isChecked);
+
+        $(this)
+            .closest('td')
+            .find('.summary_hidden_input')
+            .val(isChecked ? '1' : '0');
+    });
+});
+
+
+// Individual checkbox changed
+$(document).on('change', '.add_to_summary_checkbox', function () {
+
+    var isChecked = $(this).is(':checked');
+
+    // Update hidden input for this row
+    $(this)
+        .closest('td')
+        .find('.summary_hidden_input')
+        .val(isChecked ? '1' : '0');
+
+    // Update Select All checkbox
+    updateSelectAllState();
+});
+
+
+// Update Select All checkbox based on individual checkboxes
+function updateSelectAllState() {
+
+    var total = $('.add_to_summary_checkbox').length;
+    var checked = $('.add_to_summary_checkbox:checked').length;
+
+    $('#select_all_summary').prop(
+        'checked',
+        total > 0 && total === checked
+    );
+}
+
+
+// Set initial Select All state when page loads
+$(document).ready(function () {
+    updateSelectAllState();
 });
 var global_transaction_id = "<?php 
     // Check local variable, controller property, or highest transaction_key in session
@@ -273,7 +323,6 @@ pri.document.close();
 pri.focus();
 pri.print();
 }
-
 function initiateSms(){
 	setSmsToNumber();
 	if(!smsDetails.to){
@@ -964,8 +1013,25 @@ function openSmsModal(){
 		<script type="text/javascript" src="<?php echo base_url();?>assets/js/jquery.timeentry.min.js"></script>
 		<script type="text/javascript" src="<?php echo base_url();?>assets/js/bootbox.min.js"></script>
 		<iframe id="ifmcontentstoprint" style="height: 0px; width: 0px; position: absolute;" class="sr-only"></iframe>
+		<?php
+		$has_clinical_notes = false;
+
+				if (isset($visit_notes) && !empty($visit_notes)) {
+					foreach ($visit_notes as $note) {
+						if ($note->add_to_summary == 1) {
+							$has_clinical_notes = true;
+							break;
+						}
+					}
+				}
+		?>
 		<div class="sr-only" id="print-div" style="width:100%;height:100%;"> 
-			<?php $this->load->view('pages/print_layouts/patient_summary');?>
+		<?php $this->load->view('pages/print_layouts/patient_summary', ['has_clinical_notes' => $has_clinical_notes]); ?>		</div>
+		<div class="sr-only" id="print-div-without-diagnostics" style="width:100%;height:100%;"> 
+			<?php $this->load->view('pages/print_layouts/patient_summary_without_diagnostics',['has_clinical_notes' => $has_clinical_notes]);?>
+		</div>
+		<div class="sr-only" id="print-div-only-diagnostics" style="width:100%;height:100%;"> 
+			<?php $this->load->view('pages/print_layouts/patient_summary_only_diagnostics');?>
 		</div>
                 <div class="col-md-8"  >
 			<div class="row alt">
@@ -1986,14 +2052,16 @@ function openSmsModal(){
                         <table class="table table-bordered clinical-notes-view-table">
                             <thead>
                                 <tr>
-                                    <th colspan="5" class="text-center" style="background-color: #f5f5f5;">Clinical Notes</th>
+                                    <th colspan="6" class="text-center" style="background-color: #f5f5f5;">Clinical Notes</th>
                                 </tr>
                                 <tr>
                                     <th style="width:5%">#</th>
                                     <th style="width:18%">Date</th>
-                                    <th style="width:57%">Note</th>
-                                    <th style="width:15%">Added by</th>
-									<th style="width:5%">Add to summary</th>
+                                    <th style="width:50%">Note</th>
+                                    <th style="width:13%">Added by</th>
+									<th style="width:10%"> Summary
+									<input type="checkbox" id="select_all_summary" title="Select/Deselect All"></th>
+									<th style="width:5%">Print</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -2015,10 +2083,14 @@ function openSmsModal(){
 										<!-- 2. Checkbox has NO name; it only toggles the hidden input -->
 										<input type="checkbox" 
 											class="add_to_summary_checkbox" 
-											<?php if ($note->add_to_summary == 1) echo 'checked'; ?> />
+											<?php if ($note->add_to_summary == 1) echo 'checked';?> />
 									</td>
+									<td><button type="button" id="<?php echo 'printDoctorNotes' . $note->note_id; ?>" data-clinical-note="<?php echo $note->clinical_note;?>" data-added-by="<?php echo $note->first_name.' '.$note->last_name;?>"
+									data-note-time="<?php if($note->note_time!=0) echo date('d-M-Y g:i A',strtotime($note->note_time)); else echo '';?>"
+									class="btn btn-sm btn-primary" onclick="printDoctorNotes(this)" >Print</button></td> 
 			                            </tr>
-                                <?php  } ?>
+                                <?php
+								} ?>
                             </tbody>
                         </table>
                         <?php
@@ -2039,9 +2111,9 @@ function openSmsModal(){
 										<div style="margin-top: 8px;">
 										<label style="font-weight: normal; cursor: pointer;">
 											<!-- Only this hidden input posts to PHP -->
-											<input type="hidden" name="add_to_summary[]" class="summary_hidden_input" value="0" />
+											<input type="hidden" name="add_to_summary[]" class="summary_hidden_input_new" value="0" />
 											<!-- Checkbox has NO name, only controls the hidden input above -->
-											<input type="checkbox" class="add_to_summary_checkbox" value="1" />
+											<input type="checkbox" class="add_to_summary_checkbox_new" value="1" />
 											&nbsp;Add to patient summary
 										</label>
 										</div>
@@ -3134,14 +3206,17 @@ function openSmsModal(){
 		<input type="text" name="patient_id" id="patient_id" class="sr-only" value="<?php echo $patient->patient_id;?>" hidden readonly />
 		<input type="text" name="patient_number" class="sr-only" value="patient_number" hidden readonly />
 		<button type="button" class="btn btn-md btn-primary" value="Update" name="update_patient" onclick="onUpdatePatientSubmit(event)">Update</button>&emsp;
-		<button class="btn btn-md btn-warning" value="Print" type="button" onclick="printDiv('print-div')">Print Summary</button>
+		<button class="btn btn-md btn-warning" value="Print" type="button" onclick="printDiv('print-div-without-diagnostics')">Print summary</button>
+		<button class="btn btn-md btn-warning" value="Print" type="button" onclick="printDiv('print-div')">Print summary detailed</button>
+		<button class="btn btn-md btn-warning" value="Print" type="button" onclick="printDiv('print-div-only-diagnostics')">Print diagnostics</button>
+		<br/><br/>
 		<?php 
 			$visits = sizeof($patient_visits);
 		?>
 		<!-- <button class="btn btn-md btn-warning" value="Print" type="button" onclick="printDiv('print-div-all')">(<?php echo $visits; ?>)-Print Summary All Visits</button> -->
 		<!--<button type="button" class="btn btn-md btn-warning" onclick="printDiv('print-div_layout')">Print</button>
 		<button type="button" class="btn btn-md btn-warning" onclick="printDiv('a6-label')">Print Label</button> -->
-		<button type="button" class="btn btn-md btn-warning" id="printButton"> Print Selected Format</button>
+		<button type="button" class="btn btn-md btn-warning" id="printButton"> Print selected format</button>
 		<select class="form-control" name="add_on_print_layout_id" id="add_on_print_layout_id" style="width:265px;">
 			<option value="Select">Select Format</option>
 			<?php foreach($hosp_all_print_layouts as $layout_name) { ?>
@@ -3175,88 +3250,13 @@ function openSmsModal(){
 				});
 			});
 		</script>
-		<!-- <div id="printModal" class="modal fade" role="dialog" style='overflow:none'>
-			<div class="modal-dialog">
-				<div class="modal-content"> 
-					<div class="modal-header">
-						<h4 class="modal-title">Print Layout</h4>
-						<button type="button" class="close" data-dismiss="modal" style="margin-top:-20px!important;">&times;</button>
-					</div>
-					<div class="modal-body">
-						<iframe id="printFrame" style="width:100%; border: none;"></iframe>
-					</div>
-					<div class="modal-footer" style="position: absolute; bottom: 0; width: 100%; height: 60px;">
-						<button type="button" class="btn btn-primary" id="printLayout">Print</button>
-						<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-					</div>
-				</div>
-			</div>
-		</div> -->
-		<!-- <script>
-			function setModalDimensions(width, height) {
-				const modalDialog = document.querySelector('#printModal .modal-dialog');
-				const modalContent = document.querySelector('#printModal .modal-content');
-				const modalBody = document.querySelector('#printModal .modal-body');
-				modalDialog.style.maxWidth = width + 'px';
-				modalDialog.style.maxHeight = height + 'px';
-				modalContent.style.height = height + 'px';
-				modalBody.style.height = (height - 120) + 'px';
-				document.querySelector('#printFrame').style.height = '100%';
-			}
-			const modalWidth = 800;  
-			const modalHeight = 600;
-
-			$('#printModal').on('show.bs.modal', function () {
-				setModalDimensions(modalWidth, modalHeight);
-			});
-		</script> -->
 		<?php if ($add_sms_access==1){ ?>			
-			<button class="btn btn-md btn-warning" value="Print" type="button" onclick="openSmsModal()">Send SMS</button> 
+			<button class="btn btn-md btn-warning" type="button" onclick="openSmsModal()">Send SMS</button> 
 		<?php } ?>
 	</div>
 	</div>
 	</div>
-	<!-- <script>
-		const loggedInHospitalId = <?php echo json_encode($current_hospital_id); ?>;
-		const accessibleHospitalIds = <?php echo json_encode(isset($hospital_ids_by_user[$logged_user_id]) ? $hospital_ids_by_user[$logged_user_id] : []); ?>;
-
-		const hospitalIdStr = String(<?php echo $p->hospital_id; ?>);
-		const currentHospitalStr = String(loggedInHospitalId);
-		const accessibleStrIds = accessibleHospitalIds.map(String);
-
-		if (currentHospitalStr === hospitalIdStr) {
-			document.addEventListener('DOMContentLoaded', function() {
-				document.getElementById('select_patient_<?php echo $p->visit_id; ?>').submit();
-			});
-		} else if (accessibleStrIds.includes(hospitalIdStr)) {
-			alert("Please log into that hospital to access the patient.");
-		} else {
-			alert("You do not have access to that hospital.");
-		}
-	</script> -->
-	<!-- <script>
-		const loggedInHospitalId = <?php echo json_encode($current_hospital_id); ?>;
-		const accessibleHospitalIds = <?php echo json_encode(
-			isset($hospital_ids_by_user[$logged_user_id]) ? $hospital_ids_by_user[$logged_user_id] : []
-		); ?>;
-
-		const hospitalIdStr = String(<?php echo $patients[0]->hospital_id; ?>);
-		const currentHospitalStr = String(loggedInHospitalId);
-		const accessibleStrIds = accessibleHospitalIds.map(String);
-
-		document.addEventListener('DOMContentLoaded', function () {
-			if (currentHospitalStr === hospitalIdStr) {
-				document.getElementById('update_patients').submit();
-				break;
-			} else if (accessibleStrIds.includes(hospitalIdStr)) {
-				alert("Please log into that hospital to access the patient.");
-				window.location.href = "<?php echo base_url('register/update_patients'); ?>";
-			} else {
-				alert("You do not have access to that hospital.");
-				window.location.href = "<?php echo base_url('register/update_patients'); ?>";
-			}
-		});
-	</script> -->
+	
 	<script>
 		const loggedInHospitalId = <?php echo json_encode($current_hospital_id); ?>;
 		const accessibleHospitalIds = <?php echo json_encode(
@@ -4711,7 +4711,22 @@ function openSmsModal(){
         </div>
     </div>
 </template>
+<div class="sr-only" id="print-div-doctor-notes" style="width:100%;height:100%;"> 
+			<?php $this->load->view('pages/print_layouts/patient_doctor_notes');?>
+		</div>
 <script>
+	function printDoctorNotes(button) {
+	// 1. Extract values from the clicked button's dataset
+	const { clinicalNote, noteTime, addedBy } = button.dataset;
+
+	// 2. Inject them into the hidden print layout elements
+	document.getElementById('printClinicalNote').innerHTML = clinicalNote || '';
+	document.getElementById('printNoteTime').textContent = noteTime || '';
+	document.getElementById('printAddedBy').textContent = addedBy || '';
+
+	// 3. Trigger print
+	printDiv('print-div-doctor-notes');
+}
 $(function(){
 	$('[data-toggle="tooltip"]').tooltip();
 
