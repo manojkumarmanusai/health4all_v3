@@ -185,13 +185,75 @@
 			cursor: not-allowed;
 			opacity: 0.7;
 		}
+		.clinical-notes-view-table tbody tr:nth-of-type(odd) > td {
+        background-color: #ffffff;
+    }
+    .clinical-notes-view-table tbody tr:nth-of-type(even) > td {
+        background-color: #f4f8fb;
+    }
+    .clinical-notes-view-table tbody tr {
+        cursor: default;
+    }
+    .clinical-notes-view-table tbody tr:hover > td {
+        background-color: #dceefc !important;
+        transition: background-color 0.15s ease-in-out;
+    }
+    .clinical-notes-view-table tbody tr.row-selected > td {
+        background-color: #cfe2ff !important;
+    }
+    .clinical-notes-view-table th.col-checkbox,
+    .clinical-notes-view-table td.col-checkbox {
+        text-align: center;
+        vertical-align: middle;
+        width: 4%;
+    }
+    .clinical-notes-view-table td.col-checkbox input[type="checkbox"] {
+        cursor: pointer;
+        width: 16px;
+        height: 16px;
+        margin: 0;
+    }
 	
 </style>
 <script type="text/javascript" src="<?php echo base_url();?>assets/js/jquery.selectize.js"></script>
 <script type="text/javascript" src="<?php echo base_url();?>assets/js/jquery.timeentry.min.js"></script>
 <script type="text/javascript">
-
-
+$(document).on('change', '.add_to_summary_checkbox', function() {
+    var isChecked = $(this).is(':checked') ? '1' : '0';
+    // Find the hidden input within the same table cell (td) or label container
+    $(this).closest('td, label').find('.summary_hidden_input').val(isChecked);
+});
+var global_transaction_id = "<?php 
+    // Check local variable, controller property, or highest transaction_key in session
+    if (isset($transaction_id) && !empty($transaction_id)) {
+        echo $transaction_id;
+    } elseif (isset($this->data['transaction_id']) && !empty($this->data['transaction_id'])) {
+        echo $this->data['transaction_id'];
+    } else {
+        // Find the active transaction key directly in session
+        $sess = $this->session->all_userdata();
+        $found_id = '1';
+        foreach ($sess as $k => $v) {
+            if (strpos($k, 'transaction_key_') === 0) {
+                $found_id = str_replace('transaction_key_', '', $k);
+            }
+        }
+        echo $found_id;
+    }
+?>";
+$.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+    if (options.type.toUpperCase() === "POST") {
+        if (typeof options.data === "string") {
+            if (options.data.indexOf("transaction_id=") === -1) {
+                options.data += (options.data ? "&" : "") + "transaction_id=" + encodeURIComponent(global_transaction_id);
+            }
+        } else if (options.data instanceof FormData) {
+            if (!options.data.has("transaction_id")) {
+                options.data.append("transaction_id", global_transaction_id);
+            }
+        }
+    }
+});
 var smsDetails = {};
 var user_details = <?php echo $user_details; ?>;
 var receiver = user_details.receiver;
@@ -653,6 +715,7 @@ function openSmsModal(){
 
 											<td>
 												<?php echo form_open('register/update_patients',array('role'=>'form','id'=>'select_patient_'.$p->visit_id));?>
+												<input type="hidden" name="transaction_id" value="<?php echo (!empty($transaction_id)) ? $transaction_id : 1; ?>" />
 												<input type="text" class="sr-only" hidden value="<?php echo $p->visit_id;?>" form="select_patient_<?php echo $p->visit_id;?>" name="selected_patient" />
 												<input type="text" class="sr-only" hidden value="<?php echo $p->patient_id;?>" name="patient_id" />
 												<input type="text" class="sr-only" hidden value="<?php echo $p->hospital_id;?>" name="hospital_id" />
@@ -682,7 +745,11 @@ function openSmsModal(){
 			const accessibleStrIds = accessibleHospitalIds.map(String);
 
 			if (currentHospitalStr === hospitalIdStr) {
-				document.getElementById('select_patient_' + visitId).submit();
+				var $targetForm = $('#select_patient_' + visitId);
+				$targetForm.find('input[name="transaction_id"]').remove();
+				$targetForm.append('<input type="hidden" name="transaction_id" value="' + global_transaction_id + '" />');
+				$targetForm.submit();
+
 			} else if (accessibleStrIds.includes(hospitalIdStr)) {
 				alert("Please log into that hospital to access the patient.");
 			} else {
@@ -703,8 +770,7 @@ function openSmsModal(){
 		<div class="alert alert-info"><?php echo $msg;?></div>
 	<?php } ?>
 	<?php echo form_open('register/update_patients',array('class'=>'form-custom','role'=>'form', 'id'=>'update_patients')); ?>
-	<input type="hidden" class="sr-only" value="<?php echo $transaction_id;?>" name="transaction_id" />
-	<input type="hidden" name="patient_id" value="<?php echo $patients[0]->id; ?>">
+	<input type="hidden" class="sr-only" value="<?php echo (!empty($transaction_id)) ? $transaction_id : 1; ?>" name="transaction_id" />	<input type="hidden" name="patient_id" value="<?php echo $patients[0]->id; ?>">
 	<div class="panel panel-default">
 	<div class="panel-body">
 	  <!-- Nav tabs -->
@@ -758,7 +824,8 @@ function openSmsModal(){
 		<?php 
 			foreach($functions as $f){ 
 				if($f->user_function == "Clinical" && ($f->add==1 || $f->edit==1)) { ?>
-					<li role="presentation"><a href="#clinical" aria-controls="clinical" role="tab" data-toggle="tab"><i class="fa fa-stethoscope"></i>Clinical</a></li>
+					 <li role="presentation"><a href="#initial_assesment" aria-controls="initial_assesment" role="tab" data-toggle="tab"><i class="fa fa-stethoscope"></i>Initial Assessment</a></li>
+					 <li role="presentation"><a href="#clinical" aria-controls="clinical" role="tab" data-toggle="tab"><i class="fa fa-pencil-square-o"></i>Clinical notes</a></li>
 				<?php 
 				break;
 				 } 
@@ -1856,129 +1923,138 @@ function openSmsModal(){
 		<?php 
 			foreach($functions as $f){ 
 				if($f->user_function == "Clinical" && ($f->add==1 || $f->edit==1)) { ?>
-		<div role="tabpanel" class="tab-pane" id="clinical">
+		<div role="tabpanel" class="tab-pane" id="initial_assesment">
             <div data-patient-quick-info></div>
             
             <div data-patient-clinical-details data-source="patient" data-edit-privilege="<?php echo $f->edit==1; ?>" data-readonly-if-not-empty="true"></div>
 
-			<div class="row alt">
-				<div class="col-md-12 col-xs-12">
-					<label class="control-label">
-						Symptoms
-					</label>
-					<textarea name="presenting_complaints" cols="60" class="form-control" placeholder="Symptoms/ Presenting Complaints" <?php if($f->edit==1  && empty($patient->presenting_complaints)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->presenting_complaints;?></textarea>
-				</div>
-			</div>
-			<div class="row alt">
-				<div class="col-md-12 col-xs-12">
-					<label class="control-label">
-						Past History
-					</label>
-					<textarea name="past_history" cols="60" class="form-control" placeholder="Past History" <?php if($f->edit==1  && empty($patient->past_history)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->past_history;?></textarea>
-				</div>
-			</div>
-			<div class="row alt">
-				<div class="col-md-12 col-xs-12">
-					<label class="control-label">
-						Family History
-					</label>
-					<textarea name="family_history" cols="60" class="form-control" placeholder="Family History" <?php if($f->edit==1  && empty($patient->family_history)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->family_history;?></textarea>
-				</div>
-			</div>
-			<div class="row alt">
-				<div class="col-md-12 col-xs-12">
-					<label class="control-label">
-						Clinical Findings
-					</label>
-					<textarea name="clinical_findings" cols="60" class="form-control" placeholder="Clinical Findings" <?php if($f->edit==1 && empty($patient->clinical_findings)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->clinical_findings;?></textarea>
-				</div>
-			</div>
-			<div class="row alt">
-				<div class="col-md-12 col-xs-12">
-					<label class="control-label">
-						CVS<img src="<?php echo base_url();?>assets/images/information-icon.png" class="prescription_table_heading_info_icons" title="Cardio Vascular System" data-toggle="tooltip"/>
-					</label>
-					<textarea name="cvs" cols="60" class="form-control" placeholder="Cardio Vascular System" <?php if($f->edit==1 && empty($patient->cvs)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->cvs;?></textarea>
-				</div>
-			</div>
-			<div class="row alt">
-				<div class="col-md-12 col-xs-12">
-					<label class="control-label">
-						RS<img src="<?php echo base_url();?>assets/images/information-icon.png" class="prescription_table_heading_info_icons" title="Respiratory System" data-toggle="tooltip"/>
-					</label>
-					<textarea name="rs" cols="40" class="form-control" placeholder="Respiratory System" <?php if($f->edit==1  && empty($patient->rs)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->rs;?></textarea>
-				</div>
-			</div>
-			<div class="row alt">
-				<div class="col-md-12 col-xs-12">
-					<label class="control-label">
-						PA<img src="<?php echo base_url();?>assets/images/information-icon.png" class="prescription_table_heading_info_icons" title="Per Abdomen" data-toggle="tooltip"/>
-					</label>
-					<textarea name="pa" cols="60" class="form-control" placeholder="Per Abdomen" <?php if($f->edit==1 && empty($patient->pa)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->pa;?></textarea>
-				</div>
-			</div>
-			<div class="row alt">
-				<div class="col-md-12 col-xs-12">
-					<label class="control-label">
-						CNS<img src="<?php echo base_url();?>assets/images/information-icon.png" class="prescription_table_heading_info_icons" title="Central Nervous System" data-toggle="tooltip"/>
-					</label>
-					<textarea name="cns" cols="40" class="form-control" placeholder="Central Nervous System" <?php if($f->edit==1 && empty($patient->cns)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->cns;?></textarea>
-				</div>
-			</div>
-			<div class="row alt">
-					<div class="col-md-12 col-xs-12">
-						<?php 
-							if(isset($visit_notes) && !!$visit_notes){ ?>
-						
-						<table class="table table-bordered table-striped">
-							<thead>
-								<tr>
-									<th colspan="4">Clinical Notes</th>
-								</tr>
-								<tr>
-									<th>#</th>
-									<th>Date</th>
-									<th>Note</th>
-									<th>Added by</th>
-								</tr>
-							</thead>
-							<tbody>
-							<?php
-							$i=1;
-							 foreach($visit_notes as $note){ ?>
-								<tr>
-									<td><?php echo $i++; ?></td>
-									<td><?php if($note->note_time!=0) echo date("d-M-Y g:iA",strtotime($note->note_time)); ?></td>
-									<td><?php echo $note->clinical_note;?></td>
-									<td><?php echo $note->first_name." ".$note->last_name;?></td>
-								</tr>
-								<?php  } ?>
-							</tbody>
-						</table>
-						<?php
-							}
-						?>
-						<table class="table table-bordered table-striped clinical-notes-table">
-							<thead>
-								<tr>
-									<th colspan="4">Add Clinical Notes</th>
-								</tr>
-							</thead>
-							<tbody class="daily_notes dynamic-row">
-								<tr>
-									<td style="width:80%!important;"><textarea rows="4" cols="60" name="clinical_note[]"  class="form-control add_clinical_note "></textarea></td>
-									<td >
-										<span class="note_date_label">Select Date and Time to save the note</span> &nbsp;&nbsp;&nbsp;&nbsp;
-										<input type="datetime-local" class="daily_notes_date form-control" name="note_date[]" />
+            <div class="row alt">
+                <div class="col-md-12 col-xs-12">
+                    <label class="control-label">Symptoms</label>
+                    <textarea name="presenting_complaints" cols="60" class="form-control" placeholder="Symptoms/ Presenting Complaints" <?php if($f->edit==1  && empty($patient->presenting_complaints)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->presenting_complaints;?></textarea>
+                </div>
+            </div>
+            <div class="row alt">
+                <div class="col-md-12 col-xs-12">
+                    <label class="control-label">Past History</label>
+                    <textarea name="past_history" cols="60" class="form-control" placeholder="Past History" <?php if($f->edit==1  && empty($patient->past_history)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->past_history;?></textarea>
+                </div>
+            </div>
+            <div class="row alt">
+                <div class="col-md-12 col-xs-12">
+                    <label class="control-label">Family History</label>
+                    <textarea name="family_history" cols="60" class="form-control" placeholder="Family History" <?php if($f->edit==1  && empty($patient->family_history)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->family_history;?></textarea>
+                </div>
+            </div>
+            <div class="row alt">
+                <div class="col-md-12 col-xs-12">
+                    <label class="control-label">Clinical Findings</label>
+                    <textarea name="clinical_findings" cols="60" class="form-control" placeholder="Clinical Findings" <?php if($f->edit==1 && empty($patient->clinical_findings)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->clinical_findings;?></textarea>
+                </div>
+            </div>
+            <div class="row alt">
+                <div class="col-md-12 col-xs-12">
+                    <label class="control-label">CVS<img src="<?php echo base_url();?>assets/images/information-icon.png" class="prescription_table_heading_info_icons" title="Cardio Vascular System" data-toggle="tooltip"/></label>
+                    <textarea name="cvs" cols="60" class="form-control" placeholder="Cardio Vascular System" <?php if($f->edit==1 && empty($patient->cvs)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->cvs;?></textarea>
+                </div>
+            </div>
+            <div class="row alt">
+                <div class="col-md-12 col-xs-12">
+                    <label class="control-label">RS<img src="<?php echo base_url();?>assets/images/information-icon.png" class="prescription_table_heading_info_icons" title="Respiratory System" data-toggle="tooltip"/></label>
+                    <textarea name="rs" cols="40" class="form-control" placeholder="Respiratory System" <?php if($f->edit==1  && empty($patient->rs)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->rs;?></textarea>
+                </div>
+            </div>
+            <div class="row alt">
+                <div class="col-md-12 col-xs-12">
+                    <label class="control-label">PA<img src="<?php echo base_url();?>assets/images/information-icon.png" class="prescription_table_heading_info_icons" title="Per Abdomen" data-toggle="tooltip"/></label>
+                    <textarea name="pa" cols="60" class="form-control" placeholder="Per Abdomen" <?php if($f->edit==1 && empty($patient->pa)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->pa;?></textarea>
+                </div>
+            </div>
+            <div class="row alt">
+                <div class="col-md-12 col-xs-12">
+                    <label class="control-label">CNS<img src="<?php echo base_url();?>assets/images/information-icon.png" class="prescription_table_heading_info_icons" title="Central Nervous System" data-toggle="tooltip"/></label>
+                    <textarea name="cns" cols="40" class="form-control" placeholder="Central Nervous System" <?php if($f->edit==1 && empty($patient->cns)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->cns;?></textarea>
+                </div>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="clinical">
+            <div class="row alt">
+                    <div class="col-md-12 col-xs-12">
+                        <?php 
+                            if(isset($visit_notes) && !!$visit_notes){ ?>
+                        
+                        <table class="table table-bordered clinical-notes-view-table">
+                            <thead>
+                                <tr>
+                                    <th colspan="5" class="text-center" style="background-color: #f5f5f5;">Clinical Notes</th>
+                                </tr>
+                                <tr>
+                                    <th style="width:5%">#</th>
+                                    <th style="width:18%">Date</th>
+                                    <th style="width:57%">Note</th>
+                                    <th style="width:15%">Added by</th>
+									<th style="width:5%">Add to summary</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <?php
+                            $i=1;
+                             foreach($visit_notes as $note){ ?>
+                                <tr>
+                                    <td><?php echo $i++; ?></td>
+                                    <td><?php if($note->note_time!=0) echo date("d-M-Y g:i A",strtotime($note->note_time)); ?></td>
+                                    <td><?php echo $note->clinical_note;?></td>
+                                    <td><?php echo $note->first_name." ".$note->last_name;?></td>    
+									<td class="text-center">
+										<!-- Note ID -->
+										<input type="hidden" name="update_add_to_summary_note_id[]" value="<?php echo $note->note_id; ?>" />
+                
+										<!-- 1. Hidden input carries the array name and submits 0 or 1 -->
+										<input type="hidden" name="update_add_to_summary[]" class="summary_hidden_input" value="<?php echo $note->add_to_summary; ?>" />
+										
+										<!-- 2. Checkbox has NO name; it only toggles the hidden input -->
+										<input type="checkbox" 
+											class="add_to_summary_checkbox" 
+											<?php if ($note->add_to_summary == 1) echo 'checked'; ?> />
 									</td>
-									<td style="padding-top:35px;">
-										<button  type="button" class="btn btn-sm btn-primary add_daily_note">Add</button>
-										<button  type="button" class="btn btn-sm btn-danger remove_daily_note">X</button>
-									</td>
-								</tr>
-							</tbody>
-						</table>
-				</div>
+			                            </tr>
+                                <?php  } ?>
+                            </tbody>
+                        </table>
+                        <?php
+                            }
+                        ?>
+                        <table class="table table-bordered table-striped clinical-notes-table">
+                            <thead>
+                                <tr>
+                                    <th colspan="4">Add Clinical Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody class="daily_notes dynamic-row">
+                                <tr>
+                                    <td style="width:80%!important;"><textarea rows="4" cols="60" name="clinical_note[]"  class="form-control add_clinical_note "></textarea></td>
+                                    <td >
+                                        <span class="note_date_label">Select Date and Time to save the note</span> &nbsp;&nbsp;&nbsp;&nbsp;
+                                        <input type="datetime-local" class="daily_notes_date form-control" value="<?php echo date('Y-m-d\TH:i'); ?>" name="note_date[]" />
+										<div style="margin-top: 8px;">
+										<label style="font-weight: normal; cursor: pointer;">
+											<!-- Only this hidden input posts to PHP -->
+											<input type="hidden" name="add_to_summary[]" class="summary_hidden_input" value="0" />
+											<!-- Checkbox has NO name, only controls the hidden input above -->
+											<input type="checkbox" class="add_to_summary_checkbox" value="1" />
+											&nbsp;Add to patient summary
+										</label>
+										</div>
+                                    </td>
+									
+                                    <td style="padding-top:35px;">
+                                        <button  type="button" class="btn btn-sm btn-primary add_daily_note">Add</button>
+                                        <button  type="button" class="btn btn-sm btn-danger remove_daily_note">X</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                </div>
 				<script>
 					$(function(){
 						var initializeClassicEditor = function(element) {
@@ -1986,10 +2062,20 @@ function openSmsModal(){
 								.create(element, {
 									toolbar: ['bold', 'italic', 'bulletedList', 'numberedList']
 								})
+								.then(editor => {
+                                    editor.model.document.on('change:data', () => {
+                                        element.value = editor.getData();
+                                    });
+                                })
 								.catch(error => {
 									console.error(error);
 								});
 						};
+						function getCurrentLocalDateTime() {
+                            var now = new Date();
+                            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                            return now.toISOString().slice(0, 16);
+                        }
 						var toggleAddRemoveButton = function(parent){
 							$(parent).find(".add_daily_note").hide();
 							$(parent).find(".add_daily_note:first").show();
@@ -2006,6 +2092,8 @@ function openSmsModal(){
 							$newRow.find('input,textarea').each(function() {
 								$(this).val('').removeClass('error_field');
 							});
+							$newRow.find('.daily_notes_date').val(getCurrentLocalDateTime());
+							$newRow.find('.add_to_summary_checkbox').prop('checked', false);
 							$newRow.find('span.error').remove();
 							$newRow.find('.ck').remove();
 							$tbody.append($newRow);
@@ -3233,6 +3321,7 @@ function openSmsModal(){
 			<tr onclick="$('#select_visit_<?php echo $visit->visit_id;?>').submit()" style="cursor:pointer">
 				<td>
 					<?php echo form_open('register/update_patients',array('role'=>'form','id'=>'select_visit_'.$visit->visit_id));?>
+					<input type="hidden" name="transaction_id" value="<?php echo (!empty($transaction_id)) ? $transaction_id : 1; ?>" />
 					<input type="text" class="sr-only" hidden value="<?php echo $visit->visit_id;?>"  name="selected_patient" />
 					<input type="text" class="sr-only" hidden value="<?php echo $visit->patient_id;?>" name="patient_id" />
 					</form>
@@ -3989,7 +4078,16 @@ function openSmsModal(){
 		}	
 
 		if(flag){
-			$('form#update_patients').append('<input type="hidden" value="Update" name="update_patient" />').submit();
+			var $form = $('form#update_patients');
+        
+        // Remove existing duplicates if any, then append the authoritative value
+        $form.find('input[name="transaction_id"]').remove();
+        $form.find('input[name="update_patient"]').remove();
+
+        $form.append('<input type="hidden" name="transaction_id" value="' + global_transaction_id + '" />');
+        $form.append('<input type="hidden" name="update_patient" value="Update" />');
+
+        $form.submit();
 		}
 		
 	}
@@ -4638,6 +4736,5 @@ function validateInput(event){
       }
 }
 </script>
-
 
 

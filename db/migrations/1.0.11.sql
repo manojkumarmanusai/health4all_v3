@@ -51,3 +51,5 @@ ALTER TABLE `followup_types` ADD `updated_by` INT NOT NULL AFTER `created_by`, A
 ALTER TABLE patient_followup
 DROP INDEX patient_id,
 ADD UNIQUE KEY uk_patient_hospital (patient_id, hospital_id);
+
+ALTER TABLE `patient_clinical_notes` ADD `add_to_summary` BOOLEAN NOT NULL DEFAULT FALSE AFTER `user_id`;
