@@ -101,6 +101,7 @@ class User_panel extends CI_Controller {
 			 			$this->data['rowsperpage'] = $default->value;
 			 			$this->data['upper_rowsperpage']= $default->upper_range;
 			 			$this->data['lower_rowsperpage']= $default->lower_range;
+						break;
 			 		}
 				}
 		$this->data['userdata']=$this->session->userdata('logged_in');
@@ -204,6 +205,7 @@ class User_panel extends CI_Controller {
 		 			$this->data['rowsperpage'] = $default->value;
 		 			$this->data['upper_rowsperpage']= $default->upper_range;
 		 			$this->data['lower_rowsperpage']= $default->lower_range;
+					break;
 		 		}
 			}
 			if($this->input->post('submit')){
@@ -214,7 +216,7 @@ class User_panel extends CI_Controller {
 			}else if(!$this->input->post('select')){
 				$this->data['report_count'] = $this->staff_model->get_user_count();
 				$this->data['user'] = $this->staff_model->get_user($this->data['rowsperpage']);
-				$this->data['assigned_hospitals'] = $this->staff_model->gat_all_assigned_hosp($this->data['user'][0]->user_id);
+				$this->data['assigned_hospitals'] = $this->staff_model->get_all_assigned_hosp($this->data['user'][0]->user_id);
 				$this->data['hptls']= false;
 			}else {
 				$this->data['hptls'] = $this->staff_model->get_hospital();
@@ -230,6 +232,53 @@ class User_panel extends CI_Controller {
 		}
 	}
 
+	function user_department_link() {
+		if($this->session->userdata('logged_in')){
+			$this->load->helper('form');
+			$this->data['title']="Link User To Departments";
+			$this->data['userdata']=$this->session->userdata('logged_in');
+			$this->data['defaultsConfigs'] = $this->masters_model->get_data("defaults"); 
+			$hospital=$this->session->userdata('hospital');
+			if(!!$hospital){
+				$hospitalId = $hospital['hospital_id'];
+			}
+			else{
+				$hospitalId = -1;
+			}
+		 	foreach($this->data['defaultsConfigs'] as $default){		 
+		 	if($default->default_id=='pagination'){
+		 			$this->data['rowsperpage'] = $default->value;
+		 			$this->data['upper_rowsperpage']= $default->upper_range;
+		 			$this->data['lower_rowsperpage']= $default->lower_range;
+					break;
+		 		}
+			}
+			if($this->input->post('submit')){
+				$this->data['status'] = $this->staff_model->user_department_link();
+				$this->data['report_count'] = $this->staff_model->get_user_count($hospitalId);
+				$this->data['user'] = $this->staff_model->get_user($this->data['rowsperpage'],$hospitalId);
+				$this->data['departments']= false;
+
+			}else if(!$this->input->post('select')){
+				$this->data['report_count'] = $this->staff_model->get_user_count($hospitalId);
+				$this->data['user'] = $this->staff_model->get_user($this->data['rowsperpage'],$hospitalId);
+				$this->data['assigned_departments'] = $this->staff_model->get_all_assigned_department($this->data['user'][0]->user_id);
+				$this->data['departments']= false;
+
+			}else {
+				$this->data['departments'] = $this->staff_model->get_department(-1);
+				$this->data['user_departments'] = $this->staff_model->get_user_departments();
+			}			
+			$this->load->view('templates/header',$this->data);
+			$this->load->view('templates/leftnav',$this->data);			
+			$this->load->view('pages/user_department_link',$this->data);
+			$this->load->view('templates/footer');
+		}
+		else{
+			show_404();
+		}
+	}
+
 	function helpline_access(){
 		if($this->session->userdata('logged_in')){
 		$this->load->helper('form');
@@ -238,9 +287,19 @@ class User_panel extends CI_Controller {
 		$this->load->view('templates/header',$this->data);
 		$this->load->view('templates/leftnav',$this->data);
 		$this->load->library('form_validation');
+		$this->data['hospitals']=$this->staff_model->get_hospital();
+		foreach($this->data['defaultsConfigs'] as $default){	
+			if($default->default_id=='pagination'){
+				$this->data['rowsperpage'] = $default->value;
+				$this->data['upper_rowsperpage']= $default->upper_range;
+				$this->data['lower_rowsperpage']= $default->lower_range;
+				break;
+			}
+		}	
 		$this->form_validation->set_rules('user', 'User ID', 'trim|xss_clean');
 		if ($this->form_validation->run() === FALSE){
-			$this->data['user']=$this->masters_model->get_data("user");
+			$this->data['report_count'] = $this->staff_model->get_user_count();
+			$this->data['user'] = $this->staff_model->get_user($this->data['rowsperpage']);
 			$this->load->view('pages/helpline/edit_helpline_access',$this->data);
 		}
 		else{
@@ -260,7 +319,8 @@ class User_panel extends CI_Controller {
 				$this->data["helpline_numbers"]=$this->helpline_model->get_helpline("all", 0);
 				$this->data['user_helpline']=$this->helpline_model->get_user_access();
 			}
-			$this->data["user"]=$this->masters_model->get_data("user");
+			$this->data['report_count'] = $this->staff_model->get_user_count();
+			$this->data['user'] = $this->staff_model->get_user($this->data['rowsperpage']);
 			$this->load->view('pages/helpline/edit_helpline_access',$this->data);	
 		}
 		 $this->load->view('templates/footer');	
@@ -279,6 +339,7 @@ class User_panel extends CI_Controller {
 					$this->data['rowsperpage'] = $default->value;
 					$this->data['upper_rowsperpage']= $default->upper_range;
 					$this->data['lower_rowsperpage']= $default->lower_range;
+					break;
 				}
 			}
 			$this->load->view('templates/header',$this->data);
@@ -336,7 +397,7 @@ class User_panel extends CI_Controller {
 						$this->data['rowsperpage'] = $default->value;
 						$this->data['upper_rowsperpage']= $default->upper_range;
 						$this->data['lower_rowsperpage']= $default->lower_range;	 
-
+						break;
 					}
 				}
 				if ($this->input->post('route_primary')) 
@@ -388,7 +449,7 @@ class User_panel extends CI_Controller {
 						$this->data['rowsperpage'] = $default->value;
 						$this->data['upper_rowsperpage']= $default->upper_range;
 						$this->data['lower_rowsperpage']= $default->lower_range;	 
-
+						break;
 					}
 				}
 				$hospital = $this->session->userdata('hospital');
@@ -434,7 +495,7 @@ class User_panel extends CI_Controller {
 						$this->data['rowsperpage'] = $default->value;
 						$this->data['upper_rowsperpage']= $default->upper_range;
 						$this->data['lower_rowsperpage']= $default->lower_range;	 
-
+						break;
 					}
 				}
 				if ($this->input->post('route_primary_id') || $this->input->post('route_secondary')) 
@@ -496,7 +557,7 @@ class User_panel extends CI_Controller {
 						$this->data['rowsperpage'] = $default->value;
 						$this->data['upper_rowsperpage']= $default->upper_range;
 						$this->data['lower_rowsperpage']= $default->lower_range;	 
-
+						break;
 					}
 				}
 				$hospital = $this->session->userdata('hospital');
@@ -578,7 +639,7 @@ class User_panel extends CI_Controller {
 						$this->data['rowsperpage'] = $default->value;
 						$this->data['upper_rowsperpage']= $default->upper_range;
 						$this->data['lower_rowsperpage']= $default->lower_range;	 
-
+						break;
 					}
 				}
 				if ($this->input->post()) 
@@ -634,7 +695,7 @@ class User_panel extends CI_Controller {
 						$this->data['rowsperpage'] = $default->value;
 						$this->data['upper_rowsperpage']= $default->upper_range;
 						$this->data['lower_rowsperpage']= $default->lower_range;	 
-
+						break;
 					}
 				}
 				$hospital = $this->session->userdata('hospital');
@@ -683,7 +744,7 @@ class User_panel extends CI_Controller {
 						$this->data['rowsperpage'] = $default->value;
 						$this->data['upper_rowsperpage']= $default->upper_range;
 						$this->data['lower_rowsperpage']= $default->lower_range;	 
-
+						break;
 					}
 				}
 				if ($this->input->post()) 
@@ -766,7 +827,7 @@ class User_panel extends CI_Controller {
 						$this->data['rowsperpage'] = $default->value;
 						$this->data['upper_rowsperpage']= $default->upper_range;
 						$this->data['lower_rowsperpage']= $default->lower_range;	 
-
+						break;
 					}
 				}
 				$hospital = $this->session->userdata('hospital');
@@ -876,7 +937,7 @@ class User_panel extends CI_Controller {
 						$this->data['rowsperpage'] = $default->value;
 						$this->data['upper_rowsperpage']= $default->upper_range;
 						$this->data['lower_rowsperpage']= $default->lower_range;	 
-
+						break;
 					}
 				}
 				if ($this->input->post()) 
@@ -936,7 +997,7 @@ class User_panel extends CI_Controller {
 						$this->data['rowsperpage'] = $default->value;
 						$this->data['upper_rowsperpage']= $default->upper_range;
 						$this->data['lower_rowsperpage']= $default->lower_range;	 
-
+						break;
 					}
 				}
 				$hospital = $this->session->userdata('hospital');
@@ -990,7 +1051,7 @@ class User_panel extends CI_Controller {
 						$this->data['rowsperpage'] = $default->value;
 						$this->data['upper_rowsperpage']= $default->upper_range;
 						$this->data['lower_rowsperpage']= $default->lower_range;	 
-
+						break;
 					}
 				}
 				if ($this->input->post()) 
@@ -1048,7 +1109,7 @@ class User_panel extends CI_Controller {
 						$this->data['rowsperpage'] = $default->value;
 						$this->data['upper_rowsperpage']= $default->upper_range;
 						$this->data['lower_rowsperpage']= $default->lower_range;	 
-
+						break;
 					}
 				}
 				$hospital = $this->session->userdata('hospital');
@@ -1108,7 +1169,7 @@ class User_panel extends CI_Controller {
 						$this->data['rowsperpage'] = $default->value;
 						$this->data['upper_rowsperpage']= $default->upper_range;
 						$this->data['lower_rowsperpage']= $default->lower_range;	 
-
+						break;
 					}
 				}
 				if ($this->input->post()) 
@@ -1172,7 +1233,7 @@ class User_panel extends CI_Controller {
 						$this->data['rowsperpage'] = $default->value;
 						$this->data['upper_rowsperpage']= $default->upper_range;
 						$this->data['lower_rowsperpage']= $default->lower_range;	 
-
+						break;
 					}
 				}
 				$hospital = $this->session->userdata('hospital');
@@ -1287,7 +1348,7 @@ class User_panel extends CI_Controller {
 						$this->data['rowsperpage'] = $default->value;
 						$this->data['upper_rowsperpage']= $default->upper_range;
 						$this->data['lower_rowsperpage']= $default->lower_range;	 
-
+						break;
 					}
 				}
 				if ($this->input->post()) 
@@ -1348,8 +1409,7 @@ class User_panel extends CI_Controller {
 						$this->data['rowsperpage'] = $default->value;
 						$this->data['upper_rowsperpage']= $default->upper_range;
 						$this->data['lower_rowsperpage']= $default->lower_range;	 
-
-					}
+						break;					}
 				}
 				$hospital = $this->session->userdata('hospital');
 				$update_record_id = $this->input->post('record_id');

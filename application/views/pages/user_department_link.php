@@ -70,59 +70,56 @@ function onchange_page_dropdown(dropdownobj){
     //var_dump($hptls);
     //var_dump($user_hptls);
     
-    function match_hospital($uh, $hospital_id) {
-        foreach($uh as $hptl) {
-            if($hospital_id == $hptl->hospital_id) {
+    function match_department($ud, $department_id) {
+        foreach($ud as $dept) {
+            if($department_id == $dept->department_id) {
                 return true;
             }
         }
     }
-    if(!!$hptls){
-      
- 
+    if(!!$departments){ 
+  
+
 ?>
 <?php $page_no = 1;	?>
 
 <?php 
-    echo form_open('user_panel/user_hospital_link',array('role'=>'form','class'=>'',
+    echo form_open('user_panel/user_department_link',array('role'=>'form','class'=>'',
         'id'=>'create_user')); 
 ?>
 <div class="form-group col-md-12 col-md-offset-2">
     <table class="table table-bordered table-striped" id="table-sort">
         <thead>
-            <th colspan="3">Select hospitals user <?php if ($this->input->post('user_name')) { echo $this->input->post('user_name');}  else {echo $user_hptls[0]->username;} ?> can access</th>
+            <th colspan="3">Select departments user <?php if ($this->input->post('user_name')) { echo $this->input->post('user_name');}  else {echo $user_departments[0]->username;} ?> can access <?php if ($this->session->userdata('hospital')) {
+                echo "from ".$this->session->userdata('hospital')['hospital_short_name'];
+            }
+            ?></th>
         </thead>
         <thead>
             <th>#</th>
-            <th>Hospital Name</th>
-            <th>Short Name</th>
-            <th>Full Name</th>
-            <!-- <th>Description</th> -->
+            <th>Department Name</th>
+            <th>Clinical</th>
         </thead>
         <tbody>
         <?php
-            $array_size = sizeof($hptls);
+            $array_size = sizeof($departments);
             for($j=0; $j < $array_size; $j++){ ?>
             <tr>
                 <td><?php echo $j+1; ?></td>
                 <td>
                     <label class="control-label">                
-                        <input type="checkbox" name="user_hospital[]" value="<?php echo $hptls[$j]->hospital_id;?>" 
-                            <?php  echo match_hospital($user_hptls, $hptls[$j]->hospital_id) ? "checked" : ""; ?>                        
+                        <input type="checkbox" name="user_departments[]" value="<?php echo $departments[$j]->department_id;?>" 
+                            <?php  echo match_department($user_departments, $departments[$j]->department_id) ? "checked" : ""; ?>                        
                         />
-                        <?php echo array_search($hptls[$j]->hospital_id,$user_hptls); ?>
-                        <?php echo !!$hptls[$j]->hospital_short_name ? $hptls[$j]->hospital_short_name : $hptls[$j]->hospital; ?>
+                        <?php echo array_search($departments[$j]->department_id,$user_departments); ?>
+                        <?php echo $departments[$j]->department; ?>
                     </label>
                 </td>
-                <td><?php echo $hptls[$j]->hospital_short_name; ?></td>
-                <td><?php echo $hptls[$j]->hospital; ?></td>
-                <!-- <td>
-                    <?php echo $hptls[$j]->description; ?>
-                </td>                 -->
+                <td><?php echo $departments[$j]->clinical == 1 ? "Yes" : "No"; ?></td>
             </tr>
         <?php } ?>
         <tr>
-            <td colspan ="4">
+            <td colspan ="3">
                 <input type="hidden" value="<?php echo $this->input->post('user_id');?>" name="user_id" />    
 	            <input class="btn btn-lg btn-primary btn-block" type="submit" value="Submit" name="submit">	        
             </td>
@@ -131,14 +128,12 @@ function onchange_page_dropdown(dropdownobj){
     </table>
 </div>
 <?php echo form_close(); ?>
-<?php }else{ 
-    
-    ?>
+<?php }else{ ?>
 <?php $page_no = 1;	?>
     <div class="col-md-10 col-md-offset-2">
-    <h3>User Hospital Link</h3>
+    <h3>User Department Link</h3>
     <?php 
-    echo form_open('user_panel/user_hospital_link',array('role'=>'form','class'=>'form-custom',
+    echo form_open('user_panel/user_department_link',array('role'=>'form','class'=>'form-custom',
         'id'=>'search_user')); 
      ?>
       <input type="hidden" name="page_no" id="page_no" value='<?php echo "$page_no"; ?>'>
@@ -289,7 +284,7 @@ echo "</select></li>";
     foreach($user as $a){ ?>
     <tr>
         <td>	
-            <?php echo form_open('user_panel/user_hospital_link',array('id'=>'select_user_edit_form_'.$a->user_id,'role'=>'form')); ?>
+            <?php echo form_open('user_panel/user_department_link',array('id'=>'select_user_edit_form_'.$a->user_id,'role'=>'form')); ?>
             <?php echo $i++; ?>
         </td>
         <td><?php echo $a->first_name.' '.$a->last_name; ?></td>
@@ -417,23 +412,23 @@ echo "</select></li>";
 } ?>
 </ul>
 
-<?php if(!empty($assigned_hospitals)) { ?>
-    <h3>Current User Hospitals</h3>
+<?php if(!empty($assigned_departments)) { ?>
+    <h3>Current User Departments</h3>
     <table class="table table-bordered table-striped">
         <thead>
             <th style="text-align:center">S.no</th>
-            <th style="text-align:center">Hospital</th>
-            <th style="text-align:center">Hospital Short Name</th>                       
+            <th style="text-align:center">Department</th>
+            <th style="text-align:center">Clinical</th>                       
         </thead>
         <tbody>
         <?php 
             $jk=1 ;
-            foreach($assigned_hospitals as $aha){  
+            foreach($assigned_departments as $ad){  
         ?>
             <tr>
                 <td><?php echo $jk; ?></td>
-                <td><?php echo $aha->hp_name; ?></td>
-                <td><?php echo $aha->hospital_short_name; ?></td>
+                <td><?php echo $ad->department_name; ?></td>
+                <td><?php echo $ad->clinical == 1? "Yes" : "No"  ; ?></td>
             </tr>
         <?php $jk++; } ?>
         </tbody>

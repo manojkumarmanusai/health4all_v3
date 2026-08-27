@@ -792,6 +792,10 @@
 				echo 'class="active"'; ?>>
 				<a href="<?php echo base_url() . "user_panel/user_hospital_link"; ?>">Hospital</a>
 			</li>
+			<li <?php if (preg_match("^user_panel/user_department_link^", current_url()))
+				echo 'class="active"'; ?>>
+				<a href="<?php echo base_url() . "user_panel/user_department_link"; ?>">Department</a>
+			</li>
 			<li <?php if (preg_match("^user_panel/helpline_access^", current_url()))
 				echo 'class="active"'; ?>>
 				<a href="<?php echo base_url() . "user_panel/helpline_access"; ?>">Helpline</a>

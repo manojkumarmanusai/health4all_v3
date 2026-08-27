@@ -164,7 +164,7 @@ display: inline-grid;
 	$page_no = 1;	
 	
 	?>
-<div class="row">
+<div class="row col-md-12 col-md-offset-2">
 		<h4>User Function Access List</h4>	
 		<?php echo form_open("user_panel/user_function_act_list",array('role'=>'form','class'=>'form-custom','id'=>'appointment')); ?> 
 		<input type="hidden" name="page_no" id="page_no" value='<?php echo "$page_no"; ?>'>
@@ -320,6 +320,8 @@ echo "</select></li>";
 		<th style="text-align:center">Gender</th>
 		<th style="text-align:center">Designation</th>
 		<th style="text-align:center">Specialisation</th>
+		<th style="text-align:center">Primary Hospital</th>
+		<th style="text-align:center">Primary Department</th>
 		<th style="text-align:center">Email</th>
 		<th style="text-align:center">Phone</th>
 		<th style="text-align:center">Active</th>
@@ -334,17 +336,19 @@ echo "</select></li>";
 	foreach($related_users as $ru){
 	?>
 	<tr>
-		<td style="text-align:right"><?php echo $sno;?></td>	
-		<td style="text-align:center"><?php echo $ru->first_name.' '.$ru->last_name; ?></td>	
-		<td style="text-align:center"><?php echo $ru->gender;?></td>
-		<td style="text-align:center"><?php echo $ru->designation;?></td>
-		<td style="text-align:center"><?php echo $ru->specialisation;?></td>
-		<td style="text-align:center"><?php echo $ru->email;?></td>
-		<td style="text-align:center"><?php echo $ru->phone;?></td>
-		<td style="text-align:center"><?php echo $ru->status;?></td>
-		<td style="text-align:center"><?php echo $ru->add ?></td>	
-		<td style="text-align:center"><?php echo $ru->view ?></td>	
-		<td style="text-align:center"><?php echo $ru->edit ?></td>	
+		<td><?php echo $sno;?></td>	
+		<td><?php echo $ru->first_name.' '.$ru->last_name; ?></td>	
+		<td><?php echo $ru->gender;?></td>
+		<td><?php echo $ru->designation;?></td>
+		<td><?php echo $ru->specialisation;?></td>
+		<td><?php echo $ru->staff_primary_hospital;?></td>
+		<td><?php echo $ru->staff_primary_department;?></td>
+		<td><?php echo $ru->email;?></td>
+		<td><?php echo $ru->phone;?></td>
+		<td><?php echo $ru->status;?></td>
+		<td><?php echo $ru->add; ?></td>	
+		<td><?php echo $ru->view; ?></td>	
+		<td><?php echo $ru->edit; ?></td>	
 	</tr>
 	<?php $sno++;}	?>
 	</tbody>

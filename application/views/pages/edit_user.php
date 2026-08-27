@@ -71,8 +71,9 @@ input[type=number] {
 function doPost(page_no){
 	var page_no_hidden = document.getElementById("page_no");
   	page_no_hidden.value=page_no;
-        $('#edit_user').submit();
-   }
+	//document.getElementById("submitBtn").value="SearchFromPage";
+    $('#submitBtn').click();
+}
 function onchange_page_dropdown(dropdownobj){
    doPost(dropdownobj.value);    
 }
@@ -315,8 +316,8 @@ $(document).ready(function(){
                         </select>
 			Rows per page : <input type="number" class="rows_per_page form-custom form-control" style="width:50px" name="rows_per_page" id="rows_per_page" min=<?php echo $lower_rowsperpage; ?> max= <?php echo $upper_rowsperpage; ?> step="1" value= <?php if($this->input->post('rows_per_page')) { echo $this->input->post('rows_per_page'); }else{echo $rowsperpage;}  ?> onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))" /> 
             
-            
- <input type="submit" value="Search" name="submitBtn" class="btn btn-primary btn-sm" /> 
+      
+ 		<input type="submit" value="Search" id="submitBtn" name="submitBtn" class="btn btn-primary btn-sm" /> 
 </form>
 <br />
 <div class="col-md-12">
@@ -454,11 +455,11 @@ echo "</select></li>";
 		<table class="table table-bordered table-striped" id="table-sort">
 	<thead>
 		<th style="text-align:center">S.no</th>
-	<!--	<th style="text-align:center">Hospital</th> -->
-		<th style="text-align:center">Department</th>
-		<th style="text-align:center">Designation</th>
 		<th style="text-align:center">Name</th>
 		<th style="text-align:center">Gender</th>
+		<th style="text-align:center">Designation</th>
+		<th style="text-align:center">Primary Hospital</th>
+		<th style="text-align:center">Primary Department</th>
 		<th style="text-align:center">Specialisation</th>
 		<th style="text-align:center">Email</th>
 		<th style="text-align:center">User Name</th>
@@ -475,11 +476,11 @@ echo "</select></li>";
 			<?php echo form_open('user_panel/edit_user',array('id'=>'select_user_edit_form_'.$a->user_id,'role'=>'form')); ?>
 			<?php echo $i++; ?>
 		</td>
-	<!--	<td><?php echo $a->hospital;?></td> -->
-		<td><?php echo $a->department;?></td>
-		<td><?php echo $a->designation;?> </td>
 		<td><?php echo  $a->first_name." ".$a->last_name;  ?></td>
 		<td><?php echo $a->gender; ?>
+		<td><?php echo $a->designation;?> </td>
+		<td><?php echo $a->primary_hospital;?> </td>
+		<td><?php echo $a->department;?> </td>
 		<td><?php echo $a->specialisation; ?>
 		<td><?php echo $a->email; ?>
 		<td><?php echo $a->username; ?>
@@ -490,7 +491,7 @@ echo "</select></li>";
 			<?php echo $a->phone;?>		
 		</td>
 		<td>
-			<?php echo $a->active;?>
+			<?php echo $a->active == 1?"Yes":"No";?>
 			</form>
 		</td>
 	</tr>

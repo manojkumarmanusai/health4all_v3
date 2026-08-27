@@ -79,21 +79,35 @@ class Masters_model extends CI_Model{
 		
 		
 		if($this->input->post('status')){
-		    	if($this->input->post('status')=="1"){
+		    	if($this->input->post('status')=="Yes"){
 				$this->db->like('user.active',1);
 			}
 			else{
 				$this->db->like('user.active',0);
 			}
 		}
-		
+		$hospital_id = $this->session->userdata('hospital')['hospital_id'];
 		$this->db->select("count(*) as count", false)
 		->from('user')
 		->join('staff','user.staff_id=staff.staff_id')
 		->join('hospital','staff.hospital_id=hospital.hospital_id')
 		->join('department','staff.department_id=department.department_id');
-		
-	}
+		if (!!$hospital_id) {
+			$this->db->where(
+				"(
+					staff.hospital_id = " . (int)$hospital_id . "
+					OR EXISTS (
+						SELECT 1
+						FROM user_hospital_link uhl
+						WHERE uhl.user_id = user.user_id
+						AND uhl.hospital_id = " . (int)$hospital_id . "
+					)
+				)",
+				NULL,
+				FALSE
+			);
+		}
+	 }
 	// 204208 end
 		else if($type=='staff')
 		{
@@ -1668,8 +1682,7 @@ else if($type=="dosage"){
 		$start = ($page_no -1 )  * $rows_per_page;
 		
 		$hospital_id = $this->session->userdata('hospital')['hospital_id'];
-		if($hospital_id != '')
-				$this->db->where('staff.hospital_id', $hospital_id);
+		
 		if($this->input->post('username')){
 			$this->db->where('user.username',$this->input->post('username'));
 		}
@@ -1693,11 +1706,43 @@ else if($type=="dosage"){
 			}
 		}
 
-		$this->db->select("hospital.hospital,user.user_id,username,password,user.staff_id,user.active,first_name,last_name,gender, specialisation, email, designation,phone,department")
-		->from("user")
-		->join('staff','user.staff_id=staff.staff_id')
-		->join('hospital','staff.hospital_id=hospital.hospital_id')
-		->join('department','staff.department_id=department.department_id');
+		$this->db->select("
+				ph.hospital as hospital,
+				user.user_id,
+				username,
+				password,
+				user.staff_id,
+				user.active,
+				first_name,
+				last_name,
+				gender,
+				specialisation,
+				email,
+				designation,
+				phone,
+				pd.department as department,
+				ph.hospital_short_name as primary_hospital
+			")
+			->from("user")
+			->join('staff', 'user.staff_id = staff.staff_id')
+			->join('hospital ph', 'staff.hospital_id = ph.hospital_id', 'left')
+			->join('department pd', 'staff.department_id = pd.department_id', 'left');
+
+			if (!!$hospital_id) {
+				$this->db->where(
+					"(
+						staff.hospital_id = " . (int)$hospital_id . "
+						OR EXISTS (
+							SELECT 1
+							FROM user_hospital_link uhl
+							WHERE uhl.user_id = user.user_id
+							AND uhl.hospital_id = " . (int)$hospital_id . "
+						)
+					)",
+					NULL,
+					FALSE
+				);
+			}
 		if($this->input->post('search'))
 		{
 			$user = strtolower($this->input->post('user'));
@@ -1739,11 +1784,14 @@ else if($type=="dosage"){
 
 		$this->db->select("user_function_link.user_id,user_function_link.add,user_function_link.view,user_function_link.edit,user_function.user_function,
 						   user_function.description,staff.first_name,staff.gender,staff.specialisation,staff.email,staff.phone,staff.status,
-						   staff.designation")
+						   staff.designation,department.department as staff_primary_department,
+		hospital.hospital_short_name as staff_primary_hospital")
 				->from("user_function_link")
 				->join('user_function','user_function.user_function_id=user_function_link.function_id','left')
 				->join('user','user.user_id=user_function_link.user_id','left')
 				->join('staff','staff.staff_id=user.staff_id','left')
+				->join('hospital', 'staff.hospital_id = hospital.hospital_id','left')
+				->join('department', 'staff.department_id = department.department_id','left')
 				->where('user_function_link.function_id',$this->input->post('user_functions'));
 		$query = $this->db->get();
 		return $query->result();
