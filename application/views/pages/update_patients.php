@@ -763,13 +763,14 @@ function openSmsModal(){
 									<thead>
 										<tr>
 											<th style="text-align:center">#</th>
-											<th style="text-align:center">Visit Date</th>
+											<th style="text-align:center">Visit Registration Date</th>
 											<th style="text-align:center">Hospital</th>
 											<th style="text-align:center">OP/IP No</th>
-											<th style="text-align:center">Department -- Unit Name</th>
+											<th style="text-align:center">Department - Unit Name</th>
 											<th style="text-align:center">Visit Name</th>
-											<th style="text-align:center">Discharge Date</th>
 											<th style="text-align:center">Appointment Date</th>
+											<th style="text-align:center">Outcome</th>
+											<th style="text-align:center">Outcome Date</th>
 										</tr>
 									</thead>
 									</div>
@@ -791,10 +792,11 @@ function openSmsModal(){
 											<td style="text-align:center"><?php echo date("d-M-Y",strtotime($p->admit_date));?></td>
 											<td style="text-align:center"><?php echo $p->hospital; ?></td>
 											<td style="text-align:center"><?php echo $p->visit_type." #".$p->hosp_file_no; ?></td>
-											<td style="text-align:center"><?php echo $p->department;?> -- <?php echo $p->unit_name;?></td>
+											<td style="text-align:center"><?php echo $p->department;?> - <?php echo $p->unit_name;?></td>
 											<td style="text-align:center"><?php echo $p->visit_name;?></td>
-											<td style="text-align:center"><?php if($p->outcome_date =="0000-00-00" || $p->outcome_date==" "){ echo " "; }else{ echo date("d-M-Y",strtotime($p->outcome_date)); } ?></td>
 											<td style="text-align:center"><?php if(isset($p->appointment_time) && $p->appointment_time!="") {echo date("j M Y", strtotime("$p->appointment_time"));} ?></td>
+											<td style="text-align:center"><?php if($p->outcome!='0') { echo $p->outcome; } ?></td>
+											<td style="text-align:center"><?php if($p->outcome_date =="0000-00-00" || $p->outcome_date==" "){ echo " "; }else{ echo date("d-M-Y",strtotime($p->outcome_date)); } ?></td>
 										</tr>
 										<?php $prev = $p;
 										} ?>
@@ -1051,17 +1053,17 @@ function openSmsModal(){
 			<?php $this->load->view('pages/print_layouts/patient_summary_only_diagnostics');?>
 		</div>
                 <div class="col-md-8"  >
-			<div class="row alt">
-                            <div class="col-md-4 col-xs-12 col-lg-3"  style="background: #FFA500;">
-                                <b>Patient ID: <?php echo $patient->patient_id; ?> </b>
-                            </div>
-			<div class="col-md-4 col-xs-12 col-lg-4">
-				<b><?php echo $patient->visit_type; ?> Number: </b><?php echo $patient->hosp_file_no;?>
-			</div>
-			<div class="col-md-4 col-xs-12 col-lg-5">
-				<b><?php if( $patient->visit_type == "IP") echo "Admit Date:"; else echo "Visit Date:";?></b>
-				<?php echo date("d-M-Y", strtotime($patient->admit_date)).", ".date("g:ia", strtotime($patient->admit_time));?>
-			</div>
+				<div class="row alt">
+				<div class="col-md-3 col-sm-3 col-xs-12" style="background: #FFA500;">
+					<b>Patient ID: <?php echo $patient->patient_id; ?> </b>
+				</div>
+				<div class="col-md-3 col-sm-3 col-xs-12">
+					<b><?php echo $patient->visit_type; ?> Number: </b><?php echo $patient->hosp_file_no;?>
+				</div>
+				<div class="col-md-6 col-sm-5 col-xs-12">
+					<b><?php if( $patient->visit_type == "IP") echo "Admit Date:"; else echo "Visit Registration Date:";?></b>
+					<?php echo date("d-M-Y", strtotime($patient->admit_date)).", ".date("g:ia", strtotime($patient->admit_time));?>
+				</div>
 			</div>
 			<div class="row alt">
                         <div class="col-md-4 col-xs-12 col-lg-4">
@@ -2061,6 +2063,7 @@ function openSmsModal(){
             </div>
         </div>
         <div role="tabpanel" class="tab-pane" id="clinical">
+		<div data-patient-quick-info></div>
             <div class="row alt">
                     <div class="col-md-12 col-xs-12">
                         <?php 
@@ -2992,50 +2995,6 @@ function openSmsModal(){
 					<canvas id="hb" width="100" height="100"></canvas>
 				</div>				
 			</div>
-			<div class="row">
-			<div class="col-md-12">
-			
-			<table class="table table-striped table-bordered" id="detailed_table" >
-				<thead>
-					<tr>
-						<th>#</th>
-						<th>Date</th>
-						<th>Wt-Kg</th>
-						<th>SBP</th>
-						<th>DBP</th>
-						<th>Pulse</th>
-						<th>RBS</th>
-						<th>Hb</th>
-						<th>HbA1C</th>
-						<th>Doctor</th>
-						<th>Clinical Notes</th>
-						<th>Prescription</th>
-					</tr>
-				</thead>
-				<tbody><!-- tr td -->
-					<?php $i=1; foreach($vitals as $vital){ ?>
-					<tr>
-						<td><?php echo $i; ?></td>
-						<td><?php echo $vital->DATE; ?></td>
-						<td><?php echo $vital->Weight; ?></td>
-						<td><?php echo $vital->SBP; ?></td>
-						<td><?php echo $vital->DBP; ?></td>
-						<td><?php echo $vital->Pulse; ?></td>
-						<td><?php echo $vital->RBS; ?></td>
-						<td><?php echo $vital->Hb; ?></td>
-						<td><?php echo $vital->HbA1C; ?></td>
-						<td><?php echo $vital->Doctor; ?></td>	
-						<td><?php echo $vital->Clinical_Notes; ?></td>		
-						<td><?php echo $vital->Prescription; ?></td>		
-					</tr>
-					<?php $i++; } ?>
-				</tbody>
-				<tfoot><!-- tr td -->
-					
-				</tfoot>
-			</table>
-			</div>
-			</div>			
 		</div>
 		<!-- Insert New Tab here for Patient documents upload -->
 		<div role="tabpanel" class="tab-pane" id="docupload">
@@ -3338,12 +3297,12 @@ function openSmsModal(){
 	<div class="container">
 	<table class="table table-bordered table-striped">
 		<thead>
-		<th>Date</th>
+		<th>Visit Registration Date</th>
 		<th>Hospital</th>
-		<th>Type</th>
-		<th>Number</th>
+		<th>OP/IP No</th>
 		<th>Department</th>
 		<th>Unit/Area</th>
+		<th>Appointment Date</th>
 		<th>Outcome</th>
 		<th>Outcome Date</th>
 		</thead>
@@ -3361,11 +3320,13 @@ function openSmsModal(){
 				<?php echo date("d-M-Y",strtotime($visit->admit_date));?>
 				</td>
 				<td><?php echo $visit->hospital;?></td>
-				<td><?php echo $visit->visit_type;?></td>
-				<td><?php echo $visit->hosp_file_no;?></td>
+				<td><?php echo $visit->visit_type.' #'.$visit->hosp_file_no;?></td>
 				<td><?php echo $visit->department;?></td>
 				<td><?php echo $visit->unit_name."/".$visit->area_name;?></td>
-				<td><?php echo $visit->outcome;?></td>
+				<td><?php if(isset($visit->appointment_time) && $visit->appointment_time!="") 
+				{echo date("j M Y", strtotime("$visit->appointment_time"));} 
+				else {echo $visit->appointment_time="";}?></td>
+				<td><?php if ($visit->outcome!='0'){echo $visit->outcome;}?></td>
 				<td><?php if($visit->outcome_date!=0) echo date("d-M-Y",strtotime($visit->outcome_date));?></td>
 			</tr>
 		<?php } ?>
@@ -4719,29 +4680,54 @@ function openSmsModal(){
 </div>
 <?php } ?>
 <template id="template-patient-quick-info" type="text/html">
-    <div class="row alt">
-        <div class="col-md-4 col-xs-6">
-            <b>Patient ID: <?php echo $patient->patient_id; ?> </b>
-            <b>
+    <div class="row alt patient-info-bar">
+        <div class="patient-item">
+            <b>Patient ID:</b> <?php echo $patient->patient_id; ?> 
+            
                 <?php 
-                    echo $patient->first_name." ".$patient->last_name.", "; 
-                    if($patient->age_years!=0){ echo $patient->age_years." Yrs "; } 
-                    if($patient->age_months!=0){ echo $patient->age_months." Mths "; }
-                    if($patient->age_days!=0){ echo $patient->age_days." Days "; }
+                    echo $patient->first_name." ".$patient->last_name."/"; 
+                    if($patient->age_years!=0){ echo $patient->age_years." Yrs"; } 
+                    if($patient->age_months!=0){ echo $patient->age_months." Mths"; }
+                    if($patient->age_days!=0){ echo $patient->age_days." Days"; }
                     if($patient->age_years==0 && $patient->age_months == 0 && $patient->age_days==0) echo "0 Days";
                     echo "/".$patient->gender; 
                 ?> 
-            </b>
+            
         </div>
-        <div class="col-md-4 col-xs-6">
+        <div class="patient-item">
             <b><?php echo $patient->visit_type; ?> Number: </b><?php echo $patient->hosp_file_no;?>
         </div>
-        <div class="col-md-4 col-xs-6">
-            <b><?php if( $patient->visit_type == "IP") echo "Admit Date:"; else echo "Visit Date:";?></b>
+        <div class="patient-item">
+            <b><?php if( $patient->visit_type == "IP") echo "Admit Date:"; else echo "Visit Registration Date:";?></b>
             <?php echo date("d-M-Y", strtotime($patient->admit_date)).", ".date("g:i A", strtotime($patient->admit_time));?>
+        </div>
+        <div class="patient-item">
+            <b>Appointment Date:</b>
+            <?php if( $patient->appointment_time) { 
+                echo date("d-M-Y", strtotime($patient->appointment_time)).", ".date("g:i A", strtotime($patient->appointment_time)); 
+            } else {
+                echo "NA";
+            } ?>
         </div>
     </div>
 </template>
+
+<style>
+.patient-info-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;             /* Guarantees clean spacing between items */
+    width: 100%;
+    padding: 0 15px;
+}
+
+.patient-info-bar .patient-item {
+    white-space: nowrap;   /* Keeps each item strictly on 1 line */
+    flex-shrink: 0;        /* Prevents elements from shrinking into each other */
+}
+</style>
 <div class="sr-only" id="print-div-doctor-notes" style="width:100%;height:100%;"> 
 			<?php $this->load->view('pages/print_layouts/patient_doctor_notes');?>
 		</div>

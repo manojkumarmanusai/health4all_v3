@@ -1374,13 +1374,14 @@ function initAppointmentDoctorSelectize(modal_id){
 									<thead>
 										<tr>
 											<th style="text-align:center">#</th>
-											<th style="text-align:center">Visit Date</th>
+											<th style="text-align:center">Visit Registration Date</th>
 											<th style="text-align:center">Hospital</th>
 											<th style="text-align:center">OP/IP No</th>
-											<th style="text-align:center">Department -- Unit Name</th>
+											<th style="text-align:center">Department - Unit Name</th>
 											<th style="text-align:center">Visit Name</th>
-											<th style="text-align:center">Discharge Date</th>
 											<th style="text-align:center">Appointment Date</th>
+											<th style="text-align:center">Outcome</th>
+											<th style="text-align:center">Outcome Date</th>
 										</tr>
 									</thead>
 									</div>
@@ -1397,10 +1398,11 @@ function initAppointmentDoctorSelectize(modal_id){
 											<td style="text-align:center"><?php echo date("d-M-Y",strtotime($p->admit_date));?></td>
 											<td style="text-align:center"><?php echo $p->hospital; ?></td>
 											<td style="text-align:center"><?php echo $p->visit_type." #".$p->hosp_file_no; ?></td>
-											<td style="text-align:center"><?php echo $p->department;?> -- <?php echo $p->unit_name;?></td>
+											<td style="text-align:center"><?php echo $p->department;?> - <?php echo $p->unit_name;?></td>
 											<td style="text-align:center"><?php echo $p->visit_name;?></td>
-											<td style="text-align:center"><?php if($p->outcome_date =="0000-00-00" || $p->outcome_date==" "){ echo " "; }else{ echo date("d-M-Y",strtotime($p->outcome_date)); } ?></td>
 											<td style="text-align:center"><?php if(isset($p->appointment_time) && $p->appointment_time!="") {echo date("j M Y", strtotime("$p->appointment_time"));} ?></td>
+											<td style="text-align:center"><?php if($p->outcome!='0') { echo $p->outcome; } ?></td>
+											<td style="text-align:center"><?php if($p->outcome_date =="0000-00-00" || $p->outcome_date==" "){ echo " "; }else{ echo date("d-M-Y",strtotime($p->outcome_date)); } ?></td>
 										</tr>
 										<?php $prev = $p;
 										} ?>
