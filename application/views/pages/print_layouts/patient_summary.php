@@ -1,9 +1,4 @@
-<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/font-awesome.min.css" media="all">
-		<script type="text/javascript" src="<?php echo base_url();?>assets/js/qrcode.min.js"></script>  
-		<script type="text/javascript" src="<?php echo base_url();?>assets/js/jquery-barcode.min.js"></script>
-		
-		
-<script type="text/javascript" src="<?php echo base_url();?>assets/js/bootstrap.min.js"></script>
+<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/font-awesome.min.css" media="all"> 		
 
 		<?php $patient=$patients[0];?>
 		<style>
@@ -233,11 +228,6 @@
 				</tr>
 				<?php } ?>
 				</tbody>
-				<?php
-echo '<pre>';
-var_dump($has_clinical_notes);
-echo '</pre>';
-?>
 				<?php if(!empty($visit_notes) && ($has_clinical_notes == true)) { ?>
 				<tr class="print-element" width="95%" >				
 					<td colspan="3"><b><u>Clinical Notes</u></b></td>
@@ -262,7 +252,11 @@ echo '</pre>';
 									<!-- <td><?php echo $i++; ?></td>
 									<td width="150px"><?php if($note->note_time!=0) echo date("d-M-Y g:iA",strtotime($note->note_time)); ?>
 									</td> -->
-									<td><?php echo $note->clinical_note;?></td>
+									<?php if ((strpos($note->clinical_note, '<ul>') !== false) || (strpos($note->clinical_note, '<ol>') !== false)) { ?>
+    									<td style="padding-left:25px"><?php echo $note->clinical_note;?></td>
+									<?php } else { ?>
+										<td><?php echo $note->clinical_note;?></td>
+									<?php } ?>
 								</tr>
 								<?php  } ?>
 							</tbody>

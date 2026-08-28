@@ -1,9 +1,5 @@
 <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/font-awesome.min.css" media="all">
-		<script type="text/javascript" src="<?php echo base_url();?>assets/js/qrcode.min.js"></script>  
-		<script type="text/javascript" src="<?php echo base_url();?>assets/js/jquery-barcode.min.js"></script>
 		
-		
-<script type="text/javascript" src="<?php echo base_url();?>assets/js/bootstrap.min.js"></script>
 
 		<?php $patient=$patients[0];?>
 		<style>

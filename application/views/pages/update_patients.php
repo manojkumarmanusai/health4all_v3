@@ -312,16 +312,33 @@ $(function(){
 //	$("#from_date,#to_date").Zebra_DatePicker();
 });
 
-<!-- Scripts for printing output table -->
 function printDiv(i)
 {
-var content = document.getElementById(i);
-var pri = document.getElementById("ifmcontentstoprint").contentWindow;
-pri.document.open();
-pri.document.write(content.innerHTML);
-pri.document.close();
-pri.focus();
-pri.print();
+    var content = document.getElementById(i);
+    var pri = document.getElementById("ifmcontentstoprint").contentWindow;
+
+    pri.document.open();
+
+    pri.document.write(`
+        <html>
+        <head>
+            <script src="<?php echo base_url(); ?>assets/js/jquery.min.js"><\/script>
+            <script src="<?php echo base_url(); ?>assets/js/jquery-barcode.min.js"><\/script>
+            <script src="<?php echo base_url(); ?>assets/js/qrcode.min.js"><\/script>
+            <script src="<?php echo base_url(); ?>assets/js/bootstrap.min.js"><\/script>
+        </head>
+        <body>
+            ${content.innerHTML}
+        </body>
+        </html>
+    `);
+
+    pri.document.close();
+
+    pri.onload = function() {
+        pri.focus();
+        pri.print();
+    };
 }
 function initiateSms(){
 	setSmsToNumber();
@@ -1026,7 +1043,7 @@ function openSmsModal(){
 				}
 		?>
 		<div class="sr-only" id="print-div" style="width:100%;height:100%;"> 
-		<?php $this->load->view('pages/print_layouts/patient_summary', ['has_clinical_notes' => $has_clinical_notes]); ?>		</div>
+			<?php $this->load->view('pages/print_layouts/patient_summary', ['has_clinical_notes' => $has_clinical_notes]); ?>		</div>
 		<div class="sr-only" id="print-div-without-diagnostics" style="width:100%;height:100%;"> 
 			<?php $this->load->view('pages/print_layouts/patient_summary_without_diagnostics',['has_clinical_notes' => $has_clinical_notes]);?>
 		</div>

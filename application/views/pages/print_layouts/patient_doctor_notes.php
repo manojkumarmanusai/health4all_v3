@@ -70,7 +70,7 @@
         <tr>
             <td colspan="4" style="text-align: center; padding: 10px;">
                 <span style="font-size: 16px; font-weight: bold;">
-                    <?php echo $hospital['hospital'] . ' - ' . $hospital['place']; ?>
+                    <?php echo $hospital['hospital']; if($hospital['place']) echo ' - '. $hospital['place']; ?>
                 </span><br />
                 <span style="font-size: 15px; font-weight: bold;">
                     Doctor Notes - <span id="printNoteTime" style="font-weight: bold; font-size: 14px;"></span>
@@ -81,10 +81,10 @@
 
     <!-- Patient Details -->
     <tbody>
-        <tr style="text-align: left; font-size: 13px;">
+        <tr style="text-align: center; font-size: 13px;">
             <td style="width: 25%;"><b>Name: </b><?php echo $patient->name; ?></td>
             <td style="width: 25%;">
-                <b>Age/Sex: </b>
+                <b>Age/Gender: </b>
                 <?php 
                     if ($patient->age_years != 0) { echo $patient->age_years . " Yrs "; } 
                     if ($patient->age_months != 0) { echo $patient->age_months . " Mths "; }
