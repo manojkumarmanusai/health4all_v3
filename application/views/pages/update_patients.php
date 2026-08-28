@@ -2744,7 +2744,7 @@ function openSmsModal(){
 						if(!empty($patient->advise))
 						{
 					?>
-					   <div class="col-md-2"> <?php echo $patient->advise; ?> </div>
+					   <div class="col-md-2" style=width:max-content> <?php echo $patient->advise; ?> </div>
 					<?php	
 					    } else{
 					?>
