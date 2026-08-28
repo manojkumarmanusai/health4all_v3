@@ -370,6 +370,7 @@ function update_patient(){
             if($this->input->post('patient_id'))
             {
                 $this->data['patient_visits_edit_history'] = $this->patient_model->get_patient_visits_edit_history();
+                $this->data['patient_info'] = $this->patient_model->get_patient_info();
                 
             }
             $this->load->view('pages/edit_patient_visits',$this->data);	

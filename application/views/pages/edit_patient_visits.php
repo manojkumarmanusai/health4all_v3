@@ -794,12 +794,45 @@ bootbox.confirm({
 <div class="row">
   <div style="margin-top:4%!important;" class="col-md-12">
     <?php if(isset($patient_visits_to_edit) && count($patient_visits_to_edit)>0){ ?>
-    
+      <div class="well well-sm" style="margin-left:13px; margin-right:13px; margin-bottom: 20px; white-space: nowrap; overflow-x: auto; background-color: #f5f5f5; border: 1px solid #e3e3e3;">
+        <span class="text-primary"><strong>H4A ID:</strong></span> <span class="label label-primary"><?= $patient_info[0]->patient_id ?></span>
+        
+        <?php if (!empty($patient_info[0]->patient_id_manual)): ?>
+            <span style="color: #bbb; padding: 0 6px;">|</span>
+            <strong>Manual ID:</strong> <?= $patient_info[0]->patient_id_manual ?>
+        <?php endif; ?>
+
+        <span style="color: #bbb; padding: 0 6px;">|</span>
+        <strong>Patient:</strong> <?= $patient_info[0]->name ?>
+
+        <span style="color: #bbb; padding: 0 6px;">|</span>
+        <strong>Age:</strong> <?= "{$patient_info[0]->age_years}Y {$patient_info[0]->age_months}M {$patient_info[0]->age_days}D" ?>
+
+        <?php if ($patient_info[0]->gender !== "0"): ?>
+            <span style="color: #bbb; padding: 0 6px;">|</span>
+            <strong>Gender:</strong> <?= $patient_info[0]->gender ?>
+        <?php endif; ?>
+
+        <span style="color: #bbb; padding: 0 6px;">|</span>
+        <strong>Phone:</strong> <?= $patient_info[0]->phone ?>
+
+        <span style="color: #bbb; padding: 0 6px;">|</span>
+        <strong>Address:</strong> <?= $patient_info[0]->address ?>
+
+        <?php if (!empty($patient_info[0]->district)): ?>
+            <span style="color: #bbb; padding: 0 6px;">|</span>
+            <strong>Location:</strong> <?= "{$patient_info[0]->district}, {$patient_info[0]->state}" ?>
+        <?php endif; ?>
+
+        <?php if (!empty($patient_info[0]->parent_spouse)): ?>
+            <span style="color: #bbb; padding: 0 6px;">|</span>
+            <strong>Relative:</strong> <?= $patient_info[0]->parent_spouse ?>
+        <?php endif; ?>
+    </div>
     <h4 style="margin-left:13px;">Available Visits</h4>
     <table class="table table-bordered table-striped" id="table-sort" style="margin-left:13px;">
       <thead>
         <th style="text-align:center;">SNo</th>
-        <th style="text-align:center;">Patient id</th>
         <th style="text-align:center;">OP / IP Trends</th>
         <th style="text-align:center;">Visit type</th>
         <th style="text-align:center;">Department</th>
@@ -812,7 +845,6 @@ bootbox.confirm({
       foreach($patient_visits_to_edit as $avail){ ?> 
       <tr>
         <td style="text-align:center;"><?php echo $sno;?></td>
-        <td style="text-align:center;"><?php echo $avail->patient_id ?></td>
         <td style="text-align:center;"><?php echo $avail->visit_type." #".$avail->hosp_file_no;?></td>
         <td style="text-align:center;"><?php echo $avail->vn ?></td>
         <td style="text-align:center;"><?php echo $avail->dname;?></td>
