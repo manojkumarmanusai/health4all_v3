@@ -252,11 +252,7 @@
 									<!-- <td><?php echo $i++; ?></td>
 									<td width="150px"><?php if($note->note_time!=0) echo date("d-M-Y g:iA",strtotime($note->note_time)); ?>
 									</td> -->
-									<?php if ((strpos($note->clinical_note, '<ul>') !== false) || (strpos($note->clinical_note, '<ol>') !== false)) { ?>
-    									<td style="padding-left:25px"><?php echo $note->clinical_note;?></td>
-									<?php } else { ?>
-										<td><?php echo $note->clinical_note;?></td>
-									<?php } ?>
+									<td><?php echo $note->clinical_note;?></td>
 								</tr>
 								<?php  } ?>
 							</tbody>
@@ -486,10 +482,16 @@
 				</tr>
 				<?php } ?>
 				<style>
-					.print-element p, .print-element ul, .print-element ol {
+					.print-element p {
 						margin: 0;
-						padding: 0;
-						line-height: 1.2; /* Adjust this as needed */
+						line-height: 1.2;
+					}
+
+					.print-element ul,
+					.print-element ol {
+						margin: 0;
+						padding-left: 25px;
+						line-height: 1.2;
 					}
 				</style>
 				<?php
