@@ -2111,9 +2111,15 @@ function openSmsModal(){
 										<div style="margin-top: 8px;">
 										<label style="font-weight: normal; cursor: pointer;">
 											<!-- Only this hidden input posts to PHP -->
-											<input type="hidden" name="add_to_summary[]" class="summary_hidden_input_new" value="0" />
+											 <?php if( $patient->visit_type == "IP") { ?>
+												<input type="hidden" name="add_to_summary[]" class="summary_hidden_input_new" value="0" />
+												<input type="checkbox" class="add_to_summary_checkbox_new" value="1" />
+											<?php } else { ?>
+												<input type="hidden" name="add_to_summary[]" class="summary_hidden_input_new" value="1" />
+												<input type="checkbox" class="add_to_summary_checkbox_new" value="1" checked/>
+												<?php }?>	
 											<!-- Checkbox has NO name, only controls the hidden input above -->
-											<input type="checkbox" class="add_to_summary_checkbox_new" value="1" />
+											
 											&nbsp;Add to patient summary
 										</label>
 										</div>
@@ -2165,7 +2171,13 @@ function openSmsModal(){
 								$(this).val('').removeClass('error_field');
 							});
 							$newRow.find('.daily_notes_date').val(getCurrentLocalDateTime());
-							$newRow.find('.add_to_summary_checkbox').prop('checked', false);
+							<?php if( $patient->visit_type == "IP") { ?>
+								$newRow.find('.add_to_summary_checkbox_new').prop('checked', false);
+								$newRow.find('.summary_hidden_input_new').prop('value', 0);
+							<?php } else { ?>
+								$newRow.find('.add_to_summary_checkbox_new').prop('checked', true);
+								$newRow.find('.summary_hidden_input_new').prop('value', 1);
+							<?php }?>
 							$newRow.find('span.error').remove();
 							$newRow.find('.ck').remove();
 							$tbody.append($newRow);
