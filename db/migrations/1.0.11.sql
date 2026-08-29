@@ -53,3 +53,5 @@ DROP INDEX patient_id,
 ADD UNIQUE KEY uk_patient_hospital (patient_id, hospital_id);
 
 ALTER TABLE `patient_clinical_notes` ADD `add_to_summary` BOOLEAN NOT NULL DEFAULT FALSE AFTER `user_id`;
+
+ALTER TABLE `procedure` ADD `hospital_id` INT NOT NULL AFTER `procedure_type_id`;

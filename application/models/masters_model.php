@@ -627,7 +627,7 @@ staff.ima_registration_number, staff.doctor_flag as doctor_flag,			staff_categor
 			$this->db->select("village_town_id,village_town")->from("village_town");
 		}
 		else if($type=="procedure"){
-			$this->db->select("procedure_id,procedure_name")->from("procedure");
+			$this->db->select("procedure_id,procedure_name")->from("procedure")->order_by('procedure_name');
 		}
 		else if($type=="sanitation_activity"){
 			$date=date("Y-m-d",strtotime($this->input->post('date')));

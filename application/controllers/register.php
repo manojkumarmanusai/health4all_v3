@@ -906,7 +906,6 @@ class Register extends CI_Controller {
 				$this->data['msg'] = "Patient information has been updated successfully";
 				$this->data['previous_visits']=$this->register_model->get_visits($patient_id);
 				$this->data['patient_visits'] = $this->gen_rep_model->simple_join('patient_visits_all', false);
-				$this->data['clinical_notes'] = $this->gen_rep_model->simple_join('clinical_notes', false);
 				$this->data['all_tests'] = $this->gen_rep_model->simple_join('tests_ordered', false);
 				$this->data['prescriptions'] = $this->gen_rep_model->simple_join('prescriptions', false);
 				if(count($this->data['patients'])==1){
@@ -921,6 +920,7 @@ class Register extends CI_Controller {
 					$this->data['previous_prescription']=$this->register_model->get_prescription($previous_visit->visit_id);
 					$this->data['tests']=$this->diagnostics_model->get_all_tests($visit_id);
 					$this->data['visit_notes']=$this->register_model->get_clinical_notes($visit_id);
+					$this->data['patient_procedures'] = $this->register_model->get_patient_procedures($visit_id);
 					$this->data['patient_document_upload'] = $this->patient_document_upload_model->get_patient_documents($this->data['patients'][0]->patient_id);
 					$this->data['patient_document_type'] = $this->patient_document_upload_model->get_patient_document_type();
 					// start -- 18_02_2023 --- Shruthi S M//
@@ -956,14 +956,13 @@ class Register extends CI_Controller {
 					$data_array = array('patient_id' => $this->data['patients'][0]->patient_id);				
 					$this->data['vitals'] = $this->gen_rep_model->simple_join('patient_vitals', false, array('patient.patient_id'=>$this->data['patients'][0]->patient_id));	
 					$this->data['patient_visits'] = $this->gen_rep_model->simple_join('patient_visits_all', $data_array);
-					$this->data['clinical_notes'] = $this->gen_rep_model->simple_join('clinical_notes', $data_array);
 					$this->data['all_tests'] = $this->gen_rep_model->simple_join('tests_ordered', $data_array);
 					$this->data['prescriptions'] = $this->gen_rep_model->simple_join('prescriptions', $data_array);
 					$this->data['transfers'] = $this->patient_model->get_transfers_info($visit_id);
 					$this->data['prescription_frequency'] = $this->staff_model->get_prescription_frequency();
 					$this->data['transport'] = $this->staff_model->get_transport_log();
 					$this->data['prescription']=$this->register_model->get_prescription($visit_id);
-			                $this->data['previous_visits']=$this->register_model->get_visits($patient_id);			
+			        $this->data['previous_visits']=$this->register_model->get_visits($patient_id);			
 					$hospital=$this->session->userdata('hospital');
 					$hospital_id=$hospital['hospital_id'];
 					$this->data['hosp_all_print_layouts']=$this->register_model->get_hosp_all_print_layouts($hospital_id);
@@ -983,6 +982,7 @@ class Register extends CI_Controller {
 					}
 					$this->data['tests']=$this->diagnostics_model->get_all_tests($visit_id);
 					$this->data['visit_notes']=$this->register_model->get_clinical_notes($visit_id);
+					$this->data['patient_procedures'] = $this->register_model->get_patient_procedures($visit_id);
 					$this->data['patient_document_upload'] = $this->patient_document_upload_model->get_patient_documents($this->data['patients'][0]->patient_id);
 					$this->data['patient_document_type'] = $this->patient_document_upload_model->get_patient_document_type();
 					//Set the print layout page based on the form selected.
