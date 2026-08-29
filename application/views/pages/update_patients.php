@@ -4848,7 +4848,7 @@ function openSmsModal(){
 </div>
 <?php } ?>
 <template id="template-patient-quick-info" type="text/html">
-    <div class="row alt patient-info-bar">
+    <div class="alt patient-info-bar">
         <div class="patient-item">
             <b>Patient ID:</b> <?php echo $patient->patient_id; ?> 
             
@@ -4882,18 +4882,17 @@ function openSmsModal(){
 <style>
 .patient-info-bar {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: 18px;             /* Guarantees clean spacing between items */
+    justify-content: center;
+    gap: 20px 50px;
     width: 100%;
-	margin:auto;
+    box-sizing: border-box;
     padding: 0 15px;
 }
 
 .patient-info-bar .patient-item {
-    white-space: nowrap;   /* Keeps each item strictly on 1 line */
-    flex-shrink: 0;        /* Prevents elements from shrinking into each other */
+    min-width: 0;
 }
 </style>
 <div class="sr-only" id="print-div-doctor-notes" style="width:100%;height:100%;"> 
