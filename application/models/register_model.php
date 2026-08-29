@@ -673,28 +673,6 @@ class Register_model extends CI_Model{
 				}
 			}
 		}
-	
-		if(!empty($this->input->post('clinical_note'))) {            
-			$clinical_note = $this->input->post('clinical_note');
-			$note_date = $this->input->post('note_date');
-			$add_to_summary = $this->input->post('add_to_summary');
-			$clinical_data = array();
-			
-			if(is_array($clinical_note)){
-				for($i=0; $i < count($clinical_note); $i++){
-					$clean_note = trim(strip_tags($clinical_note[$i]));
-					if(!empty($clean_note) && !empty($note_date[$i])) {
-						$clinical_data[] = array(
-							'clinical_note' => $clinical_note[$i],
-							'note_time' => date("Y-m-d H:i:s", strtotime(str_replace('T', ' ', $note_date[$i]))),
-							'visit_id' => $this->input->post('visit_id'),
-							'user_id' =>  $user_data['user_id'],
-							'add_to_summary' =>  $add_to_summary[$i]
-						);
-					}
-				}
-			}
-		}
 
 		//Handling the patient procedure parts, if any procedure is added in the form, it will be stored in the patient_procedure table.
 		$patient_procedure_ids = $this->input->post('patient_procedure_id');

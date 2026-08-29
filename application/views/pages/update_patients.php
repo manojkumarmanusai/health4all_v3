@@ -214,10 +214,16 @@
         margin: 0;
     }
 	.procedure-item {
-    border: 1px solid #ddd;
-    padding: 15px;
-    margin-bottom: 20px;
-}
+    	border: 1px solid #ddd;
+    	padding: 15px;
+    	margin-bottom: 20px;
+	}
+	.procedure-text-area-readonly{
+		background-color:#EBEBE4;
+		min-width: 100%;
+		height:auto;
+  		box-sizing: border-box;
+	}
 </style>
 <script type="text/javascript" src="<?php echo base_url();?>assets/js/jquery.selectize.js"></script>
 <script type="text/javascript" src="<?php echo base_url();?>assets/js/jquery.timeentry.min.js"></script>
@@ -2395,11 +2401,11 @@ function openSmsModal(){
 		   value="-1">
 
 	<div class="row alt">
-		<div class="col-md-4">
+		<div class="col-md-2">
 			<label class="control-label">Procedure</label>
 		</div>
 
-		<div class="col-md-8">
+		<div class="col-md-4">
 			<select name="procedure[]" class="form-control">
 				<option value="">--SELECT--</option>
 
@@ -2414,11 +2420,11 @@ function openSmsModal(){
 	</div>
 
 	<div class="row alt">
-		<div class="col-md-4">
+		<div class="col-md-2">
 			<label class="control-label">Date, Time</label>
 		</div>
 
-		<div class="col-md-8">
+		<div class="col-md-5">
 			<input type="date"
 				   class="form-control date"
 				   name="procedure_date[]">
@@ -2430,11 +2436,11 @@ function openSmsModal(){
 	</div>
 
 	<div class="row alt">
-		<div class="col-md-4">
+		<div class="col-md-2">
 			<label class="control-label">Duration in minutes</label>
 		</div>
 
-		<div class="col-md-8">
+		<div class="col-md-5">
 			<input type="text"
 				   class="form-control"
 				   name="procedure_duration[]"
@@ -2443,7 +2449,7 @@ function openSmsModal(){
 	</div>
 
 	<div class="row alt">
-		<div class="col-md-4">
+		<div class="col-md-2">
 			<label class="control-label">Notes</label>
 		</div>
 
@@ -2454,7 +2460,7 @@ function openSmsModal(){
 	</div>
 
 	<div class="row alt">
-		<div class="col-md-4">
+		<div class="col-md-2">
 			<label class="control-label">Findings</label>
 		</div>
 
@@ -2465,7 +2471,7 @@ function openSmsModal(){
 	</div>
 
 	<div class="row alt">
-		<div class="col-md-4">
+		<div class="col-md-2">
 			<label class="control-label">Post Procedure Notes</label>
 		</div>
 
@@ -2503,10 +2509,10 @@ function openSmsModal(){
 					<div class="procedure-item">
 					<input type="hidden" name="patient_procedure_id[]" value="<?php echo !empty($patient_procedure->patient_procedure_id) ? $patient_procedure->patient_procedure_id : -1; ?>" />
 					<div class="row alt">
-						<div class="col-md-4">
+						<div class="col-md-2">
 							<label class="control-label">Procedure</label>
 						</div>
-					<div class="col-md-8">						
+					<div class="col-md-4">						
 						<select class="form-control" <?php if($f->edit==0 || !empty($patient_procedure->procedure_id))  echo ' disabled'; ?>>
 							<option value="" selected>--SELECT--</option>
 									<?php foreach($procedures as $procedure){ ?>
@@ -2521,31 +2527,31 @@ function openSmsModal(){
 						</div>
 					</div>	
 			<div class="row alt">
-				<div class="col-md-4">
+				<div class="col-md-2">
 					<label class="control-label">Date, Time</label>
 				</div>
-				<div class="col-md-8">
+				<div class="col-md-5">
 					<input type="date" class="form-control date" name="procedure_date[]" value="<?php echo date("Y-m-d", strtotime($patient_procedure->procedure_datetime)); ?>" <?php if($f->edit==0 || !empty($patient_procedure->procedure_datetime))  echo ' readonly'; ?> />
 					<input type="time" class="form-control" name="procedure_time[]" value="<?php echo date("H:i", strtotime($patient_procedure->procedure_datetime)); ?>" <?php if($f->edit==0 || !empty($patient_procedure->procedure_datetime))  echo ' readonly'; ?> />
 				</div>
 			</div>
 			<div class="row alt">
-				<div class="col-md-4">
+				<div class="col-md-2">
 					<label class="control-label">Duration in minutes</label>
 				</div>
-				<div class="col-md-8">
+				<div class="col-md-5">
 					<input type="text" class="form-control" name="procedure_duration[]" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))" value=<?php echo $patient_procedure->procedure_duration;?> <?php if($f->edit==0 || !empty($patient_procedure->procedure_duration)) echo ' readonly'; ?>  />
 				</div>
 			</div>
 			<div class="row alt">
-				<div class="col-md-4">
+				<div class="col-md-2">
 					<label class="control-label">Notes</label>
 				</div>
 
 				<div class="col-md-8">
 					<?php if ($f->edit == 0 || !empty($patient_procedure->procedure_note)) { ?>
 
-						<div  style="background-color:#EBEBE4;width:auto;height:auto;" class="form-control procedure_note_readonly">
+						<div  class="form-control procedure_note_readonly procedure-text-area-readonly">
 							<?php echo $patient_procedure->procedure_note; ?>
 						</div>
 
@@ -2563,13 +2569,13 @@ function openSmsModal(){
 			</div>
 
 			<div class="row alt">
-				<div class="col-md-4">
+				<div class="col-md-2">
 					<label class="control-label">Findings</label>
 				</div>
 				<div class="col-md-8">
 					<?php if ($f->edit == 0 || !empty($patient_procedure->procedure_findings)) { ?>
 
-						<div style="background-color:#EBEBE4;width:auto;height:auto;" class="form-control procedure_findings_readonly">
+						<div class="form-control procedure_findings_readonly procedure-text-area-readonly">
 							<?php echo $patient_procedure->procedure_findings; ?>
 						</div>
 
@@ -2588,13 +2594,13 @@ function openSmsModal(){
 				
 		
 			<div class="row alt">
-				<div class="col-md-4">
+				<div class="col-md-2">
 					<label class="control-label">Post Procedure Notes</label>
 				</div>
 				<div class="col-md-8">
 					<?php if ($f->edit == 0 || !empty($patient_procedure->post_procedure)) { ?>
 
-						<div style="background-color:#EBEBE4;width:auto;height:auto;" class="form-control post_procedure_notess_readonly">
+						<div class="form-control post_procedure_notess_readonly procedure-text-area-readonly">
 							<?php echo $patient_procedure->post_procedure; ?>
 						</div>
 
@@ -2617,7 +2623,7 @@ function openSmsModal(){
 
 			<div class="text-center add-procedure-container" style="margin:20px 0;">
 				<button type="button" class="btn btn-primary add-procedure">
-					Add Procedure
+					Add new procedure
 				</button>
 			</div>
 		
