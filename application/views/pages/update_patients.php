@@ -2545,7 +2545,7 @@ function openSmsModal(){
 				<div class="col-md-8">
 					<?php if ($f->edit == 0 || !empty($patient_procedure->procedure_note)) { ?>
 
-						<div  style="background-color:#EBEBE4;" class="form-control procedure_note_readonly">
+						<div  style="background-color:#EBEBE4;width:auto;height:auto;" class="form-control procedure_note_readonly">
 							<?php echo $patient_procedure->procedure_note; ?>
 						</div>
 
@@ -2569,7 +2569,7 @@ function openSmsModal(){
 				<div class="col-md-8">
 					<?php if ($f->edit == 0 || !empty($patient_procedure->procedure_findings)) { ?>
 
-						<div style="background-color:#EBEBE4;" class="form-control procedure_findings_readonly">
+						<div style="background-color:#EBEBE4;width:auto;height:auto;" class="form-control procedure_findings_readonly">
 							<?php echo $patient_procedure->procedure_findings; ?>
 						</div>
 
@@ -2594,7 +2594,7 @@ function openSmsModal(){
 				<div class="col-md-8">
 					<?php if ($f->edit == 0 || !empty($patient_procedure->post_procedure)) { ?>
 
-						<div style="background-color:#EBEBE4;" class="form-control post_procedure_notess_readonly">
+						<div style="background-color:#EBEBE4;width:auto;height:auto;" class="form-control post_procedure_notess_readonly">
 							<?php echo $patient_procedure->post_procedure; ?>
 						</div>
 
