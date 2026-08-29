@@ -631,35 +631,49 @@ class Register_model extends CI_Model{
 				$patient_data['alt_phone'] = $this->input->post('alt_phone');
 			}
 		}		
-		$mlc_duplicate = '';
-		foreach($this->mlc as $column){
-			if($this->input->post($column)){
-				$mlc_data[$column] = $this->input->post($column);
-				if($column == 'visit_id')
-					continue;
-				$mlc_duplicate .= "$column".'='."'$mlc_data[$column]'".', ';
-			}
-		}
-		$mlc_str = rtrim($mlc_duplicate,", ");
-		if(!!$this->input->post('clinical_note')) {			
-			$clinical_note = $this->input->post('clinical_note');
-			$note_date = $this->input->post('note_date');
-			$clinical_data = array();
-			for($i=0;$i<count($clinical_note);$i++){
-				if(!!$note_date[$i] && !!$clinical_note[$i])
-				// if(!!$note_date[$i]) { $note_date[$i]=date("Y-m-d H:i:s",strtotime($note_date[$i]));}
-				// else $note_date[$i] = 0;
-				// if($note_date[$i]!=0 && !!$clinical_note[$i])
-				{
-					$note_date[$i]=date("Y-m-d H:i:s",strtotime($note_date[$i]));
-					$clinical_data[]=array(
-						'clinical_note' => $clinical_note[$i],
-						'note_time' => $note_date[$i],
-						'visit_id' => $this->input->post('visit_id')
-					);
+		
+		if(!empty($this->input->post('update_add_to_summary_note_id'))) {            
+			$update_note_ids       = $this->input->post('update_add_to_summary_note_id');
+			$update_add_to_summary = $this->input->post('update_add_to_summary');
+			$update_clinical_data  = array();
+			
+			if(is_array($update_note_ids)){
+				for($i = 0; $i < count($update_note_ids); $i++){
+					if(!empty($update_note_ids[$i])) {
+						$update_clinical_data[] = array(
+							'note_id'        => $update_note_ids[$i],
+							'add_to_summary' => (!empty($update_add_to_summary[$i]) && $update_add_to_summary[$i] == 1) ? 1 : 0
+						);
+					}
+				}
+				// Batch update all rows in a single query
+				if(!empty($update_clinical_data)){
+					$this->db->update_batch('patient_clinical_notes', $update_clinical_data, 'note_id');
 				}
 			}
 		}
+		if(!empty($this->input->post('clinical_note'))) {            
+			$clinical_note = $this->input->post('clinical_note');
+			$note_date = $this->input->post('note_date');
+			$add_to_summary = $this->input->post('add_to_summary');
+			$clinical_data = array();
+			
+			if(is_array($clinical_note)){
+				for($i=0; $i < count($clinical_note); $i++){
+					$clean_note = trim(strip_tags($clinical_note[$i]));
+					if(!empty($clean_note) && !empty($note_date[$i])) {
+						$clinical_data[] = array(
+							'clinical_note' => $clinical_note[$i],
+							'note_time' => date("Y-m-d H:i:s", strtotime(str_replace('T', ' ', $note_date[$i]))),
+							'visit_id' => $this->input->post('visit_id'),
+							'user_id' =>  $user_data['user_id'],
+							'add_to_summary' =>  $add_to_summary[$i]
+						);
+					}
+				}
+			}
+		}
+	
 		if($this->input->post('prescription')){
 			$prescription = $this->input->post('prescription');
 			$prescription_data = array();
@@ -760,6 +774,16 @@ class Register_model extends CI_Model{
 			$this->db->update('patient', $patient_data);
 		}
 		// MLC Details
+		$mlc_duplicate = '';
+		foreach($this->mlc as $column){
+			if($this->input->post($column)){
+				$mlc_data[$column] = $this->input->post($column);
+				if($column == 'visit_id')
+					continue;
+				$mlc_duplicate .= "$column".'='."'$mlc_data[$column]'".', ';
+			}
+		}
+		$mlc_str = rtrim($mlc_duplicate,", ");
 		if($mlc_str != '' && sizeof($mlc_data) > 0){
 			$mlc_insert = $this->db->insert_string('mlc', $mlc_data).' ON DUPLICATE KEY UPDATE '.$mlc_str;
 			$this->db->query($mlc_insert);
@@ -1967,7 +1991,8 @@ hospital,department.department,unit.unit_id,unit.unit_name,area.area_id,area.are
 		patient_clinical_notes.clinical_note,
 		patient_clinical_notes.user_id,
 		patient_clinical_notes.note_time,
-		patient_clinical_notes.update_time
+		patient_clinical_notes.update_time,
+		patient_clinical_notes.add_to_summary,
 		,staff.first_name, staff.last_name')->from('patient_clinical_notes')
 		->join('user','patient_clinical_notes.user_id = user.user_id','left')
 		->join('staff','user.staff_id = staff.staff_id','left')

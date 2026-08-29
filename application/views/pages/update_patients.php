@@ -185,13 +185,125 @@
 			cursor: not-allowed;
 			opacity: 0.7;
 		}
+		.clinical-notes-view-table tbody tr:nth-of-type(odd) > td {
+        background-color: #ffffff;
+    }
+    .clinical-notes-view-table tbody tr:nth-of-type(even) > td {
+        background-color: #f4f8fb;
+    }
+    .clinical-notes-view-table tbody tr {
+        cursor: default;
+    }
+    .clinical-notes-view-table tbody tr:hover > td {
+        background-color: #dceefc !important;
+        transition: background-color 0.15s ease-in-out;
+    }
+    .clinical-notes-view-table tbody tr.row-selected > td {
+        background-color: #cfe2ff !important;
+    }
+    .clinical-notes-view-table th.col-checkbox,
+    .clinical-notes-view-table td.col-checkbox {
+        text-align: center;
+        vertical-align: middle;
+        width: 4%;
+    }
+    .clinical-notes-view-table td.col-checkbox input[type="checkbox"] {
+        cursor: pointer;
+        width: 16px;
+        height: 16px;
+        margin: 0;
+    }
 	
 </style>
 <script type="text/javascript" src="<?php echo base_url();?>assets/js/jquery.selectize.js"></script>
 <script type="text/javascript" src="<?php echo base_url();?>assets/js/jquery.timeentry.min.js"></script>
 <script type="text/javascript">
+	$(document).on('change', '.add_to_summary_checkbox_new', function () {
+    var isChecked = $(this).is(':checked');
+
+    $(this)
+        .siblings('.summary_hidden_input_new')
+        .val(isChecked ? '1' : '0');
+});
+	// Select / Deselect all
+$(document).on('change', '#select_all_summary', function () {
+    var isChecked = $(this).is(':checked');
+
+    $('.add_to_summary_checkbox').each(function () {
+        $(this).prop('checked', isChecked);
+
+        $(this)
+            .closest('td')
+            .find('.summary_hidden_input')
+            .val(isChecked ? '1' : '0');
+    });
+});
 
 
+// Individual checkbox changed
+$(document).on('change', '.add_to_summary_checkbox', function () {
+
+    var isChecked = $(this).is(':checked');
+
+    // Update hidden input for this row
+    $(this)
+        .closest('td')
+        .find('.summary_hidden_input')
+        .val(isChecked ? '1' : '0');
+
+    // Update Select All checkbox
+    updateSelectAllState();
+});
+
+
+// Update Select All checkbox based on individual checkboxes
+function updateSelectAllState() {
+
+    var total = $('.add_to_summary_checkbox').length;
+    var checked = $('.add_to_summary_checkbox:checked').length;
+
+    $('#select_all_summary').prop(
+        'checked',
+        total > 0 && total === checked
+    );
+}
+
+
+// Set initial Select All state when page loads
+$(document).ready(function () {
+    updateSelectAllState();
+});
+var global_transaction_id = "<?php 
+    // Check local variable, controller property, or highest transaction_key in session
+    if (isset($transaction_id) && !empty($transaction_id)) {
+        echo $transaction_id;
+    } elseif (isset($this->data['transaction_id']) && !empty($this->data['transaction_id'])) {
+        echo $this->data['transaction_id'];
+    } else {
+        // Find the active transaction key directly in session
+        $sess = $this->session->all_userdata();
+        $found_id = '1';
+        foreach ($sess as $k => $v) {
+            if (strpos($k, 'transaction_key_') === 0) {
+                $found_id = str_replace('transaction_key_', '', $k);
+            }
+        }
+        echo $found_id;
+    }
+?>";
+$.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+    if (options.type.toUpperCase() === "POST") {
+        if (typeof options.data === "string") {
+            if (options.data.indexOf("transaction_id=") === -1) {
+                options.data += (options.data ? "&" : "") + "transaction_id=" + encodeURIComponent(global_transaction_id);
+            }
+        } else if (options.data instanceof FormData) {
+            if (!options.data.has("transaction_id")) {
+                options.data.append("transaction_id", global_transaction_id);
+            }
+        }
+    }
+});
 var smsDetails = {};
 var user_details = <?php echo $user_details; ?>;
 var receiver = user_details.receiver;
@@ -200,18 +312,34 @@ $(function(){
 //	$("#from_date,#to_date").Zebra_DatePicker();
 });
 
-<!-- Scripts for printing output table -->
 function printDiv(i)
 {
-var content = document.getElementById(i);
-var pri = document.getElementById("ifmcontentstoprint").contentWindow;
-pri.document.open();
-pri.document.write(content.innerHTML);
-pri.document.close();
-pri.focus();
-pri.print();
-}
+    var content = document.getElementById(i);
+    var pri = document.getElementById("ifmcontentstoprint").contentWindow;
 
+    pri.document.open();
+
+    pri.document.write(`
+        <html>
+        <head>
+            <script src="<?php echo base_url(); ?>assets/js/jquery.min.js"><\/script>
+            <script src="<?php echo base_url(); ?>assets/js/jquery-barcode.min.js"><\/script>
+            <script src="<?php echo base_url(); ?>assets/js/qrcode.min.js"><\/script>
+            <script src="<?php echo base_url(); ?>assets/js/bootstrap.min.js"><\/script>
+        </head>
+        <body>
+            ${content.innerHTML}
+        </body>
+        </html>
+    `);
+
+    pri.document.close();
+
+    pri.onload = function() {
+        pri.focus();
+        pri.print();
+    };
+}
 function initiateSms(){
 	setSmsToNumber();
 	if(!smsDetails.to){
@@ -635,13 +763,14 @@ function openSmsModal(){
 									<thead>
 										<tr>
 											<th style="text-align:center">#</th>
-											<th style="text-align:center">Visit Date</th>
+											<th style="text-align:center">Visit Registration Date</th>
 											<th style="text-align:center">Hospital</th>
 											<th style="text-align:center">OP/IP No</th>
-											<th style="text-align:center">Department -- Unit Name</th>
+											<th style="text-align:center">Department - Unit Name</th>
 											<th style="text-align:center">Visit Name</th>
-											<th style="text-align:center">Discharge Date</th>
 											<th style="text-align:center">Appointment Date</th>
+											<th style="text-align:center">Outcome</th>
+											<th style="text-align:center">Outcome Date</th>
 										</tr>
 									</thead>
 									</div>
@@ -653,6 +782,7 @@ function openSmsModal(){
 
 											<td>
 												<?php echo form_open('register/update_patients',array('role'=>'form','id'=>'select_patient_'.$p->visit_id));?>
+												<input type="hidden" name="transaction_id" value="<?php echo (!empty($transaction_id)) ? $transaction_id : 1; ?>" />
 												<input type="text" class="sr-only" hidden value="<?php echo $p->visit_id;?>" form="select_patient_<?php echo $p->visit_id;?>" name="selected_patient" />
 												<input type="text" class="sr-only" hidden value="<?php echo $p->patient_id;?>" name="patient_id" />
 												<input type="text" class="sr-only" hidden value="<?php echo $p->hospital_id;?>" name="hospital_id" />
@@ -662,10 +792,11 @@ function openSmsModal(){
 											<td style="text-align:center"><?php echo date("d-M-Y",strtotime($p->admit_date));?></td>
 											<td style="text-align:center"><?php echo $p->hospital; ?></td>
 											<td style="text-align:center"><?php echo $p->visit_type." #".$p->hosp_file_no; ?></td>
-											<td style="text-align:center"><?php echo $p->department;?> -- <?php echo $p->unit_name;?></td>
+											<td style="text-align:center"><?php echo $p->department;?> - <?php echo $p->unit_name;?></td>
 											<td style="text-align:center"><?php echo $p->visit_name;?></td>
-											<td style="text-align:center"><?php if($p->outcome_date =="0000-00-00" || $p->outcome_date==" "){ echo " "; }else{ echo date("d-M-Y",strtotime($p->outcome_date)); } ?></td>
 											<td style="text-align:center"><?php if(isset($p->appointment_time) && $p->appointment_time!="") {echo date("j M Y", strtotime("$p->appointment_time"));} ?></td>
+											<td style="text-align:center"><?php if($p->outcome!='0') { echo $p->outcome; } ?></td>
+											<td style="text-align:center"><?php if($p->outcome_date =="0000-00-00" || $p->outcome_date==" "){ echo " "; }else{ echo date("d-M-Y",strtotime($p->outcome_date)); } ?></td>
 										</tr>
 										<?php $prev = $p;
 										} ?>
@@ -682,7 +813,11 @@ function openSmsModal(){
 			const accessibleStrIds = accessibleHospitalIds.map(String);
 
 			if (currentHospitalStr === hospitalIdStr) {
-				document.getElementById('select_patient_' + visitId).submit();
+				var $targetForm = $('#select_patient_' + visitId);
+				$targetForm.find('input[name="transaction_id"]').remove();
+				$targetForm.append('<input type="hidden" name="transaction_id" value="' + global_transaction_id + '" />');
+				$targetForm.submit();
+
 			} else if (accessibleStrIds.includes(hospitalIdStr)) {
 				alert("Please log into that hospital to access the patient.");
 			} else {
@@ -703,8 +838,7 @@ function openSmsModal(){
 		<div class="alert alert-info"><?php echo $msg;?></div>
 	<?php } ?>
 	<?php echo form_open('register/update_patients',array('class'=>'form-custom','role'=>'form', 'id'=>'update_patients')); ?>
-	<input type="hidden" class="sr-only" value="<?php echo $transaction_id;?>" name="transaction_id" />
-	<input type="hidden" name="patient_id" value="<?php echo $patients[0]->id; ?>">
+	<input type="hidden" class="sr-only" value="<?php echo (!empty($transaction_id)) ? $transaction_id : 1; ?>" name="transaction_id" />	<input type="hidden" name="patient_id" value="<?php echo $patients[0]->id; ?>">
 	<div class="panel panel-default">
 	<div class="panel-body">
 	  <!-- Nav tabs -->
@@ -758,7 +892,8 @@ function openSmsModal(){
 		<?php 
 			foreach($functions as $f){ 
 				if($f->user_function == "Clinical" && ($f->add==1 || $f->edit==1)) { ?>
-					<li role="presentation"><a href="#clinical" aria-controls="clinical" role="tab" data-toggle="tab"><i class="fa fa-stethoscope"></i>Clinical</a></li>
+					 <li role="presentation"><a href="#initial_assesment" aria-controls="initial_assesment" role="tab" data-toggle="tab"><i class="fa fa-stethoscope"></i>Initial Assessment</a></li>
+					 <li role="presentation"><a href="#clinical" aria-controls="clinical" role="tab" data-toggle="tab"><i class="fa fa-pencil-square-o"></i>Clinical notes</a></li>
 				<?php 
 				break;
 				 } 
@@ -897,21 +1032,38 @@ function openSmsModal(){
 		<script type="text/javascript" src="<?php echo base_url();?>assets/js/jquery.timeentry.min.js"></script>
 		<script type="text/javascript" src="<?php echo base_url();?>assets/js/bootbox.min.js"></script>
 		<iframe id="ifmcontentstoprint" style="height: 0px; width: 0px; position: absolute;" class="sr-only"></iframe>
+		<?php
+		$has_clinical_notes = false;
+
+				if (isset($visit_notes) && !empty($visit_notes)) {
+					foreach ($visit_notes as $note) {
+						if ($note->add_to_summary == 1) {
+							$has_clinical_notes = true;
+							break;
+						}
+					}
+				}
+		?>
 		<div class="sr-only" id="print-div" style="width:100%;height:100%;"> 
-			<?php $this->load->view('pages/print_layouts/patient_summary');?>
+			<?php $this->load->view('pages/print_layouts/patient_summary', ['has_clinical_notes' => $has_clinical_notes]); ?>		</div>
+		<div class="sr-only" id="print-div-without-diagnostics" style="width:100%;height:100%;"> 
+			<?php $this->load->view('pages/print_layouts/patient_summary_without_diagnostics',['has_clinical_notes' => $has_clinical_notes]);?>
+		</div>
+		<div class="sr-only" id="print-div-only-diagnostics" style="width:100%;height:100%;"> 
+			<?php $this->load->view('pages/print_layouts/patient_summary_only_diagnostics');?>
 		</div>
                 <div class="col-md-8"  >
-			<div class="row alt">
-                            <div class="col-md-4 col-xs-12 col-lg-3"  style="background: #FFA500;">
-                                <b>Patient ID: <?php echo $patient->patient_id; ?> </b>
-                            </div>
-			<div class="col-md-4 col-xs-12 col-lg-4">
-				<b><?php echo $patient->visit_type; ?> Number: </b><?php echo $patient->hosp_file_no;?>
-			</div>
-			<div class="col-md-4 col-xs-12 col-lg-5">
-				<b><?php if( $patient->visit_type == "IP") echo "Admit Date:"; else echo "Visit Date:";?></b>
-				<?php echo date("d-M-Y", strtotime($patient->admit_date)).", ".date("g:ia", strtotime($patient->admit_time));?>
-			</div>
+				<div class="row alt">
+				<div class="col-md-3 col-sm-3 col-xs-12" style="background: #FFA500;">
+					<b>Patient ID: <?php echo $patient->patient_id; ?> </b>
+				</div>
+				<div class="col-md-3 col-sm-3 col-xs-12">
+					<b><?php echo $patient->visit_type; ?> Number: </b><?php echo $patient->hosp_file_no;?>
+				</div>
+				<div class="col-md-6 col-sm-5 col-xs-12">
+					<b><?php if( $patient->visit_type == "IP") echo "Admit Date:"; else echo "Visit Registration Date:";?></b>
+					<?php echo date("d-M-Y", strtotime($patient->admit_date)).", ".date("g:ia", strtotime($patient->admit_time));?>
+				</div>
 			</div>
 			<div class="row alt">
                         <div class="col-md-4 col-xs-12 col-lg-4">
@@ -1856,129 +2008,151 @@ function openSmsModal(){
 		<?php 
 			foreach($functions as $f){ 
 				if($f->user_function == "Clinical" && ($f->add==1 || $f->edit==1)) { ?>
-		<div role="tabpanel" class="tab-pane" id="clinical">
+		<div role="tabpanel" class="tab-pane" id="initial_assesment">
             <div data-patient-quick-info></div>
             
             <div data-patient-clinical-details data-source="patient" data-edit-privilege="<?php echo $f->edit==1; ?>" data-readonly-if-not-empty="true"></div>
 
-			<div class="row alt">
-				<div class="col-md-12 col-xs-12">
-					<label class="control-label">
-						Symptoms
-					</label>
-					<textarea name="presenting_complaints" cols="60" class="form-control" placeholder="Symptoms/ Presenting Complaints" <?php if($f->edit==1  && empty($patient->presenting_complaints)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->presenting_complaints;?></textarea>
-				</div>
-			</div>
-			<div class="row alt">
-				<div class="col-md-12 col-xs-12">
-					<label class="control-label">
-						Past History
-					</label>
-					<textarea name="past_history" cols="60" class="form-control" placeholder="Past History" <?php if($f->edit==1  && empty($patient->past_history)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->past_history;?></textarea>
-				</div>
-			</div>
-			<div class="row alt">
-				<div class="col-md-12 col-xs-12">
-					<label class="control-label">
-						Family History
-					</label>
-					<textarea name="family_history" cols="60" class="form-control" placeholder="Family History" <?php if($f->edit==1  && empty($patient->family_history)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->family_history;?></textarea>
-				</div>
-			</div>
-			<div class="row alt">
-				<div class="col-md-12 col-xs-12">
-					<label class="control-label">
-						Clinical Findings
-					</label>
-					<textarea name="clinical_findings" cols="60" class="form-control" placeholder="Clinical Findings" <?php if($f->edit==1 && empty($patient->clinical_findings)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->clinical_findings;?></textarea>
-				</div>
-			</div>
-			<div class="row alt">
-				<div class="col-md-12 col-xs-12">
-					<label class="control-label">
-						CVS<img src="<?php echo base_url();?>assets/images/information-icon.png" class="prescription_table_heading_info_icons" title="Cardio Vascular System" data-toggle="tooltip"/>
-					</label>
-					<textarea name="cvs" cols="60" class="form-control" placeholder="Cardio Vascular System" <?php if($f->edit==1 && empty($patient->cvs)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->cvs;?></textarea>
-				</div>
-			</div>
-			<div class="row alt">
-				<div class="col-md-12 col-xs-12">
-					<label class="control-label">
-						RS<img src="<?php echo base_url();?>assets/images/information-icon.png" class="prescription_table_heading_info_icons" title="Respiratory System" data-toggle="tooltip"/>
-					</label>
-					<textarea name="rs" cols="40" class="form-control" placeholder="Respiratory System" <?php if($f->edit==1  && empty($patient->rs)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->rs;?></textarea>
-				</div>
-			</div>
-			<div class="row alt">
-				<div class="col-md-12 col-xs-12">
-					<label class="control-label">
-						PA<img src="<?php echo base_url();?>assets/images/information-icon.png" class="prescription_table_heading_info_icons" title="Per Abdomen" data-toggle="tooltip"/>
-					</label>
-					<textarea name="pa" cols="60" class="form-control" placeholder="Per Abdomen" <?php if($f->edit==1 && empty($patient->pa)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->pa;?></textarea>
-				</div>
-			</div>
-			<div class="row alt">
-				<div class="col-md-12 col-xs-12">
-					<label class="control-label">
-						CNS<img src="<?php echo base_url();?>assets/images/information-icon.png" class="prescription_table_heading_info_icons" title="Central Nervous System" data-toggle="tooltip"/>
-					</label>
-					<textarea name="cns" cols="40" class="form-control" placeholder="Central Nervous System" <?php if($f->edit==1 && empty($patient->cns)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->cns;?></textarea>
-				</div>
-			</div>
-			<div class="row alt">
-					<div class="col-md-12 col-xs-12">
-						<?php 
-							if(isset($visit_notes) && !!$visit_notes){ ?>
-						
-						<table class="table table-bordered table-striped">
-							<thead>
-								<tr>
-									<th colspan="4">Clinical Notes</th>
-								</tr>
-								<tr>
-									<th>#</th>
-									<th>Date</th>
-									<th>Note</th>
-									<th>Added by</th>
-								</tr>
-							</thead>
-							<tbody>
-							<?php
-							$i=1;
-							 foreach($visit_notes as $note){ ?>
-								<tr>
-									<td><?php echo $i++; ?></td>
-									<td><?php if($note->note_time!=0) echo date("d-M-Y g:iA",strtotime($note->note_time)); ?></td>
-									<td><?php echo $note->clinical_note;?></td>
-									<td><?php echo $note->first_name." ".$note->last_name;?></td>
-								</tr>
-								<?php  } ?>
-							</tbody>
-						</table>
-						<?php
-							}
-						?>
-						<table class="table table-bordered table-striped clinical-notes-table">
-							<thead>
-								<tr>
-									<th colspan="4">Add Clinical Notes</th>
-								</tr>
-							</thead>
-							<tbody class="daily_notes dynamic-row">
-								<tr>
-									<td style="width:80%!important;"><textarea rows="4" cols="60" name="clinical_note[]"  class="form-control add_clinical_note "></textarea></td>
-									<td >
-										<span class="note_date_label">Select Date and Time to save the note</span> &nbsp;&nbsp;&nbsp;&nbsp;
-										<input type="datetime-local" class="daily_notes_date form-control" name="note_date[]" />
+            <div class="row alt">
+                <div class="col-md-12 col-xs-12">
+                    <label class="control-label">Symptoms</label>
+                    <textarea name="presenting_complaints" cols="60" class="form-control" placeholder="Symptoms/ Presenting Complaints" <?php if($f->edit==1  && empty($patient->presenting_complaints)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->presenting_complaints;?></textarea>
+                </div>
+            </div>
+            <div class="row alt">
+                <div class="col-md-12 col-xs-12">
+                    <label class="control-label">Past History</label>
+                    <textarea name="past_history" cols="60" class="form-control" placeholder="Past History" <?php if($f->edit==1  && empty($patient->past_history)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->past_history;?></textarea>
+                </div>
+            </div>
+            <div class="row alt">
+                <div class="col-md-12 col-xs-12">
+                    <label class="control-label">Family History</label>
+                    <textarea name="family_history" cols="60" class="form-control" placeholder="Family History" <?php if($f->edit==1  && empty($patient->family_history)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->family_history;?></textarea>
+                </div>
+            </div>
+            <div class="row alt">
+                <div class="col-md-12 col-xs-12">
+                    <label class="control-label">Clinical Findings</label>
+                    <textarea name="clinical_findings" cols="60" class="form-control" placeholder="Clinical Findings" <?php if($f->edit==1 && empty($patient->clinical_findings)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->clinical_findings;?></textarea>
+                </div>
+            </div>
+            <div class="row alt">
+                <div class="col-md-12 col-xs-12">
+                    <label class="control-label">CVS<img src="<?php echo base_url();?>assets/images/information-icon.png" class="prescription_table_heading_info_icons" title="Cardio Vascular System" data-toggle="tooltip"/></label>
+                    <textarea name="cvs" cols="60" class="form-control" placeholder="Cardio Vascular System" <?php if($f->edit==1 && empty($patient->cvs)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->cvs;?></textarea>
+                </div>
+            </div>
+            <div class="row alt">
+                <div class="col-md-12 col-xs-12">
+                    <label class="control-label">RS<img src="<?php echo base_url();?>assets/images/information-icon.png" class="prescription_table_heading_info_icons" title="Respiratory System" data-toggle="tooltip"/></label>
+                    <textarea name="rs" cols="40" class="form-control" placeholder="Respiratory System" <?php if($f->edit==1  && empty($patient->rs)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->rs;?></textarea>
+                </div>
+            </div>
+            <div class="row alt">
+                <div class="col-md-12 col-xs-12">
+                    <label class="control-label">PA<img src="<?php echo base_url();?>assets/images/information-icon.png" class="prescription_table_heading_info_icons" title="Per Abdomen" data-toggle="tooltip"/></label>
+                    <textarea name="pa" cols="60" class="form-control" placeholder="Per Abdomen" <?php if($f->edit==1 && empty($patient->pa)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->pa;?></textarea>
+                </div>
+            </div>
+            <div class="row alt">
+                <div class="col-md-12 col-xs-12">
+                    <label class="control-label">CNS<img src="<?php echo base_url();?>assets/images/information-icon.png" class="prescription_table_heading_info_icons" title="Central Nervous System" data-toggle="tooltip"/></label>
+                    <textarea name="cns" cols="40" class="form-control" placeholder="Central Nervous System" <?php if($f->edit==1 && empty($patient->cns)) echo ''; else echo ' readonly'; ?> ><?php echo $patient->cns;?></textarea>
+                </div>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="clinical">
+		<div data-patient-quick-info></div>
+            <div class="row alt">
+                    <div class="col-md-12 col-xs-12">
+                        <?php 
+                            if(isset($visit_notes) && !!$visit_notes){ ?>
+                        
+                        <table class="table table-bordered clinical-notes-view-table">
+                            <thead>
+                                <tr>
+                                    <th colspan="6" class="text-center" style="background-color: #f5f5f5;">Clinical Notes</th>
+                                </tr>
+                                <tr>
+                                    <th style="width:5%">#</th>
+                                    <th style="width:18%">Date</th>
+                                    <th style="width:50%">Note</th>
+                                    <th style="width:13%">Added by</th>
+									<th style="width:10%"> Summary
+									<input type="checkbox" id="select_all_summary" title="Select/Deselect All"></th>
+									<th style="width:5%">Print</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <?php
+                            $i=1;
+                             foreach($visit_notes as $note){ ?>
+                                <tr>
+                                    <td><?php echo $i++; ?></td>
+                                    <td><?php if($note->note_time!=0) echo date("d-M-Y g:i A",strtotime($note->note_time)); ?></td>
+                                    <td><?php echo $note->clinical_note;?></td>
+                                    <td><?php echo $note->first_name." ".$note->last_name;?></td>    
+									<td class="text-center">
+										<!-- Note ID -->
+										<input type="hidden" name="update_add_to_summary_note_id[]" value="<?php echo $note->note_id; ?>" />
+                
+										<!-- 1. Hidden input carries the array name and submits 0 or 1 -->
+										<input type="hidden" name="update_add_to_summary[]" class="summary_hidden_input" value="<?php echo $note->add_to_summary; ?>" />
+										
+										<!-- 2. Checkbox has NO name; it only toggles the hidden input -->
+										<input type="checkbox" 
+											class="add_to_summary_checkbox" 
+											<?php if ($note->add_to_summary == 1) echo 'checked';?> />
 									</td>
-									<td style="padding-top:35px;">
-										<button  type="button" class="btn btn-sm btn-primary add_daily_note">Add</button>
-										<button  type="button" class="btn btn-sm btn-danger remove_daily_note">X</button>
-									</td>
-								</tr>
-							</tbody>
-						</table>
-				</div>
+									<td><button type="button" id="<?php echo 'printDoctorNotes' . $note->note_id; ?>" data-clinical-note="<?php echo $note->clinical_note;?>" data-added-by="<?php echo $note->first_name.' '.$note->last_name;?>"
+									data-note-time="<?php if($note->note_time!=0) echo date('d-M-Y g:i A',strtotime($note->note_time)); else echo '';?>"
+									class="btn btn-sm btn-primary" onclick="printDoctorNotes(this)" >Print</button></td> 
+			                            </tr>
+                                <?php
+								} ?>
+                            </tbody>
+                        </table>
+                        <?php
+                            }
+                        ?>
+                        <table class="table table-bordered table-striped clinical-notes-table">
+                            <thead>
+                                <tr>
+                                    <th colspan="4">Add Clinical Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody class="daily_notes dynamic-row">
+                                <tr>
+                                    <td style="width:80%!important;"><textarea rows="4" cols="60" name="clinical_note[]"  class="form-control add_clinical_note "></textarea></td>
+                                    <td >
+                                        <span class="note_date_label">Select Date and Time to save the note</span> &nbsp;&nbsp;&nbsp;&nbsp;
+                                        <input type="datetime-local" class="daily_notes_date form-control" value="<?php echo date('Y-m-d\TH:i'); ?>" name="note_date[]" />
+										<div style="margin-top: 8px;">
+										<label style="font-weight: normal; cursor: pointer;">
+											<!-- Only this hidden input posts to PHP -->
+											 <?php if( $patient->visit_type == "IP") { ?>
+												<input type="hidden" name="add_to_summary[]" class="summary_hidden_input_new" value="0" />
+												<input type="checkbox" class="add_to_summary_checkbox_new" value="1" />
+											<?php } else { ?>
+												<input type="hidden" name="add_to_summary[]" class="summary_hidden_input_new" value="1" />
+												<input type="checkbox" class="add_to_summary_checkbox_new" value="1" checked/>
+												<?php }?>	
+											<!-- Checkbox has NO name, only controls the hidden input above -->
+											
+											&nbsp;Add to patient summary
+										</label>
+										</div>
+                                    </td>
+									
+                                    <td style="padding-top:35px;">
+                                        <button  type="button" class="btn btn-sm btn-primary add_daily_note">Add</button>
+                                        <button  type="button" class="btn btn-sm btn-danger remove_daily_note">X</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                </div>
 				<script>
 					$(function(){
 						var initializeClassicEditor = function(element) {
@@ -1986,10 +2160,20 @@ function openSmsModal(){
 								.create(element, {
 									toolbar: ['bold', 'italic', 'bulletedList', 'numberedList']
 								})
+								.then(editor => {
+                                    editor.model.document.on('change:data', () => {
+                                        element.value = editor.getData();
+                                    });
+                                })
 								.catch(error => {
 									console.error(error);
 								});
 						};
+						function getCurrentLocalDateTime() {
+                            var now = new Date();
+                            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                            return now.toISOString().slice(0, 16);
+                        }
 						var toggleAddRemoveButton = function(parent){
 							$(parent).find(".add_daily_note").hide();
 							$(parent).find(".add_daily_note:first").show();
@@ -2006,6 +2190,14 @@ function openSmsModal(){
 							$newRow.find('input,textarea').each(function() {
 								$(this).val('').removeClass('error_field');
 							});
+							$newRow.find('.daily_notes_date').val(getCurrentLocalDateTime());
+							<?php if( $patient->visit_type == "IP") { ?>
+								$newRow.find('.add_to_summary_checkbox_new').prop('checked', false);
+								$newRow.find('.summary_hidden_input_new').prop('value', 0);
+							<?php } else { ?>
+								$newRow.find('.add_to_summary_checkbox_new').prop('checked', true);
+								$newRow.find('.summary_hidden_input_new').prop('value', 1);
+							<?php }?>
 							$newRow.find('span.error').remove();
 							$newRow.find('.ck').remove();
 							$tbody.append($newRow);
@@ -2056,7 +2248,9 @@ function openSmsModal(){
 						<?php
 						foreach($tests as $order) { 
 							if($order->order_id == $ord) { ?>
-						<tr <?php if($order->test_status == 2) { ?> onclick="$('#order_<?php echo $ord;?>').submit()" <?php } ?>>
+						<tr <?php if($order->test_status == 2) { ?> 
+							onclick="document.getElementById('order_<?php echo $order->order_id; ?>').submit();" 
+							<?php } ?>>
 								<td><?php echo $i++;?></td>
 								<td>
 									<?php echo form_open("diagnostics/view_results",array('role'=>'form','class'=>'form-custom','id'=>'order_'.$order->order_id)); ?>
@@ -2553,7 +2747,7 @@ function openSmsModal(){
 						if(!empty($patient->advise))
 						{
 					?>
-					   <div class="col-md-2"> <?php echo $patient->advise; ?> </div>
+					   <div class="col-md-2" style=width:max-content> <?php echo $patient->advise; ?> </div>
 					<?php	
 					    } else{
 					?>
@@ -2801,50 +2995,6 @@ function openSmsModal(){
 					<canvas id="hb" width="100" height="100"></canvas>
 				</div>				
 			</div>
-			<div class="row">
-			<div class="col-md-12">
-			
-			<table class="table table-striped table-bordered" id="detailed_table" >
-				<thead>
-					<tr>
-						<th>#</th>
-						<th>Date</th>
-						<th>Wt-Kg</th>
-						<th>SBP</th>
-						<th>DBP</th>
-						<th>Pulse</th>
-						<th>RBS</th>
-						<th>Hb</th>
-						<th>HbA1C</th>
-						<th>Doctor</th>
-						<th>Clinical Notes</th>
-						<th>Prescription</th>
-					</tr>
-				</thead>
-				<tbody><!-- tr td -->
-					<?php $i=1; foreach($vitals as $vital){ ?>
-					<tr>
-						<td><?php echo $i; ?></td>
-						<td><?php echo $vital->DATE; ?></td>
-						<td><?php echo $vital->Weight; ?></td>
-						<td><?php echo $vital->SBP; ?></td>
-						<td><?php echo $vital->DBP; ?></td>
-						<td><?php echo $vital->Pulse; ?></td>
-						<td><?php echo $vital->RBS; ?></td>
-						<td><?php echo $vital->Hb; ?></td>
-						<td><?php echo $vital->HbA1C; ?></td>
-						<td><?php echo $vital->Doctor; ?></td>	
-						<td><?php echo $vital->Clinical_Notes; ?></td>		
-						<td><?php echo $vital->Prescription; ?></td>		
-					</tr>
-					<?php $i++; } ?>
-				</tbody>
-				<tfoot><!-- tr td -->
-					
-				</tfoot>
-			</table>
-			</div>
-			</div>			
 		</div>
 		<!-- Insert New Tab here for Patient documents upload -->
 		<div role="tabpanel" class="tab-pane" id="docupload">
@@ -3046,14 +3196,17 @@ function openSmsModal(){
 		<input type="text" name="patient_id" id="patient_id" class="sr-only" value="<?php echo $patient->patient_id;?>" hidden readonly />
 		<input type="text" name="patient_number" class="sr-only" value="patient_number" hidden readonly />
 		<button type="button" class="btn btn-md btn-primary" value="Update" name="update_patient" onclick="onUpdatePatientSubmit(event)">Update</button>&emsp;
-		<button class="btn btn-md btn-warning" value="Print" type="button" onclick="printDiv('print-div')">Print Summary</button>
+		<button class="btn btn-md btn-warning" value="Print" type="button" onclick="printDiv('print-div-without-diagnostics')">Print summary</button>
+		<button class="btn btn-md btn-warning" value="Print" type="button" onclick="printDiv('print-div')">Print summary detailed</button>
+		<button class="btn btn-md btn-warning" value="Print" type="button" onclick="printDiv('print-div-only-diagnostics')">Print diagnostics</button>
+		<br/><br/>
 		<?php 
 			$visits = sizeof($patient_visits);
 		?>
 		<!-- <button class="btn btn-md btn-warning" value="Print" type="button" onclick="printDiv('print-div-all')">(<?php echo $visits; ?>)-Print Summary All Visits</button> -->
 		<!--<button type="button" class="btn btn-md btn-warning" onclick="printDiv('print-div_layout')">Print</button>
 		<button type="button" class="btn btn-md btn-warning" onclick="printDiv('a6-label')">Print Label</button> -->
-		<button type="button" class="btn btn-md btn-warning" id="printButton"> Print Selected Format</button>
+		<button type="button" class="btn btn-md btn-warning" id="printButton"> Print selected format</button>
 		<select class="form-control" name="add_on_print_layout_id" id="add_on_print_layout_id" style="width:265px;">
 			<option value="Select">Select Format</option>
 			<?php foreach($hosp_all_print_layouts as $layout_name) { ?>
@@ -3087,88 +3240,13 @@ function openSmsModal(){
 				});
 			});
 		</script>
-		<!-- <div id="printModal" class="modal fade" role="dialog" style='overflow:none'>
-			<div class="modal-dialog">
-				<div class="modal-content"> 
-					<div class="modal-header">
-						<h4 class="modal-title">Print Layout</h4>
-						<button type="button" class="close" data-dismiss="modal" style="margin-top:-20px!important;">&times;</button>
-					</div>
-					<div class="modal-body">
-						<iframe id="printFrame" style="width:100%; border: none;"></iframe>
-					</div>
-					<div class="modal-footer" style="position: absolute; bottom: 0; width: 100%; height: 60px;">
-						<button type="button" class="btn btn-primary" id="printLayout">Print</button>
-						<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-					</div>
-				</div>
-			</div>
-		</div> -->
-		<!-- <script>
-			function setModalDimensions(width, height) {
-				const modalDialog = document.querySelector('#printModal .modal-dialog');
-				const modalContent = document.querySelector('#printModal .modal-content');
-				const modalBody = document.querySelector('#printModal .modal-body');
-				modalDialog.style.maxWidth = width + 'px';
-				modalDialog.style.maxHeight = height + 'px';
-				modalContent.style.height = height + 'px';
-				modalBody.style.height = (height - 120) + 'px';
-				document.querySelector('#printFrame').style.height = '100%';
-			}
-			const modalWidth = 800;  
-			const modalHeight = 600;
-
-			$('#printModal').on('show.bs.modal', function () {
-				setModalDimensions(modalWidth, modalHeight);
-			});
-		</script> -->
 		<?php if ($add_sms_access==1){ ?>			
-			<button class="btn btn-md btn-warning" value="Print" type="button" onclick="openSmsModal()">Send SMS</button> 
+			<button class="btn btn-md btn-warning" type="button" onclick="openSmsModal()">Send SMS</button> 
 		<?php } ?>
 	</div>
 	</div>
 	</div>
-	<!-- <script>
-		const loggedInHospitalId = <?php echo json_encode($current_hospital_id); ?>;
-		const accessibleHospitalIds = <?php echo json_encode(isset($hospital_ids_by_user[$logged_user_id]) ? $hospital_ids_by_user[$logged_user_id] : []); ?>;
-
-		const hospitalIdStr = String(<?php echo $p->hospital_id; ?>);
-		const currentHospitalStr = String(loggedInHospitalId);
-		const accessibleStrIds = accessibleHospitalIds.map(String);
-
-		if (currentHospitalStr === hospitalIdStr) {
-			document.addEventListener('DOMContentLoaded', function() {
-				document.getElementById('select_patient_<?php echo $p->visit_id; ?>').submit();
-			});
-		} else if (accessibleStrIds.includes(hospitalIdStr)) {
-			alert("Please log into that hospital to access the patient.");
-		} else {
-			alert("You do not have access to that hospital.");
-		}
-	</script> -->
-	<!-- <script>
-		const loggedInHospitalId = <?php echo json_encode($current_hospital_id); ?>;
-		const accessibleHospitalIds = <?php echo json_encode(
-			isset($hospital_ids_by_user[$logged_user_id]) ? $hospital_ids_by_user[$logged_user_id] : []
-		); ?>;
-
-		const hospitalIdStr = String(<?php echo $patients[0]->hospital_id; ?>);
-		const currentHospitalStr = String(loggedInHospitalId);
-		const accessibleStrIds = accessibleHospitalIds.map(String);
-
-		document.addEventListener('DOMContentLoaded', function () {
-			if (currentHospitalStr === hospitalIdStr) {
-				document.getElementById('update_patients').submit();
-				break;
-			} else if (accessibleStrIds.includes(hospitalIdStr)) {
-				alert("Please log into that hospital to access the patient.");
-				window.location.href = "<?php echo base_url('register/update_patients'); ?>";
-			} else {
-				alert("You do not have access to that hospital.");
-				window.location.href = "<?php echo base_url('register/update_patients'); ?>";
-			}
-		});
-	</script> -->
+	
 	<script>
 		const loggedInHospitalId = <?php echo json_encode($current_hospital_id); ?>;
 		const accessibleHospitalIds = <?php echo json_encode(
@@ -3219,12 +3297,12 @@ function openSmsModal(){
 	<div class="container">
 	<table class="table table-bordered table-striped">
 		<thead>
-		<th>Date</th>
+		<th>Visit Registration Date</th>
 		<th>Hospital</th>
-		<th>Type</th>
-		<th>Number</th>
+		<th>OP/IP No</th>
 		<th>Department</th>
 		<th>Unit/Area</th>
+		<th>Appointment Date</th>
 		<th>Outcome</th>
 		<th>Outcome Date</th>
 		</thead>
@@ -3233,6 +3311,7 @@ function openSmsModal(){
 			<tr onclick="$('#select_visit_<?php echo $visit->visit_id;?>').submit()" style="cursor:pointer">
 				<td>
 					<?php echo form_open('register/update_patients',array('role'=>'form','id'=>'select_visit_'.$visit->visit_id));?>
+					<input type="hidden" name="transaction_id" value="<?php echo (!empty($transaction_id)) ? $transaction_id : 1; ?>" />
 					<input type="text" class="sr-only" hidden value="<?php echo $visit->visit_id;?>"  name="selected_patient" />
 					<input type="text" class="sr-only" hidden value="<?php echo $visit->patient_id;?>" name="patient_id" />
 					</form>
@@ -3241,11 +3320,13 @@ function openSmsModal(){
 				<?php echo date("d-M-Y",strtotime($visit->admit_date));?>
 				</td>
 				<td><?php echo $visit->hospital;?></td>
-				<td><?php echo $visit->visit_type;?></td>
-				<td><?php echo $visit->hosp_file_no;?></td>
+				<td><?php echo $visit->visit_type.' #'.$visit->hosp_file_no;?></td>
 				<td><?php echo $visit->department;?></td>
 				<td><?php echo $visit->unit_name."/".$visit->area_name;?></td>
-				<td><?php echo $visit->outcome;?></td>
+				<td><?php if(isset($visit->appointment_time) && $visit->appointment_time!="") 
+				{echo date("j M Y", strtotime("$visit->appointment_time"));} 
+				else {echo $visit->appointment_time="";}?></td>
+				<td><?php if ($visit->outcome!='0'){echo $visit->outcome;}?></td>
 				<td><?php if($visit->outcome_date!=0) echo date("d-M-Y",strtotime($visit->outcome_date));?></td>
 			</tr>
 		<?php } ?>
@@ -3989,7 +4070,16 @@ function openSmsModal(){
 		}	
 
 		if(flag){
-			$('form#update_patients').append('<input type="hidden" value="Update" name="update_patient" />').submit();
+			var $form = $('form#update_patients');
+        
+        // Remove existing duplicates if any, then append the authoritative value
+        $form.find('input[name="transaction_id"]').remove();
+        $form.find('input[name="update_patient"]').remove();
+
+        $form.append('<input type="hidden" name="transaction_id" value="' + global_transaction_id + '" />');
+        $form.append('<input type="hidden" name="update_patient" value="Update" />');
+
+        $form.submit();
 		}
 		
 	}
@@ -4590,30 +4680,70 @@ function openSmsModal(){
 </div>
 <?php } ?>
 <template id="template-patient-quick-info" type="text/html">
-    <div class="row alt">
-        <div class="col-md-4 col-xs-6">
-            <b>Patient ID: <?php echo $patient->patient_id; ?> </b>
-            <b>
+    <div class="row alt patient-info-bar">
+        <div class="patient-item">
+            <b>Patient ID:</b> <?php echo $patient->patient_id; ?> 
+            
                 <?php 
-                    echo $patient->first_name." ".$patient->last_name.", "; 
-                    if($patient->age_years!=0){ echo $patient->age_years." Yrs "; } 
-                    if($patient->age_months!=0){ echo $patient->age_months." Mths "; }
-                    if($patient->age_days!=0){ echo $patient->age_days." Days "; }
+                    echo $patient->first_name." ".$patient->last_name."/"; 
+                    if($patient->age_years!=0){ echo $patient->age_years." Yrs"; } 
+                    if($patient->age_months!=0){ echo $patient->age_months." Mths"; }
+                    if($patient->age_days!=0){ echo $patient->age_days." Days"; }
                     if($patient->age_years==0 && $patient->age_months == 0 && $patient->age_days==0) echo "0 Days";
                     echo "/".$patient->gender; 
                 ?> 
-            </b>
+            
         </div>
-        <div class="col-md-4 col-xs-6">
+        <div class="patient-item">
             <b><?php echo $patient->visit_type; ?> Number: </b><?php echo $patient->hosp_file_no;?>
         </div>
-        <div class="col-md-4 col-xs-6">
-            <b><?php if( $patient->visit_type == "IP") echo "Admit Date:"; else echo "Visit Date:";?></b>
+        <div class="patient-item">
+            <b><?php if( $patient->visit_type == "IP") echo "Admit Date:"; else echo "Visit Registration Date:";?></b>
             <?php echo date("d-M-Y", strtotime($patient->admit_date)).", ".date("g:i A", strtotime($patient->admit_time));?>
+        </div>
+        <div class="patient-item">
+            <b>Appointment Date:</b>
+            <?php if( $patient->appointment_time) { 
+                echo date("d-M-Y", strtotime($patient->appointment_time)).", ".date("g:i A", strtotime($patient->appointment_time)); 
+            } else {
+                echo "NA";
+            } ?>
         </div>
     </div>
 </template>
+
+<style>
+.patient-info-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;             /* Guarantees clean spacing between items */
+    width: 100%;
+    padding: 0 15px;
+}
+
+.patient-info-bar .patient-item {
+    white-space: nowrap;   /* Keeps each item strictly on 1 line */
+    flex-shrink: 0;        /* Prevents elements from shrinking into each other */
+}
+</style>
+<div class="sr-only" id="print-div-doctor-notes" style="width:100%;height:100%;"> 
+			<?php $this->load->view('pages/print_layouts/patient_doctor_notes');?>
+		</div>
 <script>
+	function printDoctorNotes(button) {
+	// 1. Extract values from the clicked button's dataset
+	const { clinicalNote, noteTime, addedBy } = button.dataset;
+
+	// 2. Inject them into the hidden print layout elements
+	document.getElementById('printClinicalNote').innerHTML = clinicalNote || '';
+	document.getElementById('printNoteTime').textContent = noteTime || '';
+	document.getElementById('printAddedBy').textContent = addedBy || '';
+
+	// 3. Trigger print
+	printDiv('print-div-doctor-notes');
+}
 $(function(){
 	$('[data-toggle="tooltip"]').tooltip();
 
@@ -4638,6 +4768,5 @@ function validateInput(event){
       }
 }
 </script>
-
 
 

@@ -1,4 +1,6 @@
-<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/font-awesome.min.css" media="all"> 		
+<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/font-awesome.min.css" media="all">
+		
+<script type="text/javascript" src="<?php echo base_url();?>assets/js/bootstrap.min.js"></script>
 
 		<?php $patient=$patients[0];?>
 		<style>
@@ -228,7 +230,8 @@
 				</tr>
 				<?php } ?>
 				</tbody>
-				<?php if(!empty($visit_notes) && ($has_clinical_notes == true)) { ?>
+				
+				<?php if(!empty($visit_notes)  && ($has_clinical_notes == true)) { ?>
 				<tr class="print-element" width="95%" >				
 					<td colspan="3"><b><u>Clinical Notes</u></b></td>
 				</tr>
@@ -261,138 +264,15 @@
 					</td>
 				</tr>
 				<?php } ?>
-				<?php 
-				if(isset($tests) && count($tests)>0){ ?>				
-				<tr  class="print-element" style="width:100%">
-					<td colspan="3"><b><u>Diagnositcs</u></b><br></td>
-				</tr>
-				<?php
-					$count=0;
-					$text_result_tests=array();
-					foreach($tests as $test){	
-						if($test->text_result==1 && $test->numeric_result == 0 && $test->binary_result == 0) {
-							$text_result_tests[] = $test;
-							array_splice($tests,$count,1);
-							$count--;
-						}
-						$count++;
-					}
-					if(count($text_result_tests)>0) { 
-				?>
-				<?php 
-							$o=array();
-							foreach($text_result_tests as $order){
-								$o[]=$order->order_id;
-							}
-							$o=array_unique($o);
-							$i=1;
-							foreach($o as $ord){	?>
-								<?php
-								foreach($text_result_tests as $order) { 
-									if($order->order_id == $ord) { ?>
-									<tr class="print-element" width="95%" >
-										<td colspan="3">
-											<span style="float:right"><?php echo $order->order_date_time;?></span>
-											<b>Test: </b> <?php echo $order->test_name;?><br />
-											<b>Report: </b><?php if($order->test_status==2 && $order->text_result == 1) echo $order->test_result_text; else echo "NA";?>
-										</td>
-									</tr>
-								<?php
-								}
-								} ?>
-							<?php } ?>
-				<?php } 
-				if(count($tests)>0){?>
-				
-				<tr class="print-element" width="95%" >
-					<td colspan="3">
-					<br>
-						<table id="table-prescription">
-						<tbody>
-							<tr>
-							<td style="width:3em;font-weight: bold;">#</td>
-							<td style="width:10em;font-weight: bold;">Order Date</td>
-							<td style="width:10em;font-weight: bold;">Specimen</td>
-							<td style="width:12em;font-weight: bold;">Test</td>
-							<td style="width:18em;font-weight: bold;">Value</td>
-							<td style="width:10em;font-weight: bold;">Normal Range</td>
-							</tr>
-							<?php 
-							$o=array();
-							foreach($tests as $order){
-								$o[]=$order->order_id;
-							}
-							$o=array_unique($o);
-							$i=1;
-							foreach($o as $ord){	?>
-								<?php
-								foreach($tests as $order) { 
-									if($order->order_id == $ord) {
-										if($order->test_status != 2) {
-											continue;
-										} ?>
-								<tr>
-										<td><?php echo $i++;?></td>
-										<td> 
-											<?php echo date("j-M-Y", strtotime("$order->order_date_time"));?>
-											</form>
-										</td>
-										<td><?php echo $order->specimen_type;?></td>
-										<td>
-										<?php
-															if($order->test_status==1){
-																$label="label-warning"; $status="Completed"; }
-															else if($order->test_status == 2){ $label = "label-success"; $status = "Approved"; }
-															else if($order->test_status == 0){ $label = "label-default"; $status = "Ordered"; }
-															echo '<label class="label '.$label.'" title="'.$status.'">'.$order->test_name."</label><br />";									
-											?>
-										</td>
-										<td>
-
-										<?php
-											$results = [];
-
-										
-												if ($order->numeric_result == 1) {
-													$results[] = trim($order->test_result . ' ' . $order->lab_unit);
-												}
-												if ($order->binary_result == 1) {
-													$results[] = $order->test_result_binary;
-												}
-												if ($order->text_result == 1) {
-													$results[] = $order->test_result_text;
-												}
-											
-
-											$validResults = array_filter($results);
-
-											echo !empty($validResults) ? implode(', ', $validResults) : 'NA';
-											?>
-										</td>
-										<td>
-											<?php 
-											$result = "";
-
-											if ($order->range_type == 1) $result .= "< " . $order->max ." ". $order->lab_unit;
-											else if ($order->range_type == 2) $result .= "> " . $order->min ." ". $order->lab_unit;
-											else if ($order->range_type == 3) $result .= $order->min . " - " . $order->max ." ". $order->lab_unit;
-											else if($order->range_type == 4) $result .= $order->range_text;
-                                
-                                			echo $result;
-											
-											?>
-										</td>
-								</tr>
-								<?php
-								}
-								} ?>
-							<?php } ?>
-						</tbody>
-						</table>	
+				<?php if(!!$patient->clinical_findings) { ?>
+				<tr class="print-element" width="95%">
+					<td colspan="3"  style="padding-top:5px">
+					<b>Clinical Findings</b>: <?php echo $patient->clinical_findings;?>
 					</td>
 				</tr>
-				<?php }
-				} ?>
+				<?php } ?>
+				</tbody>
+				
 				<?php if(!!$patient->final_diagnosis) { ?>
 				<tr class="print-element" width="95%" >
 					<td colspan="3">

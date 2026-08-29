@@ -105,10 +105,18 @@ class patient_model extends CI_Model {
             return false;
         }
         
-        $this->db->select('patient.patient_id, patient.first_name, patient.last_name, patient.phone, patient.blood_group, patient.gender, patient_visit.visit_id, patient_visit.hosp_file_no, patient_visit.provisional_diagnosis, patient_visit.final_diagnosis, patient_visit.hosp_file_no')
+        $this->db->select("patient.patient_id, patient.age_years,patient.age_months,patient.age_days,patient.first_name, patient.last_name, patient.phone, patient.blood_group, patient.gender, patient_visit.visit_id, patient_visit.hosp_file_no, patient_visit.provisional_diagnosis, patient_visit.final_diagnosis, patient_visit.hosp_file_no,
+        patient.address,
+		patient.place,
+		patient.country_code,
+        IF(father_name IS NULL OR father_name='',spouse_name,father_name) as parent_spouse,
+		district.district,
+        state.state",false)
                 ->from('patient')
                 ->join('patient_visit','patient_visit.patient_id = patient.patient_id','left')
-                ->where('patient.patient_id', "$patient_id");
+                ->join('district','patient.district_id=district.district_id','left')
+                ->join('state','district.state_id=state.state_id','left')
+                ->where('patient.patient_id', $patient_id);
         
         $query = $this->db->get();
         $result = $query->result();
