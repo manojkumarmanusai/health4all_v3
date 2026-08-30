@@ -673,7 +673,71 @@ class Register_model extends CI_Model{
 				}
 			}
 		}
-	
+
+		//Handling the patient procedure parts, if any procedure is added in the form, it will be stored in the patient_procedure table.
+		$patient_procedure_ids = $this->input->post('patient_procedure_id');
+		$procedures            = $this->input->post('procedure');
+		$procedure_dates       = $this->input->post('procedure_date');
+		$procedure_times       = $this->input->post('procedure_time');
+		$procedure_durations   = $this->input->post('procedure_duration');
+		$procedure_notes       = $this->input->post('procedure_note');
+		$procedure_findings    = $this->input->post('procedure_findings');
+		$post_procedure_notes  = $this->input->post('post_procedure_notes');
+
+		$visit_id = $this->input->post('visit_id');
+
+		$insert_data = array();
+		$update_data = array();
+
+		if (!empty($procedures) && is_array($procedures)) {
+			for ($i = 0; $i < count($procedures); $i++) {
+				// Skip entry if procedure, date, OR time is empty
+				if (
+					empty($procedures[$i]) || 
+					empty($procedure_dates[$i]) || 
+					empty($procedure_times[$i])
+				) {
+					continue;
+				}
+
+				// Combine date and time for datetime column
+				$date_str = trim($procedure_dates[$i]);
+				$time_str = trim($procedure_times[$i]);
+				$datetime = date('Y-m-d H:i:s', strtotime("$date_str $time_str"));
+
+				$row = array(
+					'visit_id'            => $visit_id,
+					'procedure_id'        => $procedures[$i],
+					'procedure_datetime'  => $datetime,
+					'procedure_duration'  => isset($procedure_durations[$i]) ? $procedure_durations[$i] : '',
+					'procedure_note'      => isset($procedure_notes[$i]) ? $procedure_notes[$i] : '',
+					'procedure_findings'  => isset($procedure_findings[$i]) ? $procedure_findings[$i] : '',
+					'post_procedure'      => isset($post_procedure_notes[$i]) ? $post_procedure_notes[$i] : ''
+				);
+
+				$current_proc_id = isset($patient_procedure_ids[$i]) ? (int)$patient_procedure_ids[$i] : -1;
+
+				if ($current_proc_id == -1 || $current_proc_id <= 0) {
+					// Insert new record
+					$insert_data[] = $row;
+				} else {
+					// Update existing record
+					$row['patient_procedure_id'] = $current_proc_id;
+					$update_data[] = $row;
+				}
+			}
+		}
+
+		// Persist new entries
+		if (!empty($insert_data)) {
+			$this->db->insert_batch('patient_procedure', $insert_data);
+		}
+
+		// Update existing entries using patient_procedure_id as key
+		if (!empty($update_data)) {
+			$this->db->update_batch('patient_procedure', $update_data, 'patient_procedure_id');
+		}
+
 		if($this->input->post('prescription')){
 			$prescription = $this->input->post('prescription');
 			$prescription_data = array();
@@ -1689,11 +1753,10 @@ class Register_model extends CI_Model{
 		patient_visit.temp_visit_id,
 		CONCAT(patient.first_name,' ',patient.last_name) name,
 		IF(father_name IS NULL OR father_name='',spouse_name,father_name) parent_spouse, mlc.visit_id,
-		mlc.mlc_number,mlc.mlc_number_manual,mlc.ps_name,mlc.brought_by,mlc.police_intimation,mlc.declaration_required,mlc.pc_number,mlc.mlc_id,occupation.occupation,id_proof_type, area_name,state.state_id,state.state,mainhospital.hospital,unit_name,unit.unit_id,code_title,area.area_id,district.district,department,patient.patient_id,patient_visit.visit_id, 		patient_procedure.procedure_duration, patient_procedure.procedure_note, patient_procedure.procedure_findings, visit_name.visit_name, CONCAT(staff.first_name,' ',staff.last_name) doctor_name,staff.ima_registration_number as ima_registration_number, staff.doctor_flag as doctor_flag, designation,IFNULL(visit_name.summary_header,0) as summary_header,visit_name.visit_name,referral.hospital as referral_by_hospital_name, appointment_time",false)
+		mlc.mlc_number,mlc.mlc_number_manual,mlc.ps_name,mlc.brought_by,mlc.police_intimation,mlc.declaration_required,mlc.pc_number,mlc.mlc_id,occupation.occupation,id_proof_type, area_name,state.state_id,state.state,mainhospital.hospital,unit_name,unit.unit_id,code_title,area.area_id,district.district,department,patient.patient_id,patient_visit.visit_id,  visit_name.visit_name, CONCAT(staff.first_name,' ',staff.last_name) doctor_name,staff.ima_registration_number as ima_registration_number, staff.doctor_flag as doctor_flag, designation,IFNULL(visit_name.summary_header,0) as summary_header,visit_name.visit_name,referral.hospital as referral_by_hospital_name, appointment_time",false)
 		->from('patient')
 		->join('patient_visit','patient.patient_id=patient_visit.patient_id','left')
-                ->join('visit_name','patient_visit.visit_name_id=visit_name.visit_name_id','left')
-                ->join('patient_procedure','patient_procedure.visit_id = patient_visit.visit_id','left')
+        ->join('visit_name','patient_visit.visit_name_id=visit_name.visit_name_id','left')
 		->join('department','patient_visit.department_id=department.department_id','left')
 		->join('district','patient.district_id=district.district_id','left')
 		->join('state','district.state_id=state.state_id','left')
@@ -2002,6 +2065,25 @@ hospital,department.department,unit.unit_id,unit.unit_name,area.area_id,area.are
 		return $query->result();
 	}
 	
+	function get_patient_procedures($visit_id) {
+		$this->db->select('patient_procedure.patient_procedure_id,
+			patient_procedure.procedure_plan_id,
+			patient_procedure.visit_id,
+			patient_procedure.procedure_id,
+			patient_procedure.procedure_datetime,
+			patient_procedure.procedure_duration,
+			patient_procedure.procedure_note,
+			patient_procedure.procedure_findings,
+			patient_procedure.post_procedure,
+			procedure.procedure_name')
+			->from('patient_procedure')
+			->join('procedure', 'patient_procedure.procedure_id = procedure.procedure_id')
+			->where('patient_procedure.visit_id', $visit_id)
+			->order_by('patient_procedure.procedure_datetime', 'desc');
+			
+		$query = $this->db->get();
+		return $query->result();
+	}
 	function transport(){
         if($this->input->post('transport_from_area')) $transport_from_area=$this->input->post('transport_from_area'); else $transport_from_area="";
         if($this->input->post('transport_to_area')) $transport_to_area=$this->input->post('transport_to_area'); else $transport_to_area="";

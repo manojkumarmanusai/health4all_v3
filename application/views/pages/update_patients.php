@@ -213,7 +213,17 @@
         height: 16px;
         margin: 0;
     }
-	
+	.procedure-item {
+    	border: 1px solid #ddd;
+    	padding: 15px;
+    	margin-bottom: 20px;
+	}
+	.procedure-text-area-readonly{
+		background-color:#EBEBE4;
+		min-width: 100%;
+		height:auto;
+  		box-sizing: border-box;
+	}
 </style>
 <script type="text/javascript" src="<?php echo base_url();?>assets/js/jquery.selectize.js"></script>
 <script type="text/javascript" src="<?php echo base_url();?>assets/js/jquery.timeentry.min.js"></script>
@@ -2183,6 +2193,55 @@ function openSmsModal(){
 						$('tbody.daily_notes').find('.add_clinical_note').each(function() {
 							initializeClassicEditor(this);
 						});
+
+						$('.procedure_note:not(#procedure-prototype .procedure_note)').each(function() {
+							initializeClassicEditor(this);
+						});
+
+						$('.procedure_findings:not(#procedure-prototype .procedure_findings)').each(function() {
+							initializeClassicEditor(this);
+						});
+
+						$('.post_procedure_notes:not(#procedure-prototype .post_procedure_notes)').each(function() {
+							initializeClassicEditor(this);
+						});
+						$(document).on('click', '.add-procedure', function() {
+
+							// Always clone the clean prototype
+							var $newProcedure = $('#procedure-prototype .procedure-item').clone();
+
+							// Make sure this is a new procedure
+							$newProcedure.addClass('new-procedure');
+
+							// Reset all values
+							$newProcedure.find('input, textarea').each(function() {
+								$(this).val('');
+								$(this).removeAttr('readonly');
+								$(this).prop('disabled', false);
+							});
+
+							$newProcedure.find('select')
+								.val('')
+								.prop('disabled', false)
+								.attr('name', 'procedure[]');
+
+							// New procedure ID
+							$newProcedure.find('input[name="patient_procedure_id[]"]')
+								.val('-1');
+
+							// Insert before Add Procedure button
+							$(this).closest('#procedures')
+								.find('.add-procedure-container')
+								.before($newProcedure);
+
+							// Initialize CKEditor only on this new block
+							$newProcedure.find(
+								'.procedure_note, .procedure_findings, .post_procedure_notes'
+							).each(function() {
+								initializeClassicEditor(this);
+							});
+
+							});
 						$(document).on('click', ".add_daily_note", function() {
 							var $tbody = $(this).parents('tbody.daily_notes');
 							var $row = $(this).parents('tr:eq(0)');
@@ -2325,148 +2384,257 @@ function openSmsModal(){
 				</table>
 				
 			<?php } else { ?>
-			No tests on the given date.
+					<br>
+						<center><b>No tests on the given date.</b></center>
+					<br>
 			<?php } ?>
 		</div>
 		<?php 
 				break;
 				 } }?>
+		<div id="procedure-prototype" style="display:none;">
+
+<div class="procedure-item new-procedure">
+
+	<input type="hidden"
+		   name="patient_procedure_id[]"
+		   value="-1">
+
+	<div class="row alt">
+		<div class="col-md-2">
+			<label class="control-label">Procedure</label>
+		</div>
+
+		<div class="col-md-4">
+			<select name="procedure[]" class="form-control">
+				<option value="">--SELECT--</option>
+
+				<?php foreach($procedures as $procedure){ ?>
+					<option value="<?php echo $procedure->procedure_id; ?>">
+						<?php echo $procedure->procedure_name; ?>
+					</option>
+				<?php } ?>
+
+			</select>
+		</div>
+	</div>
+
+	<div class="row alt">
+		<div class="col-md-2">
+			<label class="control-label">Date, Time</label>
+		</div>
+
+		<div class="col-md-5">
+			<input type="date"
+				   class="form-control date"
+				   name="procedure_date[]">
+
+			<input type="time"
+				   class="form-control"
+				   name="procedure_time[]">
+		</div>
+	</div>
+
+	<div class="row alt">
+		<div class="col-md-2">
+			<label class="control-label">Duration in minutes</label>
+		</div>
+
+		<div class="col-md-5">
+			<input type="text"
+				   class="form-control"
+				   name="procedure_duration[]"
+				   onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))">
+		</div>
+	</div>
+
+	<div class="row alt">
+		<div class="col-md-2">
+			<label class="control-label">Notes</label>
+		</div>
+
+		<div class="col-md-8">
+			<textarea class="form-control procedure_note"
+					  name="procedure_note[]"></textarea>
+		</div>
+	</div>
+
+	<div class="row alt">
+		<div class="col-md-2">
+			<label class="control-label">Findings</label>
+		</div>
+
+		<div class="col-md-8">
+			<textarea class="form-control procedure_findings"
+					  name="procedure_findings[]"></textarea>
+		</div>
+	</div>
+
+	<div class="row alt">
+		<div class="col-md-2">
+			<label class="control-label">Post Procedure Notes</label>
+		</div>
+
+		<div class="col-md-8">
+			<textarea class="form-control post_procedure_notes"
+					  name="post_procedure_notes[]"></textarea>
+		</div>
+	</div>
+
+	<div class="text-right procedure-close-container"
+		 style="margin-top:15px;">
+
+		<button type="button"
+				class="btn btn-danger close-procedure">
+			Close
+		</button>
+
+	</div>
+
+</div>
+
+</div>
 		<?php 
 			foreach($functions as $f){ 
 				if($f->user_function == "Procedures" && ($f->add==1 || $f->edit==1)) { ?>
-		<div role="tabpanel" class="tab-pane" id="procedures">
+				<div role="tabpanel" class="tab-pane" id="procedures">
                     <div data-patient-quick-info></div>
+					<?php if (empty($patient_procedures)) { ?>
+						<br>
+						<center><b>No Procedure found</b></center>
+						<br>
+					<?php  } ?>
+					<?php
+					foreach($patient_procedures as $patient_procedure){ ?>
+					<div class="procedure-item">
+					<input type="hidden" name="patient_procedure_id[]" value="<?php echo !empty($patient_procedure->patient_procedure_id) ? $patient_procedure->patient_procedure_id : -1; ?>" />
+					<div class="row alt">
+						<div class="col-md-2">
+							<label class="control-label">Procedure</label>
+						</div>
+					<div class="col-md-4">						
+						<select class="form-control" <?php if($f->edit==0 || !empty($patient_procedure->procedure_id))  echo ' disabled'; ?>>
+							<option value="" selected>--SELECT--</option>
+									<?php foreach($procedures as $procedure){ ?>
+											<option value="<?php echo $procedure->procedure_id;?>" <?php if ($procedure->procedure_id == $patient_procedure->procedure_id) echo "selected" ?>><?php echo $procedure->procedure_name; ?></option>
+									<?php } ?>
+						</select>
+						<?php if($f->edit==0 || !empty($patient_procedure->procedure_id)) { ?>
+							<input type="hidden"
+								name="procedure[]"
+								value="<?php echo $patient_procedure->procedure_id; ?>">
+						<?php } ?>
+						</div>
+					</div>	
 			<div class="row alt">
-				<div class="col-md-4">
-					<label class="control-label">Procedure</label>
-				</div>
-				<div class="col-md-8">
-                                    <?php if($f->edit==1 && empty($patient->procedure_name)){ ?>
-					<select name="procedure" class="form-control">
-					<option value="" selected>--SELECT--</option>
-					<?php foreach($procedures as $procedure){ ?>
-						<option value="<?php echo $procedure->procedure_id;?>"><?php echo $procedure->procedure_name;?></option>
-					<?php } ?>
-					</select>
-                                    <?php }else{
-                                    foreach($procedures as $procedure){
-                                        if($procedure->procedure_id==$patient->procedure_id){
-                                            echo "<input type='text' id='procedure_id' class='form-control' value='$procedure->procedure_name' disabled/>";
-                                            echo "<input type='hidden' name='procedure' id='procedure_id' class='form-control' value='$procedure->procedure_name'/>";
-                                        }
-                                    }
-                                } ?>
-				</div>
-			</div>
-			<div class="row alt">
-				<div class="col-md-4">
+				<div class="col-md-2">
 					<label class="control-label">Date, Time</label>
 				</div>
-				<div class="col-md-8">
-					<input type="text" class="form-control date" name="procedure_date"  <?php if($f->edit==1 && empty($patient->procedure_date)) echo ''; else echo ' readonly'; ?> />
-					<input type="text" class="form-control time" name="procedure_time"  <?php if($f->edit==1 && empty($patient->procedure_time)) echo ''; else echo ' readonly'; ?> />
+				<div class="col-md-5">
+					<input type="date" class="form-control date" name="procedure_date[]" value="<?php echo date("Y-m-d", strtotime($patient_procedure->procedure_datetime)); ?>" <?php if($f->edit==0 || !empty($patient_procedure->procedure_datetime))  echo ' readonly'; ?> />
+					<input type="time" class="form-control" name="procedure_time[]" value="<?php echo date("H:i", strtotime($patient_procedure->procedure_datetime)); ?>" <?php if($f->edit==0 || !empty($patient_procedure->procedure_datetime))  echo ' readonly'; ?> />
 				</div>
 			</div>
 			<div class="row alt">
-				<div class="col-md-4">
-					<label class="control-label">Duration</label>
+				<div class="col-md-2">
+					<label class="control-label">Duration in minutes</label>
 				</div>
-				<div class="col-md-8">
-					<input type="text" class="form-control" name="procedure_duration" value=<?php echo '"'.$patient->procedure_duration.'"';?> <?php if($f->edit==1 && empty($patient->procedure_duration)) echo ''; else echo ' readonly'; ?>  />
+				<div class="col-md-5">
+					<input type="text" class="form-control" name="procedure_duration[]" onkeypress="return (event.charCode !=8 && event.charCode ==0 || (event.charCode >= 48 && event.charCode <= 57))" value=<?php echo $patient_procedure->procedure_duration;?> <?php if($f->edit==0 || !empty($patient_procedure->procedure_duration)) echo ' readonly'; ?>  />
 				</div>
 			</div>
 			<div class="row alt">
-				<div class="col-md-4">
+				<div class="col-md-2">
 					<label class="control-label">Notes</label>
 				</div>
+
 				<div class="col-md-8">
-					<textarea type="text" class="form-control" name="procedure_note" value=<?php echo '"'.$patient->procedure_note.'"';?><?php if($f->edit==1 && empty($patient->procedure_note)) echo ''; else echo ' readonly'; ?> ></textarea>
+					<?php if ($f->edit == 0 || !empty($patient_procedure->procedure_note)) { ?>
+
+						<div  class="form-control procedure_note_readonly procedure-text-area-readonly">
+							<?php echo $patient_procedure->procedure_note; ?>
+						</div>
+
+						<input type="hidden"
+							name="procedure_note[]"
+							value="<?php echo htmlspecialchars($patient_procedure->procedure_note, ENT_QUOTES, 'UTF-8'); ?>">
+
+					<?php } else { ?>
+
+						<textarea class="form-control procedure_note"
+								name="procedure_note[]"><?php echo $patient_procedure->procedure_note; ?></textarea>
+
+					<?php } ?>
 				</div>
 			</div>
+
 			<div class="row alt">
-				<div class="col-md-4">
+				<div class="col-md-2">
 					<label class="control-label">Findings</label>
 				</div>
 				<div class="col-md-8">
-					<textarea type="text" class="form-control" name="procedure_findings" value=<?php echo '"'.$patient->procedure_findings.'"';?> <?php if($f->edit==1 && empty($patient->procedure_findings)) echo ''; else echo ' readonly'; ?> ></textarea>
+					<?php if ($f->edit == 0 || !empty($patient_procedure->procedure_findings)) { ?>
+
+						<div class="form-control procedure_findings_readonly procedure-text-area-readonly">
+							<?php echo $patient_procedure->procedure_findings; ?>
+						</div>
+
+						<input type="hidden"
+							name="procedure_findings[]"
+							value="<?php echo htmlspecialchars($patient_procedure->procedure_findings, ENT_QUOTES, 'UTF-8'); ?>">
+
+					<?php } else { ?>
+
+						<textarea class="form-control procedure_findings"
+								name="procedure_findings[]"><?php echo $patient_procedure->procedure_findings; ?></textarea>
+
+					<?php } ?>
 				</div>
 			</div>
+				
+		
 			<div class="row alt">
-				<div class="col-md-4">
+				<div class="col-md-2">
 					<label class="control-label">Post Procedure Notes</label>
 				</div>
 				<div class="col-md-8">
-					<textarea type="text" class="form-control" name="post_procedure_notes" <?php if($f->edit==1 && empty($patient->post_procedure_notes)) echo ''; else echo ' readonly'; ?> ></textarea>
+					<?php if ($f->edit == 0 || !empty($patient_procedure->post_procedure)) { ?>
+
+						<div class="form-control post_procedure_notess_readonly procedure-text-area-readonly">
+							<?php echo $patient_procedure->post_procedure; ?>
+						</div>
+
+						<input type="hidden"
+							name="post_procedure_notes[]"
+							value="<?php echo htmlspecialchars($patient_procedure->post_procedure, ENT_QUOTES, 'UTF-8'); ?>">
+
+					<?php } else { ?>
+
+						<textarea class="form-control post_procedure_notes"
+								name="post_procedure_notes[]"><?php echo $patient_procedure->post_procedure; ?></textarea>
+
+					<?php } ?>
 				</div>
 			</div>
-			<?php 
-			if(isset($tests) && count($tests)>0){ ?>
-				<table class="table table-bordered table-striped table-hover" id="table-sort">
-				<thead>
-					<th style="width:3em">#</th>
-					<th style="width:10em">Order ID</th>
-					<th style="width:10em">Order Date</th>
-					<th style="width:10em">Specimen</th>
-					<th style="width:12em">Test</th>
-					<th style="width:10em">Value</th>
-					<th style="width:5em">Report - Binary</th>
-					<th style="width:10em">Report</th>
-				</thead>
-				<tbody>
-					<?php 
-					$o=array();
-					foreach($tests as $order){
-						$o[]=$order->order_id;
-					}
-					$o=array_unique($o);
-					$i=1;
-					foreach($o as $ord){	?>
-						<?php
-						foreach($tests as $order) { 
-							if($order->order_id == $ord) { ?>
-						<tr <?php if($order->test_status == 2) { ?> onclick="$('#order_<?php echo $ord;?>').submit()" <?php } ?>>
-								<td><?php echo $i++;?></td>
-								<td>
-									<?php echo form_open("diagnostics/view_results",array('role'=>'form','class'=>'form-custom','id'=>'order_'.$order->order_id)); ?>
-									<?php echo $order->order_id;?>
-									<input type="hidden" class="sr-only" name="order_id" value="<?php echo $order->order_id;?>" />
-									</form>
-								</td>
-								<td>
-									<?php echo date("d-M-Y",strtotime($order->order_date_time));?>
-								</td>
-								<td><?php echo $order->specimen_type;?></td>
-								<td>
-								<?php
-													if($order->test_status==1){
-													$label="label-warning"; $status="Completed"; }
-													else if($order->test_status == 2){ $label = "label-success"; $status = "Approved"; }
-													else if($order->test_status == 0){ $label = "label-default"; $status = "Ordered"; }
-													echo '<label class="label '.$label.'" title="'.$status.'">'.$order->test_name."</label><br />";									
-								?>
-								</td>
-								<td>
-									<?php if($order->test_status==2 && $order->numeric_result == 1) echo $order->test_result." ".$order->lab_unit; else echo "NA";?>
-								</td>
-								<td>
-									<?php if($order->test_status==2 && $order->binary_result == 1) echo $order->test_result_binary; else echo "NA";?>
-								</td>
-								<td>
-									<?php if($order->test_status==2 && $order->text_result == 1) echo $order->test_result_text; else echo "NA";?>
-								</td>
-						</tr>
-						<?php
-						}
-						} ?>
-					<?php } ?>
-				</tbody>
-				</table>
-				
+			</div>
 			<?php } ?>
+			
+			
+
+			<div class="text-center add-procedure-container" style="margin:20px 0;">
+				<button type="button" class="btn btn-primary add-procedure">
+					Add new procedure
+				</button>
+			</div>
+		
+		
 		</div>
-		<?php  
-				break;
-				} }?>
+		<?php 		break; ?>
+				
+				<?php	 } 
+				
+				}?>
+				
 		<?php 
 			foreach($functions as $f){ 
 				if($f->user_function == "Prescription" && ($f->add==1 || $f->edit==1)) { ?>
@@ -4680,7 +4848,7 @@ function openSmsModal(){
 </div>
 <?php } ?>
 <template id="template-patient-quick-info" type="text/html">
-    <div class="row alt patient-info-bar">
+    <div class="alt patient-info-bar">
         <div class="patient-item">
             <b>Patient ID:</b> <?php echo $patient->patient_id; ?> 
             
@@ -4711,21 +4879,20 @@ function openSmsModal(){
         </div>
     </div>
 </template>
-
 <style>
 .patient-info-bar {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: 18px;             /* Guarantees clean spacing between items */
+    justify-content: center;
+    gap: 20px 50px;
     width: 100%;
+    box-sizing: border-box;
     padding: 0 15px;
 }
 
 .patient-info-bar .patient-item {
-    white-space: nowrap;   /* Keeps each item strictly on 1 line */
-    flex-shrink: 0;        /* Prevents elements from shrinking into each other */
+    min-width: 0;
 }
 </style>
 <div class="sr-only" id="print-div-doctor-notes" style="width:100%;height:100%;"> 
@@ -4767,6 +4934,13 @@ function validateInput(event){
       	event.preventDefault();
       }
 }
+
+
+$(document).on('click', '.close-procedure', function() {
+
+$(this).closest('.new-procedure').remove();
+
+});
 </script>
 
 
