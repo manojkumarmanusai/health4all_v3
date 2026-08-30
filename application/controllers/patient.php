@@ -371,7 +371,7 @@ function update_patient(){
             {
                 $this->data['patient_visits_edit_history'] = $this->patient_model->get_patient_visits_edit_history();
                 $this->data['patient_info'] = $this->patient_model->get_patient_info();
-                
+                $this->data['patient_info'] = $this->data['patient_info'][0];
             }
             $this->load->view('pages/edit_patient_visits',$this->data);	
             $this->load->view('templates/footer');
