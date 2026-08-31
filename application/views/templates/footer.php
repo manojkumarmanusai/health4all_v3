@@ -3,13 +3,14 @@
 </div>
 <!-- End Wrap -->
 
-<div id="footer">
+<div id="footer" style="clear:both">
 <?php 
 		$uc_url = "";
 		if(isset($defaultsConfigs)){
 			foreach($defaultsConfigs as $default){
 				if ($default->default_id == "uc_url")
 					$uc_url = $default->value;
+					break;
 			}
 		}
         ?>                        
