@@ -2115,9 +2115,23 @@ function openSmsModal(){
 											class="add_to_summary_checkbox" 
 											<?php if ($note->add_to_summary == 1) echo 'checked';?> />
 									</td>
-									<td><button type="button" id="<?php echo 'printDoctorNotes' . $note->note_id; ?>" data-clinical-note="<?php echo $note->clinical_note;?>" data-added-by="<?php echo $note->first_name.' '.$note->last_name;?>"
-									data-note-time="<?php if($note->note_time!=0) echo date('d-M-Y g:i A',strtotime($note->note_time)); else echo '';?>"
-									class="btn btn-sm btn-primary" onclick="printDoctorNotes(this)" >Print</button></td> 
+									<td>
+										<button type="button" 
+												id="printDoctorNotes<?php echo htmlspecialchars(!empty($note->note_id) ? $note->note_id : '', ENT_QUOTES, 'UTF-8'); ?>" 
+												data-clinical-note="<?php echo htmlspecialchars(!empty($note->clinical_note) ? $note->clinical_note : '', ENT_QUOTES, 'UTF-8'); ?>" 
+												data-added-by="<?php 
+													$firstName = !empty($note->first_name) ? $note->first_name : '';
+													$lastName = !empty($note->last_name) ? $note->last_name : '';
+													echo htmlspecialchars(trim($firstName . ' ' . $lastName), ENT_QUOTES, 'UTF-8'); 
+												?>"
+												data-note-time="<?php 
+													echo (!empty($note->note_time) && strtotime($note->note_time)) ? date('d-M-Y g:i A', strtotime($note->note_time)) : ''; 
+												?>"
+												class="btn btn-sm btn-primary" 
+												onclick="printDoctorNotes(this)">
+											Print
+										</button>
+									</td>
 			                            </tr>
                                 <?php
 								} ?>
@@ -2915,7 +2929,7 @@ function openSmsModal(){
 						if(!empty($patient->advise))
 						{
 					?>
-					   <div class="col-md-2" style=width:max-content> <?php echo $patient->advise; ?> </div>
+					   <div class="col-md-2" style=width:80%> <?php echo $patient->advise; ?> </div>
 					<?php	
 					    } else{
 					?>
@@ -4885,7 +4899,7 @@ function openSmsModal(){
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: 20px 50px;
+    gap: 3px 33px;
     width: 100%;
     box-sizing: border-box;
     padding: 0 15px;
