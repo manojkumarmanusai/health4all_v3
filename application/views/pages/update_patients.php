@@ -4899,7 +4899,7 @@ function openSmsModal(){
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: 3px 33px;
+    gap: 3px 20px;
     width: 100%;
     box-sizing: border-box;
     padding: 0 15px;
