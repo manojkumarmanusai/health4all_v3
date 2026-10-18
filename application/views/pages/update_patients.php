@@ -4965,7 +4965,7 @@ function printProcedure(button) {
     const { 
         patientProcedureId,
         procedureId,
-		procedureName,
+        procedureName,
         procedureNote,
         procedureFindings,
         postProcedure,
@@ -4974,18 +4974,43 @@ function printProcedure(button) {
         procedureTime 
     } = button.dataset;
 
-    // 2. Inject into the hidden print layout elements
+    // Helper: strip trailing blank tags/nbsp and remove all HTML tags to check if it's truly empty
+    const cleanContent = (html) => {
+        if (!html) return '';
+        return html
+            .replace(/(<p>(&nbsp;|\s)*<\/p>\s*)+$/gi, '')
+            .trim();
+    };
+
+    // Helper: check if HTML content has actual text/content (not just empty tags like <p><br></p>)
+    const hasContent = (html) => {
+        if (!html) return false;
+        const textOnly = html.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, '').trim();
+        return textOnly.length > 0;
+    };
+
+    // 2. Inject notes & toggle wrappers based on content presence
     const noteEl = document.getElementById('printProcedureNote');
-    if (noteEl) noteEl.innerHTML = (procedureNote || '').replace(/\n/g, '<br>');
+    const noteWrapper = document.getElementById('wrapperPrintProcedureNote');
+    const cleanedNote = cleanContent(procedureNote);
+    if (noteEl) noteEl.innerHTML = cleanedNote;
+    if (noteWrapper) noteWrapper.style.display = hasContent(cleanedNote) ? 'block' : 'none';
 
     const findingsEl = document.getElementById('printProcedureFindings');
-    if (findingsEl) findingsEl.innerHTML = (procedureFindings || '').replace(/\n/g, '<br>');
+    const findingsWrapper = document.getElementById('wrapperPrintProcedureFindings');
+    const cleanedFindings = cleanContent(procedureFindings);
+    if (findingsEl) findingsEl.innerHTML = cleanedFindings;
+    if (findingsWrapper) findingsWrapper.style.display = hasContent(cleanedFindings) ? 'block' : 'none';
 
     const postNotesEl = document.getElementById('printPostProcedureNotes');
-    if (postNotesEl) postNotesEl.innerHTML = (postProcedure || '').replace(/\n/g, '<br>');
+    const postNotesWrapper = document.getElementById('wrapperPrintPostProcedureNotes');
+    const cleanedPost = cleanContent(postProcedure);
+    if (postNotesEl) postNotesEl.innerHTML = cleanedPost;
+    if (postNotesWrapper) postNotesWrapper.style.display = hasContent(cleanedPost) ? 'block' : 'none';
 
-	const printProcedureNameEl = document.getElementById('printProcedureName');
-    if (printProcedureNameEl) printProcedureNameEl.textContent =(procedureName || '').replace(/\n/g, '<br>');
+    // 3. Metadata fields
+    const printProcedureNameEl = document.getElementById('printProcedureName');
+    if (printProcedureNameEl) printProcedureNameEl.textContent = procedureName || '';
 
     const durationEl = document.getElementById('printProcedureDuration');
     if (durationEl) durationEl.textContent = duration ? `${duration} mins` : '';
@@ -4996,7 +5021,7 @@ function printProcedure(button) {
     const addedByEl = document.getElementById('printProcedureAddedBy');
     if (addedByEl) addedByEl.textContent = addedBy || '';
 
-    // 3. Trigger your print function
+    // 4. Trigger print
     printDiv('print-div-patient-procedure');
 }
 $(function(){
