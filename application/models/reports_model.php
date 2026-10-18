@@ -4282,7 +4282,9 @@ function get_icd_detail_count($icdchapter,$icdblock,$icd_10,$department,$unit,$a
 			$this->db->select("count(*) as count",false)
 			->join('procedure','procedure.procedure_id = patient_procedure.procedure_id')
 			->join('patient_visit','patient_visit.visit_id = patient_procedure.visit_id')
+			->join('patient','patient_visit.patient_id = patient.patient_id')
 			->join('visit_name','patient_visit.visit_name_id = visit_name.visit_name_id','left')
+			->join('patient_followup','patient_visit.patient_id = patient_followup.patient_id','left')
 			->join('department','patient_visit.department_id = department.department_id','left');
 			$this->db->from('patient_procedure');
 			$this->db->where('patient_visit.hospital_id',$hospital['hospital_id']);

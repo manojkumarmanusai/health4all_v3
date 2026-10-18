@@ -288,6 +288,27 @@ if($function->user_function== "Bloodbank"){ ?>
 }
 ?>
 <!--Diagnostic tab ends-->
+<!--Procedure tab -->
+<?php
+foreach($this->data['functions'] as $function){
+	if( $function->user_function=="Procedures"){
+		$procedures=1;
+		?>
+		<button class="accordion">Procedures</button>
+<?php			break;}
+}
+
+if($procedures==1) { ?>
+<div class="panel_accordion" style="padding-right:18px!important;">
+
+<button class="col-xs-12 col-sm-4 col-md-4 col-lg-4"> 
+	<a class="anchor_style" href="<?php echo base_url()."reports/procedure_summary";?>">Procedure Summary</a>
+</button>
+
+</div> <?php
+}
+?>
+<!--Procedure tab ends-->
 
 <!--Sanitation tab -->
 <?php
@@ -424,24 +445,4 @@ if ($function->user_function == "duplicate_patient_id_merge") { ?>
 	}
 ?>
 
-<!--Procedure tab -->
-<?php
-foreach($this->data['functions'] as $function){
-	if( $function->user_function=="Procedures"){
-		$procedures=1;
-		?>
-		<button class="accordion">Procedures</button>
-<?php			break;}
-}
 
-if($procedures==1) { ?>
-<div class="panel_accordion" style="padding-right:18px!important;">
-
-<button class="col-xs-12 col-sm-4 col-md-4 col-lg-4"> 
-	<a class="anchor_style" href="<?php echo base_url()."reports/procedure_summary";?>">Procedure Summary</a>
-</button>
-
-</div> <?php
-}
-?>
-<!--Procedure tab ends-->
