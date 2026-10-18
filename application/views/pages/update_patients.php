@@ -4374,12 +4374,6 @@ function openSmsModal(){
 	        		label.css({display: 'block'});
 	        	}
 	        	element.parent().append( label ); 
-				/*if( ["age_years", "age_months", "age_days", "sbp", "dbp"].indexOf(element.attr( "name" )) > -1 ) {
-					// this would append the label after all your checkboxes/labels (so the error-label will be the last element in <div class="controls"> )
-					element.parent().append( label ); 
-				} else {
-					label.insertAfter( element ); // standard behaviour
-				}*/
 			}
 	        /*ignore: ".date_custom",
 	        submitHandler: function (form) {
