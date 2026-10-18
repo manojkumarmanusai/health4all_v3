@@ -2219,6 +2219,9 @@ function openSmsModal(){
 						$('.post_procedure_notes:not(#procedure-prototype .post_procedure_notes)').each(function() {
 							initializeClassicEditor(this);
 						});
+						$('.procedure_done_by:not(#procedure-prototype .procedure_done_by)').each(function() {
+							initializeClassicEditor(this);
+						});
 						$(document).on('click', '.add-procedure', function() {
 
 							// Always clone the clean prototype
@@ -2250,7 +2253,7 @@ function openSmsModal(){
 
 							// Initialize CKEditor only on this new block
 							$newProcedure.find(
-								'.procedure_note, .procedure_findings, .post_procedure_notes'
+								'.procedure_note, .procedure_findings, .post_procedure_notes, .procedure_done_by'
 							).each(function() {
 								initializeClassicEditor(this);
 							});
@@ -2495,6 +2498,17 @@ function openSmsModal(){
 		</div>
 	</div>
 
+	<div class="row alt">
+		<div class="col-md-2">
+			<label class="control-label">Done by</label>
+		</div>
+
+		<div class="col-md-8">
+			<textarea class="form-control procedure_done_by"
+					  name="procedure_done_by[]"></textarea>
+		</div>
+	</div>
+
 	<div class="text-right procedure-close-container"
 		 style="margin-top:15px;">
 
@@ -2632,23 +2646,40 @@ function openSmsModal(){
 				
 			</div>
 			
+			<div class="row alt">
+				<div class="col-md-2">
+					<label class="control-label">Done by</label>
+				</div>
+				<div class="col-md-8">
+					<?php if ($f->edit == 0 || !empty($patient_procedure->procedure_done_by)) { ?>
+
+						<div class="form-control procedure_done_by_readonly procedure-text-area-readonly">
+							<?php echo $patient_procedure->procedure_done_by; ?>
+						</div>
+
+						<input type="hidden"
+							name="procedure_done_by[]"
+							value="<?php echo htmlspecialchars($patient_procedure->procedure_done_by, ENT_QUOTES, 'UTF-8'); ?>">
+
+					<?php } else { ?>
+
+						<textarea class="form-control procedure_done_by"
+								name="procedure_done_by[]"><?php echo $patient_procedure->procedure_done_by; ?></textarea>
+
+					<?php } ?>
+				</div>
+				
+			</div>
 
 			<div class="text-left procedure-close-container" style="margin-top:15px;">
 
 		 <button type="button" 
 			id="printProcedure<?php echo htmlspecialchars(!empty($patient_procedure->patient_procedure_id) ? $patient_procedure->patient_procedure_id : '', ENT_QUOTES, 'UTF-8'); ?>" 
-			data-patient-procedure-id="<?php echo htmlspecialchars(!empty($patient_procedure->patient_procedure_id) ? $patient_procedure->patient_procedure_id : '', ENT_QUOTES, 'UTF-8'); ?>" 
-			data-procedure-id="<?php echo htmlspecialchars(!empty($patient_procedure->procedure_id) ? $patient_procedure->procedure_id : '', ENT_QUOTES, 'UTF-8'); ?>" 
 			data-procedure-name="<?php echo htmlspecialchars(!empty($patient_procedure->procedure_name) ? $patient_procedure->procedure_name : '', ENT_QUOTES, 'UTF-8'); ?>" 
 			data-procedure-note="<?php echo htmlspecialchars(!empty($patient_procedure->procedure_note) ? $patient_procedure->procedure_note : '', ENT_QUOTES, 'UTF-8'); ?>" 
 			data-procedure-findings="<?php echo htmlspecialchars(!empty($patient_procedure->procedure_findings) ? $patient_procedure->procedure_findings : '', ENT_QUOTES, 'UTF-8'); ?>" 
 			data-post-procedure="<?php echo htmlspecialchars(!empty($patient_procedure->post_procedure) ? $patient_procedure->post_procedure : '', ENT_QUOTES, 'UTF-8'); ?>" 
-			data-duration="<?php echo htmlspecialchars(!empty($patient_procedure->procedure_duration) ? $patient_procedure->procedure_duration : '', ENT_QUOTES, 'UTF-8'); ?>" 
-			data-added-by="<?php 
-				$firstName = !empty($patient_procedure->first_name) ? $patient_procedure->first_name : '';
-				$lastName  = !empty($patient_procedure->last_name) ? $patient_procedure->last_name : '';
-				echo htmlspecialchars(trim($firstName . ' ' . $lastName), ENT_QUOTES, 'UTF-8'); 
-			?>"
+			data-duration="<?php echo htmlspecialchars(!empty($patient_procedure->procedure_duration) ? $patient_procedure->procedure_duration : '', ENT_QUOTES, 'UTF-8'); ?>"  
 			data-procedure-time="<?php 
 				echo (!empty($patient_procedure->procedure_datetime) && strtotime($patient_procedure->procedure_datetime)) 
 					? date('d-M-Y g:i A', strtotime($patient_procedure->procedure_datetime)) 
@@ -4957,14 +4988,11 @@ function openSmsModal(){
 function printProcedure(button) {
     // 1. Extract values from dataset (converts data-kebab-case to camelCase)
     const { 
-        patientProcedureId,
-        procedureId,
         procedureName,
         procedureNote,
         procedureFindings,
         postProcedure,
         duration,
-        addedBy,
         procedureTime 
     } = button.dataset;
 
@@ -5011,9 +5039,6 @@ function printProcedure(button) {
 
     const timeEl = document.getElementById('printProcedureTime');
     if (timeEl) timeEl.textContent = procedureTime || '';
-
-    const addedByEl = document.getElementById('printProcedureAddedBy');
-    if (addedByEl) addedByEl.textContent = addedBy || '';
 
     // 4. Trigger print
     printDiv('print-div-patient-procedure');
