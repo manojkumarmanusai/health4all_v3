@@ -2629,8 +2629,39 @@ function openSmsModal(){
 
 					<?php } ?>
 				</div>
+				
 			</div>
+			
+
+			<div class="text-left procedure-close-container" style="margin-top:15px;">
+
+		 <button type="button" 
+			id="printProcedure<?php echo htmlspecialchars(!empty($patient_procedure->patient_procedure_id) ? $patient_procedure->patient_procedure_id : '', ENT_QUOTES, 'UTF-8'); ?>" 
+			data-patient-procedure-id="<?php echo htmlspecialchars(!empty($patient_procedure->patient_procedure_id) ? $patient_procedure->patient_procedure_id : '', ENT_QUOTES, 'UTF-8'); ?>" 
+			data-procedure-id="<?php echo htmlspecialchars(!empty($patient_procedure->procedure_id) ? $patient_procedure->procedure_id : '', ENT_QUOTES, 'UTF-8'); ?>" 
+			data-procedure-name="<?php echo htmlspecialchars(!empty($patient_procedure->procedure_name) ? $patient_procedure->procedure_name : '', ENT_QUOTES, 'UTF-8'); ?>" 
+			data-procedure-note="<?php echo htmlspecialchars(!empty($patient_procedure->procedure_note) ? $patient_procedure->procedure_note : '', ENT_QUOTES, 'UTF-8'); ?>" 
+			data-procedure-findings="<?php echo htmlspecialchars(!empty($patient_procedure->procedure_findings) ? $patient_procedure->procedure_findings : '', ENT_QUOTES, 'UTF-8'); ?>" 
+			data-post-procedure="<?php echo htmlspecialchars(!empty($patient_procedure->post_procedure) ? $patient_procedure->post_procedure : '', ENT_QUOTES, 'UTF-8'); ?>" 
+			data-duration="<?php echo htmlspecialchars(!empty($patient_procedure->procedure_duration) ? $patient_procedure->procedure_duration : '', ENT_QUOTES, 'UTF-8'); ?>" 
+			data-added-by="<?php 
+				$firstName = !empty($patient_procedure->first_name) ? $patient_procedure->first_name : '';
+				$lastName  = !empty($patient_procedure->last_name) ? $patient_procedure->last_name : '';
+				echo htmlspecialchars(trim($firstName . ' ' . $lastName), ENT_QUOTES, 'UTF-8'); 
+			?>"
+			data-procedure-time="<?php 
+				echo (!empty($patient_procedure->procedure_datetime) && strtotime($patient_procedure->procedure_datetime)) 
+					? date('d-M-Y g:i A', strtotime($patient_procedure->procedure_datetime)) 
+					: ''; 
+			?>"
+			class="btn btn-sm btn-primary" 
+			onclick="printProcedure(this)">
+			Print
+		</button>
+
+	</div>
 			</div>
+			
 			<?php } ?>
 			
 			
@@ -4910,8 +4941,11 @@ function openSmsModal(){
 }
 </style>
 <div class="sr-only" id="print-div-doctor-notes" style="width:100%;height:100%;"> 
-			<?php $this->load->view('pages/print_layouts/patient_doctor_notes');?>
-		</div>
+	<?php $this->load->view('pages/print_layouts/patient_doctor_notes');?>
+</div>
+<div class="sr-only" id="print-div-patient-procedure" style="width:100%;height:100%;"> 
+    <?php $this->load->view('pages/print_layouts/patient_procedure'); ?>
+</div>
 <script>
 	function printDoctorNotes(button) {
 	// 1. Extract values from the clicked button's dataset
@@ -4924,6 +4958,46 @@ function openSmsModal(){
 
 	// 3. Trigger print
 	printDiv('print-div-doctor-notes');
+}
+
+function printProcedure(button) {
+    // 1. Extract values from dataset (converts data-kebab-case to camelCase)
+    const { 
+        patientProcedureId,
+        procedureId,
+		procedureName,
+        procedureNote,
+        procedureFindings,
+        postProcedure,
+        duration,
+        addedBy,
+        procedureTime 
+    } = button.dataset;
+
+    // 2. Inject into the hidden print layout elements
+    const noteEl = document.getElementById('printProcedureNote');
+    if (noteEl) noteEl.innerHTML = (procedureNote || '').replace(/\n/g, '<br>');
+
+    const findingsEl = document.getElementById('printProcedureFindings');
+    if (findingsEl) findingsEl.innerHTML = (procedureFindings || '').replace(/\n/g, '<br>');
+
+    const postNotesEl = document.getElementById('printPostProcedureNotes');
+    if (postNotesEl) postNotesEl.innerHTML = (postProcedure || '').replace(/\n/g, '<br>');
+
+	const printProcedureNameEl = document.getElementById('printProcedureName');
+    if (printProcedureNameEl) printProcedureNameEl.textContent =(procedureName || '').replace(/\n/g, '<br>');
+
+    const durationEl = document.getElementById('printProcedureDuration');
+    if (durationEl) durationEl.textContent = duration ? `${duration} mins` : '';
+
+    const timeEl = document.getElementById('printProcedureTime');
+    if (timeEl) timeEl.textContent = procedureTime || '';
+
+    const addedByEl = document.getElementById('printProcedureAddedBy');
+    if (addedByEl) addedByEl.textContent = addedBy || '';
+
+    // 3. Trigger your print function
+    printDiv('print-div-patient-procedure');
 }
 $(function(){
 	$('[data-toggle="tooltip"]').tooltip();
