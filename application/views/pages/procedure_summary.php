@@ -80,7 +80,40 @@ $('#to_date').Zebra_DatePicker({
             $('#table-sort').trigger('printTable');
         });
 });
+function navigateToDetail(department_id,visit_name_id,procedure_id){
+	var sourceForm = document.getElementById("procedure_summary");
+	if (!sourceForm) return;
 
+
+	const formData = new FormData(sourceForm);
+
+	if (department_id!=-1){
+		formData.set('department', department_id);
+	}
+
+	if (visit_name_id!=-1){
+		formData.set('visit_name', visit_name_id);
+	}
+
+	if (procedure_id!=-1){
+		formData.set('procedure', procedure_id);
+	}
+
+	const targetForm = document.createElement('form');
+	targetForm.method = 'POST';
+	targetForm.action = '<?php echo base_url()."reports/procedure_detail" ?>';
+
+	for (const [key, value] of formData.entries()) {
+		const input = document.createElement('input');
+		input.type = 'hidden';
+		input.name = key;
+		input.value = value;
+		targetForm.appendChild(input);
+  	}
+	document.body.appendChild(targetForm);
+	targetForm.submit();
+
+}
 </script>
 <style type="text/css">
 /* Chrome, Safari, Edge, Opera */
@@ -94,26 +127,22 @@ input::-webkit-inner-spin-button {
 input[type=number] {
   -moz-appearance: textfield;
 }
-.rows_per_page{
-    display: inline-block;
-    height: 34px;
-    padding: 6px 12px;
-    font-size: 14px;
-    line-height: 1.428571429;
-    color: #555555;
-    vertical-align: middle;
-    background-color: #ffffff;
-    background-image: none;
-    border: 1px solid #cccccc;
-    border-radius: 4px;
-    -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-    -webkit-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
-    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+
+.clickable-cell {
+  cursor: pointer;
+  color: #1a73e8;            /* Tinted blue to mimic text anchor elements */
+  font-weight: 500;
+  user-select: none;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
-.rows_per_page:focus{
-    border-color: #66afe9;
-    outline: 0;	
+
+.clickable-cell:hover {
+  background-color: #e8f0fe !important; /* Highlights cell under cursor */
+  color: #0d5bdd;
+}
+
+.clickable-cell:active {
+  background-color: #d2e3fc !important;
 }
 </style>
 	<?php 
@@ -125,7 +154,7 @@ input[type=number] {
 	<?php $userdata=$this->session->userdata('hospital'); ?>
 	<div class="row">
 		<h4><b>Login Activities</b></h4>	
-		<?php echo form_open("reports/procedure_summary",array('role'=>'form','class'=>'form-custom')); ?>
+		<?php echo form_open("reports/procedure_summary",array('role'=>'form','class'=>'form-custom','id'=>'procedure_summary')); ?>
                 <b>Trend:  </b>
 				<label><input type="radio" name="visit_type" class ="form-control" value="All" checked  > All </label>
 				<label><input type ="radio" name="visit_type" class ="form-control" value="OP" <?php if($this->input->post('visit_type') == "OP") echo " checked "; ?> > OP</label>
@@ -198,16 +227,13 @@ input[type=number] {
 	<?php 
 
 	$total=0;
-        if($this->input->post('rows_per_page')){
-        	$rowsperpage = $this->input->post('rows_per_page');
-        }
 		foreach($report as $s){
 	?>
 	<tr>
 		<td><?php echo $s->department;?></td>
 		<td><?php echo $s->visit_name;?></td>
 		<td><?php echo $s->procedure_name;?></td>
-		<td style="text-align:right"><?php echo $s->total_procedures;?></td>		
+		<td class="clickable-cell" style="text-align:right" onclick="navigateToDetail(<?php echo $s->department_id?>,<?php echo $s->visit_name_id?>,<?php echo $s->procedure_id?>)"><?php echo $s->total_procedures;?></td>		
 	</tr>
 	<?php
 		$total += $s->total_procedures;
@@ -218,7 +244,7 @@ input[type=number] {
         <tbody class="tablesorter-no-sort">
 	<tr>
 		<th>Total </th>
-		<th colspan="3" style="text-align:right"><?php echo $total;?></th>
+		<td colspan="3" class="clickable-cell" style="text-align:right;font-weight:bold;"  onclick="navigateToDetail(-1,-1,-1)"><?php echo $total;?></td>
 	</tr>
         </tbody>
 	</table>

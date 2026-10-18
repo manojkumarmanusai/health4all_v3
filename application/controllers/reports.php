@@ -1963,16 +1963,6 @@ class Reports extends CI_Controller {
 			}
 			if($access==1){                                      
 				$this->data['title']="Procedure Summary";                      
-				$this->data['defaultsConfigs'] = $this->masters_model->get_data("defaults");
-				foreach($this->data['defaultsConfigs'] as $default){		 
-				if($default->default_id=='pagination'){
-				$this->data['rowsperpage'] = $default->value;
-				$this->data['upper_rowsperpage']= $default->upper_range;
-				$this->data['lower_rowsperpage']= $default->lower_range;	 
-				break;
-
-				}
-				}
 				$this->load->view('templates/header',$this->data);
 				$this->load->helper('form');
 				$this->load->library('form_validation');
@@ -1998,6 +1988,73 @@ class Reports extends CI_Controller {
 		}
 	}	
     
+	public function procedure_detail()
+	{
+		
+		
+	       if($this->session->userdata('logged_in')){
+			
+		$this->data['userdata']=$this->session->userdata('logged_in');
+		$access=0;
+		foreach($this->data['functions'] as $function){
+			if($function->user_function=="login_report"){
+				$access=1;
+				break;
+			}
+		}
+		if($access==1){
+		
+
+
+    	$this->data['title']="Procedure Detail"; 	
+		$this->load->helper('form');
+		$this->load->library('form_validation');
+		$this->data['defaultsConfigs'] = $this->masters_model->get_data("defaults");
+		foreach($this->data['defaultsConfigs'] as $default){		 
+			if($default->default_id=='pagination'){
+					$this->data['rowsperpage'] = $default->value;
+					$this->data['upper_rowsperpage']= $default->upper_range;
+				   $this->data['lower_rowsperpage']= $default->lower_range;	 
+				   break;
+
+				}
+		   }
+	
+		$this->load->view('templates/header',$this->data);
+		$this->data['all_departments']=$this->staff_model->get_department();
+				$this->data['units']=$this->staff_model->get_unit();
+				$this->data['areas']=$this->staff_model->get_area();
+				$this->data['visit_names']=$this->staff_model->get_visit_name();
+				$this->data['procedures'] = $this->masters_model->get_data("procedure");
+		//print_r($this->data['report_count']);
+		$this->data['report_count']=$this->reports_model->get_procedure_detail_count();
+		//print_r($this->data['report_count']);
+		$this->data['report']=$this->reports_model->get_procedure_detail($this->data['rowsperpage']);		
+
+		$this->form_validation->set_rules('from_date', 'From Date',
+		'trim|required|xss_clean');
+	    $this->form_validation->set_rules('to_date', 'To Date', 
+	    'trim|required|xss_clean');
+		
+		if ($this->form_validation->run() === FALSE)
+		{	
+			$this->load->view('pages/procedure_detail',$this->data);
+		}
+		else{
+			$this->load->view('pages/procedure_detail',$this->data);
+		}
+		
+		$this->load->view('templates/footer');
+		}
+		else{
+		show_404();
+		}
+		}
+		else{
+		show_404();
+		}
+		
+	}
 
     public function outcome_summary(){
         if($this->session->userdata('logged_in')){
