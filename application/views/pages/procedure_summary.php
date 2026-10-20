@@ -153,7 +153,7 @@ input[type=number] {
 	?>
 	<?php $userdata=$this->session->userdata('hospital'); ?>
 	<div class="row">
-		<h4><b>Login Activities</b></h4>	
+		<h4><b>Procedure Summary</b></h4>	
 		<?php echo form_open("reports/procedure_summary",array('role'=>'form','class'=>'form-custom','id'=>'procedure_summary')); ?>
                 <b>Trend:  </b>
 				<label><input type="radio" name="visit_type" class ="form-control" value="All" checked  > All </label>
